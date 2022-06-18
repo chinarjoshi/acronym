@@ -1,0 +1,5 @@
+[tool.pyright]
+reportUnusedImport = false
+reportUnusedClass = false
+reportUnusedFunction = false
+reportUnusedVariable = false
