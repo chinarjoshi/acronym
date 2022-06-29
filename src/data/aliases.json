@@ -1,0 +1,8 @@
+{
+    "pacman": {
+        "pS": "pacman -S -o"
+    },
+    "git": {
+        "gc": "git clone"
+    }
+}
