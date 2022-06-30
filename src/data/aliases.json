@@ -1,8 +1,6 @@
 {
     "pacman": {
-        "pS": "pacman -S -o"
-    },
-    "git": {
-        "gc": "git clone"
+        "pS": "pacman -Syu",
+        "pQ": "pacman -Quent"
     }
 }
