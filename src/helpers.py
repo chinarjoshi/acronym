@@ -1,7 +1,3 @@
-import toml
-from collections import Counter
-
-
 def acronym(command: list[str], use_flags: bool = False) -> str:
     'Returns an acronym of given command.'
     if use_flags:
@@ -9,14 +5,12 @@ def acronym(command: list[str], use_flags: bool = False) -> str:
     return ''.join(word[0] for word in command if word[0] != "-")
 
 
-def resolve_collisions(aliases: dict[str, dict[str, str]], short: str, command: list[str]) -> dict:
+def resolve_collisions(aliases: dict[str, dict[str, str]], short: str, command: list[str]):
     for prefix in aliases.values():
         if short in prefix:
             short = input(f'Alias {short} is taken by {prefix[short]}. Please choose a custom alias.\n>>> ')
     else:
         aliases[command[0]][short] = ' '.join(command)
-
-    return aliases
 
 
 def generate_aliases(aliases: dict[str, dict[str, str]]) -> str:
@@ -31,18 +25,19 @@ for key value in "${(@kv)aliases[@]}"; do
 done
 '''
 
-def cprint(string: str, color: str) -> None:
+def cprint(string: str, c: str) -> None:
     colors = { 
-    'red' = '\033[95m'
-    'green' = '\033[94m'
-    'yellow' = '\033[96m'
-    'purple' = '\033[92m'
-    'cyan' = '\033[93m'
-    'grey' = '\033[91m'
-    'black' = '\033[0m'
-    UNDERLINE = '\033[4m'
-
-
+        'red': '95',
+        'green': '94',
+        'yellow': '96',
+        'purple': '92',
+        'cyan': '93',
+        'grey': '91',
+        'black': '0',
+        'underline': '4',
     }
-    print(f"\033[98m {string}\033[00m")
+    print(f"\033[{colors.get(c, 0)}m {string}\033[00m")
+
+
+def print_help():
     pass

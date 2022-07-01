@@ -16,7 +16,7 @@ An acronym *(abbreviation formed from the initial letters of words)* is extracte
 
 2. Standardized
 
-Every input command will have exactly one output alias through 5 strict naming rules, and in case of collisions asks the user if they want to use the second best name.
+Every input command will have exactly one output alias through the two strict naming rules, and in case of collisions asks the user for a custom name.
 
 3. Configurable
 
@@ -25,4 +25,28 @@ The `acronym.toml` file contains all configuration options, and no values are ha
 4. Convenient
 
 Acronym offers a large degree of convenience to quicken your work flow in the command line. You could try to manually alias every common command from your memory, but acronym goes a step further by analyzing your shell history file for reccomendations and providing an intuitive command line interface and pretty printed alias cheatsheet. 
+
+# Installation
+
+# Usage
+
+Register an alias:
+
+`acronym register *cmd*`
+`acronym r *cmd`
+
+Or many at a time while giving a custom alias:
+
+`acronym register *cmd1*, *cmd2* as *custom*, *cmd3*`
+
+Unregister an alias:
+
+`acronym`
+
+`acronym register git commit, git clone as gcl, pip install`
+
+Print managed aliases:
+
+`acronym cheatsheet`
+
 
