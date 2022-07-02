@@ -3,7 +3,7 @@
 import sys
 import json
 import toml
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from helpers import *
 
@@ -20,22 +20,35 @@ def parse_args():
     match sys.argv[1:]:
         case ['add', *cmd]:
             for segment in ' '.join(cmd).split(','):
-                cmd = [w.strip() for w in segment if w not in FLAGS]
-                if 'as' in segment:
-                    short = cmd[-1]
-                    cmd = cmd[:cmd.index('as')]
-                else:
-                    short = acronym(cmd, use_flags='--flags' in segment)
+                cmd = [w.strip() for w in segment.split() if w not in FLAGS]
 
-                resolve_collisions(aliases, short, cmd)
+                section = cmd[0]
+                if 'sudo' in cmd:
+                    section = cmd[1]
+                if 'under' in cmd:
+                    section = cmd[cmd.index('under') + 1]
+                    cmd = cmd[:cmd.index('under')]
+
+                if 'as' in cmd:
+                    i = cmd.index('as')
+                    short = cmd[i + 1]
+                    cmd = cmd[:i]
+                else:
+                    filtered = [w for w in cmd if w != 'sudo']
+                    short = acronym(filtered, use_flags='--flags' in segment)
+
+                cmd_str = ' '.join(cmd)
+                resolve_collisions(aliases, short, cmd_str, section)
+                print(f"'{cmd_str}' -> {short}")
 
         case ['rm', *names]:
+            filtered = [w for w in names if w not in FLAGS]
             if '--section' in names:
-                for name in names:
+                for name in filtered:
                     if not aliases.pop(name, False):
-                        print(f"Category '{names}' not found.")
+                        print(f"Category '{name}' not found.")
             else:
-                for name in names:
+                for name in filtered:
                     if not any(prefix.pop(name, False) for prefix in aliases.values() if name in prefix):
                         print(f"Alias '{name}' not found.")
             
@@ -65,7 +78,7 @@ def parse_args():
         case [('-h' | '--help')]:
             print_help()
 
-        case [_]:
+        case [*_]:
             print('Incorrect usage')
             print_help()
 

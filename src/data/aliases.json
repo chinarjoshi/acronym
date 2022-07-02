@@ -1,6 +1,12 @@
 {
     "pacman": {
         "pS": "pacman -Syu",
-        "pQ": "pacman -Quent"
+        "pSq": "sudo pacman -Syu --quiet"
+    },
+    "npm": {
+        "ni": "npm install"
+    },
+    "pip": {
+        "yi": "pip install"
     }
 }

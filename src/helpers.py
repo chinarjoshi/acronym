@@ -5,25 +5,19 @@ def acronym(command: list[str], use_flags: bool = False) -> str:
     return ''.join(word[0] for word in command if word[0] != "-")
 
 
-def resolve_collisions(aliases: dict[str, dict[str, str]], short: str, command: list[str]):
+def resolve_collisions(aliases: dict[str, dict[str, str]], short: str, command: str, section: str):
     for prefix in aliases.values():
         if short in prefix:
-            short = input(f'Alias {short} is taken by {prefix[short]}. Please choose a custom alias.\n>>> ')
+            short = input(f'Alias {short} is taken by {prefix[short]}. Please choose a custom alias, or press return to skip.\n>>> ')
+        if not short:
+            return
     else:
-        aliases[command[0]][short] = ' '.join(command)
+        aliases[section][short] = command
 
 
 def generate_aliases(aliases: dict[str, dict[str, str]]) -> str:
-    file = '''declare -A aliases=('''
-    for key in aliases.values():
-        for key, value in key.items():
-            file += f"\n\t'{key}'\t'{value}'"
-    return file + '''
-)
-for key value in "${(@kv)aliases[@]}"; do
-    alias "$letter"="$command"
-done
-'''
+    return '\n'.join(f"alias {k}='{v}'" for key in aliases.values() for k, v in key.items())
+
 
 def cprint(string: str, c: str) -> None:
     colors = { 

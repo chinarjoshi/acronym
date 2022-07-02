@@ -1,7 +1,4 @@
-declare -A aliases=(
-	'pS'	'pacman -Syu'
-	'pQ'	'pacman -Quent'
-)
-for key value in "${(@kv)aliases[@]}"; do
-    alias "$letter"="$command"
-done
+alias pS='pacman -Syu'
+alias pSq='sudo pacman -Syu --quiet'
+alias ni='npm install'
+alias yi='pip install'
