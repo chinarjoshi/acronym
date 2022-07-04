@@ -35,10 +35,12 @@ def parse_args():
                     cmd = cmd[:i]
                 else:
                     filtered = [w for w in cmd if w != 'sudo']
-                    short = acronym(filtered, use_flags='--flags' in segment)
+                    short = acronymize(filtered, use_flags='--flags' in segment)
+
+                values = {k: v for x in aliases.values() for k, v in x.items()}
 
                 cmd_str = ' '.join(cmd)
-                resolve_collisions(aliases, short, cmd_str, section)
+                resolve_collisions(aliases, values, short, cmd_str, section)
                 print(f"'{cmd_str}' -> {short}")
 
         case ['rm', *names]:
@@ -66,7 +68,7 @@ def parse_args():
             
             print('Your most common commands with the default alias reccomended:')
             for i, command in enumerate(sorted(history, key=recc_engine)[:10]):
-                print(f"{i + 1}. '{command}'  ->  '{acronym(command.split())}'")
+                print(f"{i + 1}. '{command}'  ->  '{acronymize(command.split())}'")
 
 
         case ['print', *prefixes] if prefixes:

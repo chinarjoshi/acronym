@@ -8,5 +8,8 @@
     },
     "pip": {
         "yi": "pip install"
+    },
+    "pasta": {
+        "pa": "sudo pasta add -asdf --options"
     }
 }
