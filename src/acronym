@@ -1,26 +1,26 @@
 #!/usr/bin/python3
 
+import os
 import sys
-import json
 import toml
 from collections import defaultdict, Counter
 
 from helpers import *
 
-JSON = '/home/c/projects/acronym/src/data/aliases.json'
+TOML = '/home/c/projects/acronym/src/data/data.toml'
 SH = '/home/c/projects/acronym/src/data/aliases.sh'
-CONFIG = '/etc/acronym.toml'
 FLAGS = '--flags', '--section'
+HISTFILE = os.environ.get('HISTFILE', False)
 
 # Parse the arguments, if register then add the word to the json file,
 def parse_args():
-    with open(JSON) as f:
-        aliases = defaultdict(dict, json.load(f))
+    with open(TOML) as f:
+        aliases = defaultdict(dict, toml.load(f))
 
     match sys.argv[1:]:
         case ['add', *cmd]:
             for segment in ' '.join(cmd).split(','):
-                cmd = [w.strip() for w in segment.split() if w not in FLAGS]
+                cmd = [w.strip(' \'"') for w in segment.split() if w not in FLAGS]
 
                 section = cmd[0]
                 if 'sudo' in cmd:
@@ -37,11 +37,11 @@ def parse_args():
                     filtered = [w for w in cmd if w != 'sudo']
                     short = acronymize(filtered, use_flags='--flags' in segment)
 
-                values = {k: v for x in aliases.values() for k, v in x.items()}
+                ac = Acronym(cmd, ' '.join(cmd), short, section)
+                values = {k for x in aliases.values() for k in x}
 
-                cmd_str = ' '.join(cmd)
-                resolve_collisions(aliases, values, short, cmd_str, section)
-                print(f"'{cmd_str}' -> {short}")
+                resolve_collisions(aliases, values, ac)
+                print(f"'{ac.cmd_str}' -> {short}")
 
         case ['rm', *names]:
             filtered = [w for w in names if w not in FLAGS]
@@ -57,9 +57,8 @@ def parse_args():
             aliases = {k: v for k, v in aliases.items() if v}
 
         case ['suggest']:
-            with open(CONFIG) as c:
-                with open(toml.load(c)['hist_path']) as f:
-                    history = Counter([line[15:-1] for line in f.readlines()[:500]])
+            with open(HISTFILE) as f:
+                history = Counter([line[15:-1] for line in f.readlines()[:500]])
 
             def recc_engine(s: str) -> int:
                 return (len(s) * 2) ** 3 \
@@ -72,12 +71,12 @@ def parse_args():
 
 
         case ['print', *prefixes] if prefixes:
-            print(json.dumps({k: v for k, v in aliases.items() if k in prefixes}, indent=4))
+            print('\n' + toml.dumps({k: v for k, v in aliases.items() if k in prefixes}))
 
         case ['print']:
-            print(json.dumps(aliases, indent=4))
+            print('\n' + toml.dumps(aliases))
 
-        case [('-h' | '--help')]:
+        case [('help' | '-h' | '--help')]:
             print_help()
 
         case [*_]:
@@ -85,8 +84,8 @@ def parse_args():
             print_help()
 
 
-    with open(JSON, 'w') as j, open(SH, 'w') as s:
-        json.dump(aliases, j, indent=4)
+    with open(TOML, 'w') as j, open(SH, 'w') as s:
+        toml.dump(aliases, j)
         s.write(generate_aliases(aliases))
 
 

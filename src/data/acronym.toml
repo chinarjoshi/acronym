@@ -1,4 +1,0 @@
-mode = 'single'
-delimiter = ''
-use_flags = false
-history_file = '/home/c/.histfile'
