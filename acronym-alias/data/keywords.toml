@@ -1,0 +1,94 @@
+[git]
+ga = "git add"
+gA = "git add --all"
+gb = "git branch"
+gc = "git commit"
+gd = "git diff"
+gf = "git fetch"
+gl = "git log --graph --oneline --decorate"
+gm = "git merge"
+gr = "git revert"
+gs = "git status --short --branch --show-stash"
+gbd = "git branch -d"
+gbD = "git branch -D"
+gch = "git checkout"
+gcm = "git commit -m"
+gpl = "git pull origin"
+gpu = "git push origin"
+grh = "git reset --hard"
+grs = "git reset --soft"
+grm = "git rm --cached"
+gst = "git stash"
+gsa = "git stash apply"
+gsc = "git stash clear"
+gsd = "git stash drop"
+gsl = "git stash list"
+gsp = "git stash pop"
+grc = "git rebase --continue"
+gra = "git rebase --abort"
+gcb = "git checkout -b"
+
+[pacman]
+pi = "sudo pacman -Sq --color=auto"
+pss = "sudo pacman -Ss --color=auto"
+psc = "sudo pacman -Sc --color=auto"
+pr = "sudo pacman -Rns --color=auto"
+pu = "sudo pacman -Syuq --color=auto"
+
+[yay]
+yi = "sudo yay -Sq --color=auto"
+yss = "sudo yay -Ss --color=auto"
+ysc = "sudo yay -Sc --color=auto"
+yr = "sudo yay -Rns --color=auto"
+yu = "sudo yay -Syuq --color=auto"
+
+[apt]
+ai = "sudo apt install"
+ar = "sudo apt remove"
+ap = "sudo apt purge"
+as = "sudo apt search"
+al = "sudo apt list"
+af = "sudo apt full-upgrade"
+au = "sudo apt update && sudo apt upgrade"
+
+[brew]
+bi = "brew install"
+bu = "brew uninstall"
+bs = "brew search"
+bupd = "brew update"
+bupg = "brew upgrade"
+bin = "brew info"
+
+[pip]
+pi = "pip install"
+pf = "pip freeze"
+pd = "pip download"
+pl = "pip list"
+pu = "pip uninstall"
+
+[npm]
+nins = "npm install"
+nini = "npm init"
+nr = "npm remove"
+nl = "npm list"
+
+[acronym]
+aa = "acronym add"
+ae = "acronym edit"
+ar = "acronym rm"
+ap = "acronym print"
+as = "acronym suggest"
+ah = "acronym help"
+
+[systemctl]
+se = "sudo systemctl enable --now"
+sd = "sudo systemctl disable --now"
+sl = "systemctl list-units"
+sr = "sudo systemctl restart"
+ss = "systemctl status"
+ssta = "sudo systemctl start"
+ssto = "sudo systemctl stop"
+
+[jupyter]
+jl = "jupyter lab"
+jn = "jupyter notebook"

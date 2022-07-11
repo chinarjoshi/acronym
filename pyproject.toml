@@ -1,5 +1,27 @@
-[tool.pyright]
-reportUnusedImport = false
-reportUnusedClass = false
-reportUnusedFunction = false
-reportUnusedVariable = false
+[build-system]
+requires = ["setuptools>=61.0, wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "acronym-alias"
+license = { file="LICENSE" }
+readme = "README.md"
+version = "1.0"
+authors = [
+  { name="Chinar Joshi", email="chinarjoshi7@gmail.com" },
+]
+description = "A smart alias management system for your shell commands"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+
+[project.scripts]
+acronym = "acronym:main"
+
+[project.urls]
+"Homepage" = "https://github.com/chinarjoshi/acronym"
+"Bug Tracker" = "https://github.com/chinarjoshi/acronym/issues"

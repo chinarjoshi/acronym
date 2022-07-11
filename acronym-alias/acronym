@@ -1,19 +1,23 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import sys
 import toml
-from collections import defaultdict, Counter
+from collections import defaultdict
+from pathlib import Path
 
 from helpers import *
 
-TOML = '/home/c/projects/acronym/src/data/data.toml'
-SH = '/home/c/projects/acronym/src/data/aliases.sh'
+ROOT = Path(__file__).parent.resolve() / 'data'
+SH = ROOT / 'aliases.sh'
+TOML = ROOT / 'aliases.toml'
+HELP = ROOT.parent / 'help.txt'
+KEYWORDS = ROOT / 'keywords.toml'
 FLAGS = '--flags', '--section'
 HISTFILE = os.environ.get('HISTFILE', False)
 
 # Parse the arguments, if register then add the word to the json file,
-def parse_args():
+def main():
     with open(TOML) as f:
         aliases = defaultdict(dict, toml.load(f))
 
@@ -43,6 +47,10 @@ def parse_args():
                 resolve_collisions(aliases, values, ac)
                 print(f"'{ac.cmd_str}' -> {short}")
 
+        case ['edit']:
+            os.system(f"{os.environ.get('EDITOR', 'vim')} {str(TOML)}")
+            exit(0)
+
         case ['rm', *names]:
             filtered = [w for w in names if w not in FLAGS]
             if '--section' in names:
@@ -56,19 +64,25 @@ def parse_args():
             
             aliases = {k: v for k, v in aliases.items() if v}
 
+        case ['change', old, 'with', new]:
+            for section in aliases:
+                if old in section:
+                    aliases[section][new] = aliases[section].pop(old)
+                    break
+            else:
+                print(f"Alias '{old}' not found to be replaced.")
+                exit(1)
+
         case ['suggest']:
-            with open(HISTFILE) as f:
-                history = Counter([line[15:-1] for line in f.readlines()[:500]])
+            with open(HISTFILE) as f, open(KEYWORDS) as k:
+                history = [line[15:-1] if line[0] == ':' else line.strip() for line in f.readlines()[:1000]]
+                recs = toml.load(k)
 
-            def recc_engine(s: str) -> int:
-                return (len(s) * 2) ** 3 \
-                    + (history[s] if history[s] < 20 else 20) * 2 \
-                    * (0 if len(s) < 5 or history[s] < 5 else 1)
-            
-            print('Your most common commands with the default alias reccomended:')
-            for i, command in enumerate(sorted(history, key=recc_engine)[:10]):
-                print(f"{i + 1}. '{command}'  ->  '{acronymize(command.split())}'")
-
+            recs = toml.dumps({k: v for k, v in recs.items() if k in history and k not in aliases})
+            if recs:
+                print('The following aliases are reccomended based on your command history:' + '\n' + recs)
+            else:
+                print('No current reccomendations')
 
         case ['print', *prefixes] if prefixes:
             print('\n' + toml.dumps({k: v for k, v in aliases.items() if k in prefixes}))
@@ -77,17 +91,23 @@ def parse_args():
             print('\n' + toml.dumps(aliases))
 
         case [('help' | '-h' | '--help')]:
-            print_help()
+            with open(HELP) as f:
+                for line in f:
+                    print(str(line.strip()))
+                    break
+            print("Usage: \033[95m acronym\033[0m [OPTIONS] COMMAND [ARGS]...")
+            # print(HELP.read_text())
 
         case [*_]:
-            print('Incorrect usage')
-            print_help()
+            print('Incorrect usage.')
+            print(HELP.read_text())
+            exit(0)
 
 
-    with open(TOML, 'w') as j, open(SH, 'w') as s:
-        toml.dump(aliases, j)
+    with open(TOML, 'w') as f, open(SH, 'w') as s:
+        toml.dump(aliases, f)
         s.write(generate_aliases(aliases))
 
 
 if __name__ == "__main__":
-    parse_args()
+    main()
