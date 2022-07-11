@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 '''A smart alias management system to shorten your shell commands.'''
 __version__ = '1.0'
 
@@ -7,7 +9,8 @@ import toml
 from collections import defaultdict
 from pathlib import Path
 
-from helpers import *
+from utils import *
+from help_text import HELP_TEXT
 
 ROOT = Path(__file__).parent.resolve() / 'data'
 SH = ROOT / 'aliases.sh'
@@ -46,7 +49,7 @@ def main():
                 values = {k for x in aliases.values() for k in x}
 
                 resolve_collisions(aliases, values, ac)
-                print(f"'{ac.cmd_str}' -> {short}")
+                print(f'{short} = "{ac.cmd_str}"')
 
         case ['edit']:
             os.system(f"{os.environ.get('EDITOR', 'vim')} {str(TOML)}")
@@ -92,17 +95,12 @@ def main():
             print('\n' + toml.dumps(aliases))
 
         case [('help' | '-h' | '--help')]:
-            with open(HELP) as f:
-                for line in f:
-                    print(str(line.strip()))
-                    break
-            print("Usage: \033[95m acronym\033[0m [OPTIONS] COMMAND [ARGS]...")
-            # print(HELP.read_text())
+            print(HELP_TEXT)
 
         case [*_]:
             print('Incorrect usage.')
-            print(HELP.read_text())
-            exit(0)
+            print(HELP_TEXT)
+            exit(1)
 
 
     with open(TOML, 'w') as f, open(SH, 'w') as s:

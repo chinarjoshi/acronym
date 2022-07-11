@@ -5,3 +5,6 @@ ae = "acronym edit"
 ac = "acronym change"
 as = "acronym suggest"
 ap = "acronym print"
+
+[asdf]
+af = "asdf fdsa"

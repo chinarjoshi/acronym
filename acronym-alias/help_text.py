@@ -1,3 +1,5 @@
+"""Workaround: putting help text in program file allows for escape codes."""
+HELP_TEXT = '''
 Usage: \033[95m acronym\033[0m [OPTIONS] COMMAND [ARGS]...
 
 Note: The main file, aliases.toml, is structured as the following:
@@ -62,3 +64,4 @@ Usage Examples:
 
   [apt]
   ...
+  '''

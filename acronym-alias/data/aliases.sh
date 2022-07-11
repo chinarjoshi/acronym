@@ -1,0 +1,7 @@
+alias "aa"="acronym add"
+alias "ar"="acronym rm"
+alias "ae"="acronym edit"
+alias "ac"="acronym change"
+alias "as"="acronym suggest"
+alias "ap"="acronym print"
+alias "af"="asdf fdsa"
