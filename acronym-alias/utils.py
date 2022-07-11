@@ -26,18 +26,3 @@ def resolve_collisions(aliases: dict[str, dict[str, str]], values: set, ac: Acro
 
 def generate_aliases(aliases: dict[str, dict[str, str]]) -> str:
     return '\n'.join(f'alias "{k}"="{v}"' for key in aliases.values() for k, v in key.items())
-
-
-def cprint(string: str, c: str = 'black') -> None:
-    colors = { 
-        'red': '91',
-        'green': '92',
-        'orange': '93',
-        'blue': '94',
-        'purple': '95',
-        'cyan': '96',
-        'white': '97',
-        'black': '0',
-        'underline': '4',
-    }
-    print(f"\033[{colors.get(c, 0)}m {string}\033[00m")

@@ -6,8 +6,8 @@ __version__ = '1.0'
 import os
 import sys
 import toml
-from collections import defaultdict
 from pathlib import Path
+from collections import defaultdict
 
 from utils import *
 from help_text import HELP_TEXT
