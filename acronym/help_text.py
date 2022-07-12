@@ -1,6 +1,6 @@
 """Workaround: putting help text in program file allows for escape codes."""
 
-HELP_TEXT = f'''Usage: \033[1macronym\033[0m [OPTIONS] COMMAND [ARGS]...
+HELP_TEXT = '''Usage: \033[1macronym\033[0m [OPTIONS] COMMAND [ARGS]...
 
 \033[1mNote\033[0m: The main file, aliases.toml, is structured as the following:
 
