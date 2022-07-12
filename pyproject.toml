@@ -7,6 +7,7 @@ name = "acronym-alias"
 authors = [ { name="Chinar Joshi", email="chinarjoshi7@gmail.com" } ]
 keywords = ["alias", "shell", "productivity", "development"]
 readme = "README.md"
+dependencies = ["toml"]
 license = { file="LICENSE" }
 dynamic = ["version", "description"]
 requires-python = ">=3.10"
@@ -17,11 +18,14 @@ classifiers = [
 ]
 
 [project.scripts]
-acronym = "acronym:main"
+acronym = "acronym.acronym:main"
 
 [project.urls]
 "Homepage" = "https://github.com/chinarjoshi/acronym"
 "Bug Tracker" = "https://github.com/chinarjoshi/acronym/issues"
 
 [tool.flit.external-data]
-directory = "data"
+directory = "external"
+
+[tool.flit.module]
+name = "acronym"

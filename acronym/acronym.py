@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 
-'''A smart alias management system to shorten your shell commands.'''
-__version__ = '1.0'
-
 import os
 import sys
 import toml
 from pathlib import Path
 from collections import defaultdict
 
-from utils import *
-from help_text import HELP_TEXT
+from acronym.alias_utils import *
+from acronym.help_text import HELP_TEXT
 
 ROOT = Path(__file__).parent.resolve() / 'data'
 SH = ROOT / 'aliases.sh'
@@ -96,6 +93,29 @@ def main():
 
         case [('help' | '-h' | '--help')]:
             print(HELP_TEXT)
+
+        case ['install']:
+            content = '. ' + str(Path(__file__).parent) + '/data/aliases.sh'
+            home = Path(os.environ['HOME']).resolve()
+
+            shellrc = home / ('.bashrc' if 'bash' in os.environ['SHELL'] else '.zshrc')
+            if os.environ.get('BASHRC', False):
+                shellrc = Path(os.environ['BASHRC'])
+            elif os.environ.get('ZSHRC', False):
+                shellrc = Path(os.environ['ZSHRC'])
+
+            if not shellrc.exists():
+                print(f'''\
+Shell configuration file, {shellrc}, not found.
+Please provide either environmental variable (ZSHRC | BASHRC), for example:
+"ZSHRC=/home/c/.config/zsh/.zshrc acronym install"
+or manually add the following line to your shell config file.
+
+{content}''')
+                exit(1)
+            with open(shellrc) as f:
+                print(f"Writing '{content}' to {shellrc}")
+                f.write(content)
 
         case [*_]:
             print('Incorrect usage.')
