@@ -15,6 +15,7 @@ KEYWORDS = ROOT / 'keywords.toml'
 FLAGS = '--flags', '--section'
 HISTFILE = os.environ.get('HISTFILE', False)
 
+
 # Parse the arguments, if register then add the word to the json file,
 def main():
     with open(TOML) as f:

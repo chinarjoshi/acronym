@@ -17,7 +17,10 @@ def acronymize(command: list[str], use_flags: bool = False) -> str:
 
 def resolve_collisions(aliases: dict[str, dict[str, str]], values: set[str], ac: Acronym):
     if ac.short in values:
-        ac.short = input(f"Warning: alias '{ac.short}' is taken. Please choose a custom alias, or press return to skip.\n>>> ")
+        ac.short = input(
+            f"Warning: alias '{ac.short}' is taken. \
+            Please choose a custom alias, or press return to skip.\n>>> "
+        )
         if not ac.short:
             return
 

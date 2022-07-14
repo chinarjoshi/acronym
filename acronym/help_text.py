@@ -11,8 +11,8 @@ jl = "jupyter lab"
 Where [jupyter] is the section, jn is the alias, and "jupyter notebook" is the command.
 
 \033[1mOptions:\033[0m
-add ... \033[1m--flags\033[0m    Include command line flags in auto-generated acronym.
-rm ...  \033[1m--section\033[0m  Delete whole sections instead of aliases from aliases.toml.
+  add ... \033[1m--flags\033[0m    Include command line flags in auto-generated acronym.
+  rm ...  \033[1m--section\033[0m  Delete whole sections instead of aliases from aliases.toml.
   \033[1m-h\033[0m, \033[1m--help\033[0m       Show this message and exit.
 
 
