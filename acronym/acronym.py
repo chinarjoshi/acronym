@@ -11,7 +11,6 @@ import acronym.alias_utils as utils
 from acronym.help_text import HELP_TEXT
 
 
-
 def main():
     """Read aliases.toml file, modify it, and write it back to file.
 
