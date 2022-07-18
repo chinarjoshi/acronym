@@ -24,6 +24,10 @@
   </p>
 </p>
 
+
+https://user-images.githubusercontent.com/68311366/179600073-37302b77-d885-4bf8-9bef-c49158268895.mp4
+
+
 ## Elevator pitch
 
 `alias` is a POSIX shell command that replaces a single word with a string. As [linuxize](https://linuxize.com/post/how-to-create-bash-aliases/) describes about `alias`:
