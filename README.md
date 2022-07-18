@@ -3,11 +3,9 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
 
 <!-- PROJECT LOGO -->
 <br />
-
 <p align="center">
   <a href="https://github.com/chinarjoshi/acronym">
   </a>
@@ -20,41 +18,23 @@
     <a href="https://github.com/chinarjoshi/acronym"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/chinarjoshi/visual-aid-transducer/issues">Report Bug</a>
+    <a href="https://github.com/chinarjoshi/acronym">Report Bug</a>
     ·
-    <a href="https://github.com/chinarjoshi/visual-aid-transducer/issues">Request Feature</a>
+    <a href="https://github.com/chinarjoshi/acronym">Request Feature</a>
   </p>
 </p>
 
-<!-- TABLE OF CONTENTS -->
-<details open="open">
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">Elevator pitch</a>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
-    <li><a href="#gallery">Gallery</a></li>
-  </ol>
-</details>
-
 ## Elevator pitch
 
-As [linuxize](https://linuxize.com/post/how-to-create-bash-aliases/) describes about aliases:
+`alias` is a POSIX shell command that replaces a single word with a string. As [linuxize](https://linuxize.com/post/how-to-create-bash-aliases/) describes about `alias`:
 
 > If you often find youself typing a long command on the terminal, then you will find bash aliases handy... Bash aliases are essentially shortcuts that can save you from having to remember long commands and eliminate a great deal of typing when you are working on the command line.
 
-The problem *acronym* solves is the difficulty keeping track of what aliases you've defined in your shell configuration, and greatly simplifies the process of defining new aliases in a standard and efficient way.
+The problem *acronym* attempts to solves is the difficulty keeping track of what aliases you've defined in your possibly long shell configuration, and the difficulty maintaining a consistent naming pattern.
 
+*Acronym* solves this by greatly simplifying the process of defining new aliases in a standard and efficient way. Instead of having to edit your shell configuration, pick a memorable name that doesn't conflict with other aliases, and add the `alias` command, you would simply use the `acronym add` invocation to automatically use the command's acronym, or see <a href="#Usage">usage</a> for greater versatility.
 
-An acronym *(abbreviation formed from the initial letters of words)* is extracted from any input command, which is the most efficient way to remember a string. For example, `git reset --hard` is aliased to `grh`, which reduces typing from 16 characters to 3 characters (5x less typing).
-
-Every input command will have exactly one output alias through the naming rules, and in case of collisions asks the user for a custom name.
-
-# Installation
+## Installation
 
 
 1. Install package
@@ -69,12 +49,39 @@ Every input command will have exactly one output alias through the naming rules,
 
 2. Source the aliases in shellrc
 
+* With install script
+
 `acronym install`
 
+* Manually edit rc (use `pip show acronym` to find install dir, which is either under `~/.local/lib/...` or `/usr/lib/...`)
 
-# Usage
+`. ~/.local/lib/python3.10/site-packages/acronym/data/aliases.sh`
 
-commands:
+If you're using zsh and want completion, add this line:
+
+`fpath+=(~/.local/share/zsh/site-functions)`
+
+
+## Usage
+
+```
+Usage: acronym [OPTIONS] COMMAND [ARGS]...
+
+Note: The main file, aliases.toml, is structured as the following:
+
+[jupyter]
+jn = "jupyter notebook"
+jl = "jupyter lab"
+
+Where [jupyter] is the section, jn is the alias, and "jupyter notebook" is the command.
+
+Options:
+  add ... --flags    Include command line flags in auto-generated acronym.
+  rm ...  --section  Delete whole sections instead of aliases from aliases.toml.
+  -h, --help       Show this message and exit.
+
+
+Commands:
   add       Add provided CMD with auto-generated alias, or add multiple with comma seperation.
             Keywords: "CMD as ALIAS" to give custom ALIAS.
                       "CMD under SECTION" to give custom SECTION for organization purposes.
@@ -122,9 +129,9 @@ Usage Examples:
 
   [apt]
   ...
+```
 
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/chinarjoshi/visual-aid-transducer?style=for-the-badge
 [contributors-url]: https://github.com/chinarjoshi/visual-aid-transducer/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/chinarjoshi/visual-aid-transducer?style=for-the-badge
@@ -136,5 +143,4 @@ Usage Examples:
 [license-shield]: https://img.shields.io/github/license/chinarjoshi/visual-aid-transducer?style=for-the-badge
 [license-url]: https://github.com/chinarjoshi/visual-aid-transducer/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/chinar-joshi-905493207/
 [product-screenshot]: images/screenshot.png

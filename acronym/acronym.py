@@ -40,6 +40,10 @@ def parse_args(aliases: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     """
     match sys.argv[1:]:
         case ["add", *cmd]:
+            if not cmd:
+                print("Incorrect usage: args needed after add command.")
+                print('See "acronym --help" for more info.')
+                exit(1)
             values = {k for x in aliases.values() for k in x}
             for segment in " ".join(cmd).split(","):
                 ac = utils.Acronym.from_segment(segment)
@@ -51,6 +55,10 @@ def parse_args(aliases: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
             exit(0)
 
         case ["rm", *names]:
+            if not names:
+                print("Incorrect usage: names needed after rm command")
+                print('See "acronym --help" for more info.')
+                exit(1)
             filtered = [w for w in names if w not in utils.FLAGS]
             if "--section" in names:
                 for name in filtered:
@@ -68,6 +76,10 @@ def parse_args(aliases: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
             aliases = {k: v for k, v in aliases.items() if v}
 
         case ["change", old, "with", new]:
+            if not (old and new):
+                print("Incorrect usage: args needed after change command.")
+                print('See "acronym --help" for more info.')
+                exit(1)
             for section in aliases:
                 if old in section:
                     aliases[section][new] = aliases[section].pop(old)
