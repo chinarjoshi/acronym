@@ -40,7 +40,6 @@ The problem *acronym* attempts to solves is the difficulty keeping track of what
 
 ## Installation
 
-
 1. Install package
 
 * With pip:
@@ -125,6 +124,15 @@ Usage Examples:
 
   Remove sections "jupyter" and "etc"
   $ acronym rm jupyter etc --section
+
+  Edit the configuration file
+  $ acronym edit
+
+  Replace alias "gr" to "greset" without changing its command
+  $ acronym change gr with greset
+
+  Get suggestions for more aliases based on shell history file
+  $ acronym suggest
 
   Print sections "pip" and "apt"
   $ acronym print pip apt
