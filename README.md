@@ -24,10 +24,6 @@
   </p>
 </p>
 
-
-https://user-images.githubusercontent.com/68311366/179600073-37302b77-d885-4bf8-9bef-c49158268895.mp4
-
-
 ## Elevator pitch
 
 `alias` is a POSIX shell command that replaces a single word with a string. As [linuxize](https://linuxize.com/post/how-to-create-bash-aliases/) describes about `alias`:
@@ -37,6 +33,13 @@ https://user-images.githubusercontent.com/68311366/179600073-37302b77-d885-4bf8-
 The problem *acronym* attempts to solves is the difficulty keeping track of what aliases you've defined in your possibly long shell configuration, and the difficulty maintaining a consistent naming pattern.
 
 *Acronym* solves this by greatly simplifying the process of defining new aliases in a standard and efficient way. Instead of having to edit your shell configuration, pick a memorable name that doesn't conflict with other aliases, and add the `alias` command, you would simply use the `acronym add` invocation to automatically use the command's acronym, or see <a href="#Usage">usage</a> for greater versatility.
+
+
+# Demonstration
+
+This demo showcases how a very long command with `sudo` and specific flags can be easily shortened to a two letter alias.
+
+https://user-images.githubusercontent.com/68311366/179607402-bbbd1114-0cf8-4aa3-b20d-1b6989ee0e26.mp4
 
 ## Installation
 
