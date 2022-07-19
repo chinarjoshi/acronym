@@ -9,9 +9,7 @@
 <p align="center">
   <a href="https://github.com/chinarjoshi/acronym">
   </a>
-
   <h1 align="center">Acronym</h1>
-
   <p align="center">
     A smart alias management system to shorten your shell commands.
     <br />
@@ -30,7 +28,7 @@
 
 > If you often find youself typing a long command on the terminal, then you will find bash aliases handy... Bash aliases are essentially shortcuts that can save you from having to remember long commands and eliminate a great deal of typing when you are working on the command line.
 
-The problem *acronym* attempts to solves is the difficulty keeping track of what aliases you've defined in your possibly long shell configuration, and the difficulty maintaining a consistent naming pattern.
+So aliases are no doubt a boon for productive shell usage. The problem *acronym* attempts to solves is the difficulty keeping track of what aliases you've defined in your possibly long shell configuration, and the difficulty maintaining a consistent naming pattern.
 
 *Acronym* solves this by greatly simplifying the process of defining new aliases in a standard and efficient way. Instead of having to edit your shell configuration, pick a memorable name that doesn't conflict with other aliases, and add the `alias` command, you would simply use the `acronym add` invocation to automatically use the command's acronym, or see <a href="#Usage">usage</a> for greater versatility.
 
@@ -40,6 +38,30 @@ The problem *acronym* attempts to solves is the difficulty keeping track of what
 This demo showcases how a very long command with `sudo` and specific flags can be easily shortened to a two letter alias.
 
 https://user-images.githubusercontent.com/68311366/179607402-bbbd1114-0cf8-4aa3-b20d-1b6989ee0e26.mp4
+
+The best way to do this example without *acronym* in my opnion is:
+
+```
+echo 'alias pu="sudo pacman -Syu --noconfirm --color=auto"' >> /path/to/aliases.sh
+```
+
+To view them, `cat /path/to/aliases.sh`, where the output is in the format 
+```
+alias a="b"
+alias m="n"
+alias x="y"
+```
+And while this was the system I used before writing this tool, *acronym* allows for much needed abstraction. Note that the *acronym* commands come pre-registered for convenience, so to add an alias is `aa x`, to change the alias name is `ac x with y`, to remove it is `ar y`, and to print your aliases in toml format is `ap`, where the output is in the format
+```
+[acronym]
+aa = "acronym add"
+ar = "acronym rm"
+ae = "acronym edit"
+...
+
+[pacman]
+pu = "sudo pacman -Syu --noconfirm --colo=auto"
+```
 
 ## Installation
 
@@ -63,7 +85,7 @@ https://user-images.githubusercontent.com/68311366/179607402-bbbd1114-0cf8-4aa3-
 
 `. ~/.local/lib/python3.10/site-packages/acronym/data/aliases.sh`
 
-If you're using zsh and want completion, add this line:
+If you're using zsh and want completion, add this line too:
 
 `fpath+=(~/.local/share/zsh/site-functions)`
 
