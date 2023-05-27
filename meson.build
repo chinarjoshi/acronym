@@ -11,4 +11,4 @@ check_dep = dependency('check')
 test_sources = ['tests/test_acronym.c']
 e = executable('tests', sources : test_sources,
   dependencies : check_dep)
-test('tests', e)
+test('test', e)
