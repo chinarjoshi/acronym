@@ -1,5 +1,5 @@
 #include <check.h>
-#include "../src/acronym.h"
+#include "../src/ACHashTable.h"
 #include <stdlib.h>
 
 ACEntry *entry;
