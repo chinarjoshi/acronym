@@ -3,9 +3,9 @@
 #include <stdbool.h>
 
 typedef struct ACEntry {
-    char *acronym;
-    char *command;
-    char *set;
+    char *acronym; // key
+    char *command; // value
+    char *set;     // value
     bool is_removed;
 } ACEntry;
 
@@ -21,6 +21,7 @@ typedef enum Status {
     ERR_NOT_FOUND,
     ERR_DUPLICATE,
     ERR_OUT_OF_MEMORY,
+    ERR_INVALID_ARGS,
 } Status;
 
 // AC helper functions
@@ -29,12 +30,14 @@ Status create_ACEntry(ACEntry **data_out, const char *command,
                       bool include_flags);
 char *create_set_name(const char *command);
 char *create_acronym(const char *command, bool include_flags);
+int hash_acronym(char *acronym, int capacity);
 void free_ACEntry(ACEntry *ac);
 
 // ACHashTable functions
-Status create_AC_hash_table(ACHashTable **data_out, int capacity, float load_factor);
+Status create_ACHashTable(ACHashTable **data_out, int capacity,
+                          float load_factor);
 Status add_AC(ACEntry *data, ACHashTable *ht);
-Status remove_AC(ACEntry **data_out, ACHashTable *ht);
-void free_AC_hash_table(ACHashTable *ht);
+Status remove_AC(ACEntry **data_out, char *acronym, ACHashTable *ht);
+void free_ACHashTable(ACHashTable *ht);
 
 #endif

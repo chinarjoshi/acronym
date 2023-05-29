@@ -5,7 +5,7 @@
 START_TEST(test_create_acronym) {
     char *command = "grep --color=auto";
     char *acronym = create_acronym(command, false);
-    ck_assert_str_eq(acronym, "gc");
+    ck_assert_str_eq(acronym, "g");
     free(acronym);
 }
 END_TEST
@@ -23,6 +23,23 @@ START_TEST(test_create_set_name) {
     char *set = create_set_name(command);
     ck_assert_str_eq(set, "jupyter");
     free(set);
+}
+END_TEST
+
+START_TEST(test_hash_acronym) {
+    char *acronym1 = "gs";
+    char *acronym2 = "gst";
+    int capacity = 7;
+    
+    int hash1 = hash_acronym(acronym1, capacity);
+    int hash2 = hash_acronym(acronym2, capacity);
+
+    ck_assert_int_ge(hash1, 0);
+    ck_assert_int_lt(hash1, capacity);
+    ck_assert_int_ge(hash2, 0);
+    ck_assert_int_lt(hash2, capacity);
+
+    ck_assert_int_ne(hash1, hash2);
 }
 END_TEST
 
@@ -115,6 +132,7 @@ Suite *acronymed_command_suite(void) {
     tcase_add_test(tc_helpers, test_create_acronym);
     tcase_add_test(tc_helpers, test_create_acronym_include_flags);
     tcase_add_test(tc_helpers, test_create_set_name);
+    tcase_add_test(tc_helpers, test_hash_acronym);
     suite_add_tcase(s, tc_helpers);
 
     TCase *tc_AC = tcase_create("Create AC");
