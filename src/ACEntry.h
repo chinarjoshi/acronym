@@ -12,10 +12,11 @@ typedef struct ACEntry {
 
 typedef enum Status {
     SUCCESS,
-    ERR_NOT_FOUND,
-    ERR_DUPLICATE,
-    ERR_OUT_OF_MEMORY,
     ERR_INVALID_ARGS,
+    ERR_OUT_OF_MEMORY,
+    ERR_NOT_FOUND,    // Remove
+    ERR_DUPLICATE,    // Add
+    ERR_INVALID_PATH, // Tree, Show
 } Status;
 
 Status create_ACEntry(ACEntry **data_out, const char *command,

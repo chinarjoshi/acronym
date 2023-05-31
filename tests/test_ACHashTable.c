@@ -1,5 +1,5 @@
-#include <check.h>
 #include <stdlib.h>
+#include <check.h>
 #include "../src/ACHashTable.h"
 #include "test.h"
 

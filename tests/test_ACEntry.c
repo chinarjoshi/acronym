@@ -1,5 +1,5 @@
-#include <check.h>
 #include <stdlib.h>
+#include <check.h>
 #include "../src/ACEntry.h"
 #include "test.h"
 
@@ -136,8 +136,8 @@ Suite *ACEntry_suite(void) {
     Suite *s = suite_create("ACEntry");
 
     TCase *tc_helpers = tcase_create("AC helpers");
-    tcase_add_test(tc_helpers, test_create_alias);
-    tcase_add_test(tc_helpers, test_create_alias_include_flags);
+    tcase_add_test(tc_helpers, test_create_alias_name);
+    tcase_add_test(tc_helpers, test_create_alias_name_include_flags);
     tcase_add_test(tc_helpers, test_create_section_name);
     tcase_add_test(tc_helpers, test_hash_alias);
     suite_add_tcase(s, tc_helpers);

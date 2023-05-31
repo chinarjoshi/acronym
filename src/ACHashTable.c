@@ -14,6 +14,10 @@ Status remove_AC(ACEntry **data_out, char *alias, ACHashTable *ht) {
     return SUCCESS;
 }
 
+Status get_AC(ACEntry **data_out, char *alias, ACHashTable *ht) {
+    return SUCCESS;
+}
+
 Status resize_backing_array(ACHashTable *ht) {
     return SUCCESS;
 }

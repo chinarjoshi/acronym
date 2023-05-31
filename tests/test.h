@@ -4,5 +4,6 @@
 
 Suite *ACEntry_suite(void);
 Suite *ACHashTable_suite(void);
+Suite *parse_args_suite(void);
 
 #endif

@@ -5,9 +5,11 @@
 int main() {
     Suite *suite1 = ACEntry_suite();
     Suite *suite2 = ACHashTable_suite();
+    Suite *suite3 = ACHashTable_suite();
 
     SRunner *sr = srunner_create(suite1);
     srunner_add_suite(sr, suite2);
+    srunner_add_suite(sr, suite3);
 
     srunner_run_all(sr, CK_NORMAL);
     int number_failed = srunner_ntests_failed(sr);

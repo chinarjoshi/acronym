@@ -6,28 +6,6 @@
 const char *argp_program_version = "0.1.0";
 const char *argp_program_bug_address = "chinarjoshi7@gmail.com";
 
-struct Add {
-    char *command;
-    char *alias_override;
-    char *section_override;
-    bool include_flags;
-    bool local;
-};
-
-struct Remove {
-    char **aliases;
-    bool whole_section;
-    bool force;
-    bool interactive;
-    bool local;
-};
-
-union Subcommand {
-    struct Add add;
-    struct Remove remove;
-    bool edit;
-};
-
 static int parse_opt(int key, char *arg, struct argp_state *state) {
     switch (key) {
         case 'd': 
