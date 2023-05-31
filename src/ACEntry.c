@@ -2,20 +2,20 @@
 #include "ACEntry.h"
 
 Status create_ACEntry(ACEntry **data_out, const char *command,
-                      const char *acronym_override, const char *set_override,
+                      const char *alias_override, const char *section_override,
                       bool include_flags) {
     return SUCCESS;
 }
 
-char *create_set_name(const char *command) {
+char *create_section_name(const char *command) {
     return NULL;
 }
 
-char *create_acronym(const char *command, bool include_flags) {
+char *create_alias_name(const char *command, bool include_flags) {
     return NULL;
 }
 
-int hash_acronym(char *acronym, int capacity) {
+int hash_alias(char *alias, int capacity) {
     return 0;
 }
 

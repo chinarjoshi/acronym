@@ -3,7 +3,7 @@ project('acronym', 'c',
   license : 'MIT')
 
 # Main executable
-sources = ['src/ACEntry.c', 'src/ACHashTable.c', 'src/main.c']
+sources = ['src/ACEntry.c', 'src/ACHashTable.c', 'src/parse_args.c']
 executable('acronym', sources : sources)
 
 # Test suite

@@ -44,7 +44,7 @@ START_TEST(test_add_AC) {
     ck_assert_int_eq(ht->size, 1);
     ck_assert(s == SUCCESS);
 
-    int hash = hash_acronym(entry->acronym, ht->capacity);
+    int hash = hash_alias(entry->alias, ht->capacity);
     ck_assert_ptr_eq(ht->backing_array[hash], entry);
 }
 END_TEST
@@ -78,12 +78,12 @@ START_TEST(test_add_AC_duplicate) {
 END_TEST
 
 START_TEST(test_remove_AC) {
-    int hash = hash_acronym(entry->acronym, ht->capacity);
+    int hash = hash_alias(entry->alias, ht->capacity);
     ht->backing_array[hash] = entry;
     ht->size = 1;
 
     ACEntry *data_out;
-    Status s = remove_AC(&data_out, entry->acronym, ht);
+    Status s = remove_AC(&data_out, entry->alias, ht);
     ck_assert(s == SUCCESS);
     ck_assert_int_eq(ht->size, 0);
     ck_assert(ht->backing_array[hash]->is_removed);
@@ -93,13 +93,13 @@ END_TEST
 
 START_TEST(test_remove_AC_empty) {
     ACEntry *data_out;
-    Status s = remove_AC(&data_out, entry->acronym, ht);
+    Status s = remove_AC(&data_out, entry->alias, ht);
     ck_assert(s == ERR_NOT_FOUND);
 }
 END_TEST
 
 START_TEST(test_remove_AC_not_found) {
-    int hash = hash_acronym(entry->acronym, ht->capacity);
+    int hash = hash_alias(entry->alias, ht->capacity);
     ht->backing_array[hash] = entry;
     ht->size = 1;
     

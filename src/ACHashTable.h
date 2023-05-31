@@ -11,8 +11,9 @@ typedef struct ACHashTable {
 
 Status create_ACHashTable(ACHashTable **data_out, int capacity,
                           float load_factor);
+Status resize_backing_array(ACHashTable *ht);
 Status add_AC(ACEntry *data, ACHashTable *ht);
-Status remove_AC(ACEntry **data_out, char *acronym, ACHashTable *ht);
+Status remove_AC(ACEntry **data_out, char *alias, ACHashTable *ht);
 void free_ACHashTable(ACHashTable *ht);
 
 #endif

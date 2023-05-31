@@ -2,10 +2,11 @@
 #define ACENTRY_H
 #include <stdbool.h>
 
+// Aliased command entry in hash table
 typedef struct ACEntry {
-    char *acronym; // key
+    char *alias;   // key
     char *command; // value
-    char *set;     // value
+    char *section; // cached value
     bool is_removed;
 } ACEntry;
 
@@ -18,11 +19,11 @@ typedef enum Status {
 } Status;
 
 Status create_ACEntry(ACEntry **data_out, const char *command,
-                      const char *acronym_override, const char *set_override,
+                      const char *alias_override, const char *section_override,
                       bool include_flags);
-char *create_set_name(const char *command);
-char *create_acronym(const char *command, bool include_flags);
-int hash_acronym(char *acronym, int capacity);
+char *create_alias_name(const char *command, bool include_flags);
+char *create_section_name(const char *command);
+int hash_alias(char *alias, int capacity);
 void free_ACEntry(ACEntry *ac);
 
 #endif
