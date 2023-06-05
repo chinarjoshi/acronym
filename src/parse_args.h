@@ -11,13 +11,13 @@ struct Add {
     bool local;
 };
 
-typedef struct RemoveAliasNode {
-    RemoveAliasNode *next;
+typedef struct AliasListNode {
+    struct AliasListNode *next;
     char *data;
-} RemoveAliasNode;
+} AliasListNode;
 
 struct Remove {
-    RemoveAliasNode *aliases;
+    AliasListNode *aliases;
     bool recursive;
     bool force;
     bool interactive;
@@ -25,7 +25,7 @@ struct Remove {
 };
 
 struct Tree {
-    char **aliases;
+    AliasListNode *aliases;
     int depth;
     bool all;
 };

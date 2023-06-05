@@ -99,18 +99,70 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'l':
             remove->local = true;
             break;
-        case ARGP_KEY_ARG:
-            
+        case ARGP_KEY_ARG:;
+            AliasListNode *new_node;
+            if (!(new_node = malloc(sizeof(AliasListNode))))
+                return 1;
+            if (!(new_node->data = malloc(strlen(arg) + 1))) {
+                free(new_node);
+                return 1;
+            }
+            strcpy(new_node->data, arg);
+            new_node->next = remove->aliases;
+            remove->aliases = new_node;
     }
     return 0;
 }
 int tree_parse_opt(int key, char *arg, struct argp_state *state) {
+    struct Tree *tree = state->input; 
+    switch (key) {
+        case 'd':
+            tree->depth = atoi(arg);
+            break;
+        case 'a':
+            tree->all = true;
+            break;
+        case ARGP_KEY_ARG:;
+            AliasListNode *new_node;
+            if (!(new_node = malloc(sizeof(AliasListNode))))
+                return 1;
+            if (!(new_node->data = malloc(strlen(arg) + 1))) {
+                free(new_node);
+                return 1;
+            }
+            strcpy(new_node->data, arg);
+            new_node->next = tree->aliases;
+            tree->aliases = new_node;
+    }
     return 0;
 }
+
 int show_parse_opt(int key, char *arg, struct argp_state *state) {
+    struct Show *show = state->input;
+    switch (key) {
+        case 'd':
+            if (!(show->directory = malloc(strlen(arg) + 1)))
+                return 1;
+            strcpy(show->directory, arg);
+            break;
+        case 'a':
+            show->all = true;
+            break;
+    }
     return 0;
 }
+
 int edit_parse_opt(int key, char *arg, struct argp_state *state) {
+    struct Edit *edit = state->input;
+    switch (key) {
+        case 'e':
+            if (!(edit->editor = malloc(strlen(arg) + 1)))
+                return 1;
+            strcpy(edit->editor, arg);
+        case 'l':
+            edit->local = true;
+            break;
+    }
     return 0;
 }
 
