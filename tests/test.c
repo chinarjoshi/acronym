@@ -5,7 +5,7 @@
 int main() {
     Suite *suite1 = ACEntry_suite();
     Suite *suite2 = ACHashTable_suite();
-    Suite *suite3 = ACHashTable_suite();
+    Suite *suite3 = parse_args_suite();
 
     SRunner *sr = srunner_create(suite1);
     srunner_add_suite(sr, suite2);

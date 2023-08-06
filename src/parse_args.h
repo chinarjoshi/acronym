@@ -113,4 +113,8 @@ const struct argp_option edit_options[] = {
 int edit_parse_opt(int key, char *arg, struct argp_state *state);
 const struct argp edit_argp = { edit_options, edit_parse_opt }; 
 
+struct Cli parse_args(int argc, char **argv);
+void free_Cli(Cli *cli);
+void free_AliasList(AliasListNode *node);
+
 #endif

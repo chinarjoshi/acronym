@@ -44,7 +44,7 @@ int global_parse_opt(int key, char *arg, struct argp_state *state) {
                 cli->type = EDIT; 
                 argp_parse(&edit_argp, argc, argv, 0, 0, &cli->cmd.edit);
             } else {
-                argp_error(state, "Subcommand not found: %s", arg);
+                argp_error(state, "Invalid subcommand: %s", arg);
             }
             break;
         default:
@@ -73,10 +73,11 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
             add->local = true;
             break;
         case ARGP_KEY_ARG:;
-            char *command = state->argv[state->next];
-            if (!(add->alias_override = malloc(strlen(command) + 1)))
+            if (add->command)
+                argp_error(state, "Only add one command at a time.");
+            if (!(add->command = malloc(strlen(arg) + 1)))
                 return 1;
-            strcpy(add->alias_override, command);
+            strcpy(add->command, arg);
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -113,6 +114,7 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
     }
     return 0;
 }
+
 int tree_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Tree *tree = state->input; 
     switch (key) {
@@ -170,4 +172,37 @@ struct Cli parse_args(int argc, char **argv) {
     Cli cli;
     argp_parse(&global_argp, argc, argv, 0, 0, &cli);
     return cli;
+}
+
+void free_AliasList(AliasListNode *node) {
+    AliasListNode *tmp;
+    while (node->next) {
+        free(node->data);
+        tmp = node->next;
+        free(node);
+        node = tmp;
+    } 
+    free(node);
+}
+
+void free_Cli(Cli *cli) {
+    switch (cli->type) {
+        case ADD:
+            free(cli->cmd.add.command);
+            free(cli->cmd.add.alias_override);
+            free(cli->cmd.add.section_override);
+            break;
+        case REMOVE:
+            free_AliasList(cli->cmd.remove.aliases);
+            break;
+        case TREE:
+            free_AliasList(cli->cmd.tree.aliases);
+            break;
+        case SHOW:
+            free(cli->cmd.show.directory);
+            break;
+        case EDIT:
+            free(cli->cmd.edit.editor);
+            break;
+    }
 }
