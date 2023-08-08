@@ -5,10 +5,10 @@
 
 START_TEST(test_parse_args_add_normal) {
     int argc = 3;
-    char *argv[] = { "add", "git add -A" };
-    Cli cli = parse_args(argc, argv);
-    ck_assert_int_eq(cli.type, ADD);
-    struct Add a = cli.cmd.add;
+    char *argv[] = { "acronym", "add", "git add -A" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, ADD);
+    struct Add a = cli->cmd.add;
     ck_assert_str_eq("git add -A", a.command);
     ck_assert_ptr_null(a.alias_override);
     ck_assert_ptr_null(a.section_override);
@@ -19,10 +19,10 @@ END_TEST
 
 START_TEST(test_parse_args_add_alias_override_local) {
     int argc = 5;
-    char *argv[] = { "add", "git add -A", "-la", "ga" };
-    Cli cli = parse_args(argc, argv);
-    ck_assert_int_eq(cli.type, ADD);
-    struct Add a = cli.cmd.add;
+    char *argv[] = { "acronym", "add", "git add -A", "-la", "ga" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, ADD);
+    struct Add a = cli->cmd.add;
     ck_assert_str_eq("git add -A", a.command);
     ck_assert_str_eq("ga", a.alias_override);
     ck_assert_ptr_null(a.section_override);
@@ -33,10 +33,10 @@ END_TEST
 
 START_TEST(test_parse_args_remove_normal) {
     int argc = 5;
-    char *argv[] = { "remove", "ga", "tldr", "-rf" };
-    Cli cli = parse_args(argc, argv);
-    ck_assert_int_eq(cli.type, REMOVE);
-    struct Remove r = cli.cmd.remove;
+    char *argv[] = { "acronym", "remove", "ga", "tldr", "-rf" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, REMOVE);
+    struct Remove r = cli->cmd.remove;
     ck_assert_str_eq(r.aliases->data, "ga");
     ck_assert_str_eq(r.aliases->next->data, "tldr");
     ck_assert(r.force);
@@ -48,10 +48,10 @@ END_TEST
 
 START_TEST(test_parse_args_tree_normal) {
     int argc = 5;
-    char *argv[] = { "tree", "run", "test", "-aL3" };
-    Cli cli = parse_args(argc, argv);
-    ck_assert_int_eq(cli.type, TREE);
-    struct Tree t = cli.cmd.tree;
+    char *argv[] = { "acronym", "tree", "run", "test", "-aL3" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, TREE);
+    struct Tree t = cli->cmd.tree;
     ck_assert_str_eq(t.aliases->data, "run");
     ck_assert_str_eq(t.aliases->next->data, "test");
     ck_assert_int_eq(t.depth, 3);
@@ -61,20 +61,20 @@ END_TEST
 
 START_TEST(test_parse_args_show_normal) {
     int argc = 3;
-    char *argv[] = { "show", "~/projects/acronym" };
-    Cli cli = parse_args(argc, argv);
-    ck_assert_int_eq(cli.type, SHOW);
-    ck_assert_str_eq(cli.cmd.show.directory, "~/projects/acronym");
-    ck_assert(!cli.cmd.show.all);
+    char *argv[] = { "acronym", "show", "~/projects/acronym" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, SHOW);
+    ck_assert_str_eq(cli->cmd.show.directory, "~/projects/acronym");
+    ck_assert(!cli->cmd.show.all);
 }
 END_TEST
 
 START_TEST(test_parse_args_edit_normal) {
     int argc = 3;
-    char *argv[] = { "edit", "-e", "emacs" };
-    Cli cli = parse_args(argc, argv);
-    ck_assert_str_eq(cli.cmd.edit.editor, "emacs");
-    ck_assert(!cli.cmd.edit.local);
+    char *argv[] = { "acronym", "edit", "-e", "emacs" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_str_eq(cli->cmd.edit.editor, "emacs");
+    ck_assert(!cli->cmd.edit.local);
 }
 END_TEST
 

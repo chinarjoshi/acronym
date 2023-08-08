@@ -56,13 +56,19 @@ typedef struct Cli {
     int verbosity;
 } Cli;
 
-int global_parse_opt(int key, char *arg, struct argp_state *state);
+extern struct argp add_argp;
+extern struct argp remove_argp;
+extern struct argp tree_argp;
+extern struct argp show_argp;
+extern struct argp edit_argp;
+
 int add_parse_opt(int key, char *arg, struct argp_state *state);
 int remove_parse_opt(int key, char *arg, struct argp_state *state);
 int tree_parse_opt(int key, char *arg, struct argp_state *state);
 int show_parse_opt(int key, char *arg, struct argp_state *state);
 int edit_parse_opt(int key, char *arg, struct argp_state *state);
-struct Cli parse_args(int argc, char **argv);
+struct Cli *parse_args(int argc, char **argv);
+struct Cli *parse_global_args(int argc, char **argv);
 void free_Cli(Cli *cli);
 void free_AliasList(AliasListNode *node);
 

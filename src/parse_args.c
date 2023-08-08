@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -5,98 +6,93 @@
 #include <argp.h>
 #include "parse_args.h"
 
-const char *argp_program_version = "0.1.0";
-const char *argp_program_bug_address = "chinarjoshi7@gmail.com";
-
-struct argp_option global_options[] = {
-    { "verbose", 'v', "VERBOSITY", OPTION_ARG_OPTIONAL, "Level of output verbosity (0-3)"},
-    { 0 }
-};
-struct argp global_argp = { global_options, global_parse_opt }; 
-
-struct argp_option add_options[] = {
-    { "alias", 'a', "ALIAS", 0, "Optionally provide alias" },
-    { "section", 's', "SECTION", 0, "Optionally provide section/category" },
-    { "include-flags", 'i', 0, 0, "Include flags when generating default alias" },
-    { "local", 'l', 0, 0, "Change env file in current directory" },
-    { 0 }
-};
-struct argp add_argp = { add_options, add_parse_opt }; 
-
-struct argp_option remove_options[] = {
-    { "recursive", 'r', 0, 0, "Remove a whole section instead of alias(es)" },
-    { "force", 'f', 0, 0, "Never prompt, even if alias not found" },
-    { "interactive", 'i', 0, 0, "Prompt before every removal" },
-    { "local", 'l', 0, 0, "Change env file in current directory" },
-    { 0 }
-};
-struct argp remove_argp = { remove_options, remove_parse_opt }; 
-
-struct argp_option tree_options[] = {
-    { "depth", 'L', "DEPTH", 0, "Max display depth of the tree" },
-    { "all", 'a', 0, 0, "Start from home directory" },
-    { 0 }
-};
-struct argp tree_argp = { tree_options, tree_parse_opt }; 
-
-struct argp_option show_options[] = {
-    { "directory", 'd', "DIRECTORY", 0, "Directory to show active aliases" },
-    { "all", 'a', 0, 0, "Show all active aliases, not just overriden ones" },
-    { 0 }
-};
-struct argp show_argp = { show_options, show_parse_opt }; 
-
-struct argp_option edit_options[] = {
-    { "editor", 'e', "EDITOR", 0, "Name of editor to use" },
-    { "local", 'l', 0, 0, "Edit env file in current directory" },
-    { 0 }
-};
-struct argp edit_argp = { edit_options, edit_parse_opt }; 
-
-
-int global_parse_opt(int key, char *arg, struct argp_state *state) {
-    Cli *cli = state->input; 
-    switch (key) {
-        case 'v':
-            if (arg) {
-                int verbosity = atoi(arg);
-                if (verbosity < 0 || verbosity > 3) {
-                    argp_error(state, "Verbosity must be between 0-3. Provided: %s", arg);
-                }
-                cli->verbosity = verbosity;
-            } else {
-                cli->verbosity = 1;
-            }
-            break;
-        case 'q':
-            global_parse_opt('v', "0", state);
-            break;
-        case ARGP_KEY_ARG:;
-            int argc = state->argc - state->next + 1;
-            char **argv = &state->argv[state->next - 1];
-            if (strcmp(arg, "add") == 0) {
-                cli->type = ADD; 
-                argp_parse(&add_argp, argc, argv, 0, 0, &cli->cmd.add);
-            } else if (strcmp(arg, "remove") == 0) {
-                cli->type = REMOVE; 
-                argp_parse(&remove_argp, argc, argv, 0, 0, &cli->cmd.remove);
-            } else if (strcmp(arg, "tree") == 0) {
-                cli->type = TREE; 
-                argp_parse(&tree_argp, argc, argv, 0, 0, &cli->cmd.tree);
-            } else if (strcmp(arg, "show") == 0) {
-                cli->type = SHOW; 
-                argp_parse(&show_argp, argc, argv, 0, 0, &cli->cmd.show);
-            } else if (strcmp(arg, "edit") == 0) {
-                cli->type = EDIT; 
-                argp_parse(&edit_argp, argc, argv, 0, 0, &cli->cmd.edit);
-            } else {
-                argp_error(state, "Invalid subcommand: %s", arg);
-            }
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
+struct Cli *parse_global_options(int argc, char **argv) {
+    if (argc < 2) {
+        printf("invalid use: provide option or subcommand\n");
+        return NULL;
     }
-    return 0;
+
+    Cli *cli = calloc(1, sizeof(Cli));
+    if (!cli)
+        return NULL;
+
+    // Stop option processing at first subcommand, and v has an optional argument
+    char *short_options = "+v::qhV";
+    struct option long_options[] = {
+        { "verbose", optional_argument, 0, 'v' },
+        { "quiet", no_argument, 0, 'q' },
+        { "help", no_argument, 0, 'h' },
+        { "version", no_argument, 0, 'V' },
+        { 0, 0, 0, 0 }
+    };
+
+    int opt;
+    opterr = 0;
+    while ((opt = getopt_long(argc, argv, short_options, long_options, 0)) != -1) {
+        switch (opt) {
+            case 'v':
+                if (optarg) {
+                    int verbosity = atoi(optarg);
+                    if (verbosity < 0 || verbosity > 3) {
+                        printf("Verbosity must be between 0-3. Provided: %s", optarg);
+                        return NULL;
+                    }
+                    cli->verbosity = verbosity;
+                } else {
+                    cli->verbosity = 1;
+                }
+                break;
+            case 'q':
+                cli->verbosity = 0;
+                break;
+            case 'h': // TODO: flesh out these options
+                // Print help
+                printf("Help message\n");
+                return NULL;
+                break;
+            case 'V':
+                // Print the version
+                printf("0.1.0\n");
+                return NULL;
+                break;
+            case '?':
+            default:
+                printf("Error: invalid option\n");
+                return NULL;
+                break;
+        }
+    }
+    return cli;
+}
+
+struct Cli *parse_args(int argc, char **argv) {
+    Cli *cli = parse_global_options(argc, argv);
+    if (!cli)
+        return NULL;
+
+    // Move forward argc and argv to subcommand
+    argc -= optind;
+    argv += optind;
+    char *subcommand = argv[0];
+    if (strcmp(subcommand, "add") == 0) {
+        cli->type = ADD; 
+        argp_parse(&add_argp, argc, argv, 0, 0, &cli->cmd.add);
+    } else if (strcmp(subcommand, "remove") == 0) {
+        cli->type = REMOVE; 
+        argp_parse(&remove_argp, argc, argv, 0, 0, &cli->cmd.remove);
+    } else if (strcmp(subcommand, "tree") == 0) {
+        cli->type = TREE; 
+        argp_parse(&tree_argp, argc, argv, 0, 0, &cli->cmd.tree);
+    } else if (strcmp(subcommand, "show") == 0) {
+        cli->type = SHOW; 
+        argp_parse(&show_argp, argc, argv, 0, 0, &cli->cmd.show);
+    } else if (strcmp(subcommand, "edit") == 0) {
+        cli->type = EDIT; 
+        argp_parse(&edit_argp, argc, argv, 0, 0, &cli->cmd.edit);
+    } else {
+        printf("Invalid subcommand: %s", subcommand);
+    }
+    return cli;
 }
 
 int add_parse_opt(int key, char *arg, struct argp_state *state) {
@@ -119,8 +115,6 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
             add->local = true;
             break;
         case ARGP_KEY_ARG:;
-            if (add->command)
-                argp_error(state, "Only add one command at a time.");
             if (!(add->command = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(add->command, arg);
@@ -157,6 +151,8 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(new_node->data, arg);
             new_node->next = remove->aliases;
             remove->aliases = new_node;
+        default:
+            return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
@@ -181,6 +177,8 @@ int tree_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(new_node->data, arg);
             new_node->next = tree->aliases;
             tree->aliases = new_node;
+        default:
+            return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
@@ -196,6 +194,8 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'a':
             show->all = true;
             break;
+        default:
+            return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
@@ -210,6 +210,8 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'l':
             edit->local = true;
             break;
+        default:
+            return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
@@ -245,11 +247,5 @@ void free_Cli(Cli *cli) {
             free(cli->cmd.edit.editor);
             break;
     }
+    free(cli);
 }
-
-struct Cli parse_args(int argc, char **argv) {
-    Cli cli;
-    argp_parse(&global_argp, argc, argv, 0, 0, &cli);
-    return cli;
-}
-

@@ -4,6 +4,9 @@
 #include "ACEntry.h"
 
 int main(int argc, char **argv) {
-    Cli c = parse_args(argc, argv);
-    printf("%d\n", c.type);
+    Cli *c = parse_args(argc, argv);
+    if (!c)
+        return 0;
+
+    printf("%d\n", c->type);
 }
