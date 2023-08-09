@@ -30,7 +30,7 @@ END_TEST
 START_TEST(test_hash_alias) {
     char *alias1 = "gs";
     char *alias2 = "gst";
-    int capacity = 7;
+    int capacity = 137;
     
     int hash1 = hash_alias(alias1, capacity);
     int hash2 = hash_alias(alias2, capacity);
