@@ -33,18 +33,33 @@ END_TEST
 
 START_TEST(test_parse_args_remove_normal) {
     int argc = 5;
-    char *argv[] = { "acronym", "remove", "ga", "tldr", "-rf" };
+    char *argv[] = { "acronym", "remove", "a", "b", "-rf" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, REMOVE);
     struct Remove r = cli->cmd.remove;
-    ck_assert_str_eq(r.aliases->data, "tldr");
-    ck_assert_str_eq(r.aliases->next->data, "ga");
+    ck_assert_str_eq(r.aliases->data, "b");
+    ck_assert_str_eq(r.aliases->next->data, "a");
     ck_assert(r.force);
     ck_assert(r.recursive);
     ck_assert(!r.local);
     ck_assert(!r.interactive);
 }
 END_TEST
+
+START_TEST(test_parse_args_remove_all_flags) {
+    int argc = 8;
+    char *argv[] = { "acronym", "remove", "-r", "a", "--force", "b", "-il", "c" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, REMOVE);
+    struct Remove r = cli->cmd.remove;
+    ck_assert_str_eq(r.aliases->data, "c");
+    ck_assert_str_eq(r.aliases->next->data, "b");
+    ck_assert_str_eq(r.aliases->next->next->data, "a");
+    ck_assert(r.force);
+    ck_assert(r.recursive);
+    ck_assert(r.local);
+    ck_assert(r.interactive);
+}
 
 START_TEST(test_parse_args_tree_normal) {
     int argc = 5;
@@ -88,6 +103,7 @@ Suite *parse_args_suite(void) {
 
     TCase *tc_remove = tcase_create("Remove");
     tcase_add_test(tc_remove, test_parse_args_remove_normal);
+    tcase_add_test(tc_remove, test_parse_args_remove_all_flags);
     suite_add_tcase(s, tc_remove);
 
     TCase *tc_tree = tcase_create("Tree");
