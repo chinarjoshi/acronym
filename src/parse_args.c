@@ -151,6 +151,7 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(new_node->data, arg);
             new_node->next = remove->aliases;
             remove->aliases = new_node;
+            break;
         default:
             return ARGP_ERR_UNKNOWN;
     }
@@ -177,6 +178,7 @@ int tree_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(new_node->data, arg);
             new_node->next = tree->aliases;
             tree->aliases = new_node;
+            break;
         default:
             return ARGP_ERR_UNKNOWN;
     }
@@ -207,6 +209,7 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
             if (!(edit->editor = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(edit->editor, arg);
+            break;
         case 'l':
             edit->local = true;
             break;

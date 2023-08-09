@@ -37,8 +37,8 @@ START_TEST(test_parse_args_remove_normal) {
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, REMOVE);
     struct Remove r = cli->cmd.remove;
-    ck_assert_str_eq(r.aliases->data, "ga");
-    ck_assert_str_eq(r.aliases->next->data, "tldr");
+    ck_assert_str_eq(r.aliases->data, "tldr");
+    ck_assert_str_eq(r.aliases->next->data, "ga");
     ck_assert(r.force);
     ck_assert(r.recursive);
     ck_assert(!r.local);
@@ -48,20 +48,20 @@ END_TEST
 
 START_TEST(test_parse_args_tree_normal) {
     int argc = 5;
-    char *argv[] = { "acronym", "tree", "run", "test", "-aL3" };
+    char *argv[] = { "acronym", "tree", "run", "test", "-ad3" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, TREE);
     struct Tree t = cli->cmd.tree;
-    ck_assert_str_eq(t.aliases->data, "run");
-    ck_assert_str_eq(t.aliases->next->data, "test");
+    ck_assert_str_eq(t.aliases->data, "test");
+    ck_assert_str_eq(t.aliases->next->data, "run");
     ck_assert_int_eq(t.depth, 3);
     ck_assert(t.all);
 }
 END_TEST
 
 START_TEST(test_parse_args_show_normal) {
-    int argc = 3;
-    char *argv[] = { "acronym", "show", "~/projects/acronym" };
+    int argc = 4;
+    char *argv[] = { "acronym", "show", "-d", "~/projects/acronym" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, SHOW);
     ck_assert_str_eq(cli->cmd.show.directory, "~/projects/acronym");
@@ -70,7 +70,7 @@ START_TEST(test_parse_args_show_normal) {
 END_TEST
 
 START_TEST(test_parse_args_edit_normal) {
-    int argc = 3;
+    int argc = 4;
     char *argv[] = { "acronym", "edit", "-e", "emacs" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_str_eq(cli->cmd.edit.editor, "emacs");
