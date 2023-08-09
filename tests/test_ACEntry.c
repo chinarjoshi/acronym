@@ -20,6 +20,14 @@ START_TEST(test_create_alias_name_include_flags) {
 END_TEST
 
 START_TEST(test_create_section_name) {
+    char *command = "git branch --all";
+    char *section = create_section_name(command);
+    ck_assert_str_eq(section, "git");
+    free(section);
+}
+END_TEST
+
+START_TEST(test_create_section_name_sudo) {
     char *command = "sudo jupyter notebook .";
     char *section = create_section_name(command);
     ck_assert_str_eq(section, "jupyter");
@@ -139,6 +147,7 @@ Suite *ACEntry_suite(void) {
     tcase_add_test(tc_helpers, test_create_alias_name);
     tcase_add_test(tc_helpers, test_create_alias_name_include_flags);
     tcase_add_test(tc_helpers, test_create_section_name);
+    tcase_add_test(tc_helpers, test_create_section_name_sudo);
     tcase_add_test(tc_helpers, test_hash_alias);
     suite_add_tcase(s, tc_helpers);
 

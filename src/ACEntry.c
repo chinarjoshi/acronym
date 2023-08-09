@@ -56,6 +56,7 @@ char *create_section_name(const char *command) {
     if (!section)
         return NULL;
     strncpy(section, command, section_length);
+    section[section_length] = '\0';
 
     return section;
 }
@@ -126,5 +127,8 @@ int hash_alias(char *str, int capacity) {
 }
 
 void free_ACEntry(ACEntry *ac) {
-    return;
+    free(ac->alias);
+    free(ac->section);
+    free(ac->command);
+    free(ac);
 }
