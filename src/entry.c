@@ -1,17 +1,17 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "ACEntry.h"
+#include "entry.h"
 
-// Allocates an ACEntry and saves it in *data_out, returning the status.
+// Allocates an Entry and saves it in *data_out, returning the status.
 // If 'alias_override' is a valid string, then the 'alias' field will contain it
 // Same with 'section_override'
 // If 'include_flags', then options and the first letter of flags are included,
 // exluding their arguments, in order.
-Status create_ACEntry(ACEntry **data_out, const char *command,
+Status create_entry(Entry **data_out, const char *command,
                       const char *alias_override, const char *section_override,
                       bool include_flags) {
-    ACEntry *entry = malloc(sizeof(ACEntry));
+    Entry *entry = malloc(sizeof(Entry));
     if (!entry)
         return ERR_OUT_OF_MEMORY;
 
@@ -126,9 +126,9 @@ int hash_alias(char *str, int capacity) {
     return (hash & 0xFFFFFFFF) % capacity;
 }
 
-void free_ACEntry(ACEntry *ac) {
-    free(ac->alias);
-    free(ac->section);
-    free(ac->command);
-    free(ac);
+void free_entry(Entry *entry) {
+    free(entry->alias);
+    free(entry->section);
+    free(entry->command);
+    free(entry);
 }

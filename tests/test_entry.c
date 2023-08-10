@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <check.h>
-#include "../src/ACEntry.h"
+#include "../src/entry.h"
 #include "test.h"
 
 START_TEST(test_create_alias_name) {
@@ -52,98 +52,98 @@ START_TEST(test_hash_alias) {
 }
 END_TEST
 
-START_TEST(test_create_ACEntry_default1) {
-    ACEntry *entry;
+START_TEST(test_create_entry_default1) {
+    Entry *entry;
     char *command = "git branch --all";
-    Status s = create_ACEntry(&entry, command, NULL, NULL, false);
+    Status s = create_entry(&entry, command, NULL, NULL, false);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "gb");
     ck_assert_str_eq(entry->command, "git branch --all");
     ck_assert_str_eq(entry->section, "git");
     ck_assert(!entry->is_removed);
-    free_ACEntry(entry);
+    free_entry(entry);
 }
 END_TEST
 
-START_TEST(test_create_ACEntry_default2) {
-    ACEntry *entry;
+START_TEST(test_create_entry_default2) {
+    Entry *entry;
     char *command = "meson compile -C ~/projects/alias/builds";
-    Status s = create_ACEntry(&entry, command, NULL, NULL, false);
+    Status s = create_entry(&entry, command, NULL, NULL, false);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "mc");
     ck_assert_str_eq(entry->command, "meson compile -C ~/projects/alias/builds");
     ck_assert_str_eq(entry->section, "meson");
     ck_assert(!entry->is_removed);
-    free_ACEntry(entry);
+    free_entry(entry);
 }
 END_TEST
 
-START_TEST(test_create_ACEntry_include_flags) {
-    ACEntry *entry;
+START_TEST(test_create_entry_include_flags) {
+    Entry *entry;
     char *command = "sudo pacman -Syu";
-    Status s = create_ACEntry(&entry, command, NULL, NULL, true);
+    Status s = create_entry(&entry, command, NULL, NULL, true);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "pSyu");
     ck_assert_str_eq(entry->command, "sudo pacman -Syu");
     ck_assert_str_eq(entry->section, "pacman");
     ck_assert(!entry->is_removed);
-    free_ACEntry(entry);
+    free_entry(entry);
 }
 END_TEST
 
-START_TEST(test_create_ACEntry_alias_override) {
-    ACEntry *entry;
+START_TEST(test_create_entry_alias_override) {
+    Entry *entry;
     char *command = "ls -al";
     char *alias_override = "ll";
-    Status s = create_ACEntry(&entry, command, alias_override, NULL, true);
+    Status s = create_entry(&entry, command, alias_override, NULL, true);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "ll");
     ck_assert_str_eq(entry->command, "ls -al");
     ck_assert_str_eq(entry->section, "ls");
     ck_assert(!entry->is_removed);
-    free_ACEntry(entry);
+    free_entry(entry);
 }
 END_TEST
 
-START_TEST(test_create_ACEntry_section_override_include_flags) {
-    ACEntry *entry;
+START_TEST(test_create_entry_section_override_include_flags) {
+    Entry *entry;
     char *command = "npm uninstall -g";
     char *section_override = "package_managers";
-    Status s = create_ACEntry(&entry, command, NULL, section_override, true);
+    Status s = create_entry(&entry, command, NULL, section_override, true);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "nug");
     ck_assert_str_eq(entry->command, "npm uninstall -g");
     ck_assert_str_eq(entry->section, "package_managers");
     ck_assert(!entry->is_removed);
-    free_ACEntry(entry);
+    free_entry(entry);
 }
 END_TEST
 
-START_TEST(test_create_ACEntry_all_options) {
-    ACEntry *entry;
+START_TEST(test_create_entry_all_options) {
+    Entry *entry;
     char *command = "cd ..";
     char *alias_override = "...";
     char *section_override = "etc";
-    Status s = create_ACEntry(&entry, command, alias_override, section_override, false);
+    Status s = create_entry(&entry, command, alias_override, section_override, false);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "...");
     ck_assert_str_eq(entry->command, "cd ..");
     ck_assert_str_eq(entry->section, "etc");
     ck_assert(!entry->is_removed);
-    free_ACEntry(entry);
+    free_entry(entry);
 }
 END_TEST
 
-Suite *ACEntry_suite(void) {
-    Suite *s = suite_create("ACEntry");
+Suite *entry_suite(void) {
+    Suite *s = suite_create("Entry");
 
-    TCase *tc_helpers = tcase_create("AC helpers");
+    TCase *tc_helpers = tcase_create("Entry helpers");
     tcase_add_test(tc_helpers, test_create_alias_name);
     tcase_add_test(tc_helpers, test_create_alias_name_include_flags);
     tcase_add_test(tc_helpers, test_create_section_name);
@@ -151,14 +151,14 @@ Suite *ACEntry_suite(void) {
     tcase_add_test(tc_helpers, test_hash_alias);
     suite_add_tcase(s, tc_helpers);
 
-    TCase *tc_AC = tcase_create("Create AC");
-    tcase_add_test(tc_AC, test_create_ACEntry_default1);
-    tcase_add_test(tc_AC, test_create_ACEntry_default2);
-    tcase_add_test(tc_AC, test_create_ACEntry_include_flags);
-    tcase_add_test(tc_AC, test_create_ACEntry_alias_override);
-    tcase_add_test(tc_AC, test_create_ACEntry_section_override_include_flags);
-    tcase_add_test(tc_AC, test_create_ACEntry_all_options);
-    suite_add_tcase(s, tc_AC);
+    TCase *tc_ = tcase_create("Create entry");
+    tcase_add_test(tc_, test_create_entry_default1);
+    tcase_add_test(tc_, test_create_entry_default2);
+    tcase_add_test(tc_, test_create_entry_include_flags);
+    tcase_add_test(tc_, test_create_entry_alias_override);
+    tcase_add_test(tc_, test_create_entry_section_override_include_flags);
+    tcase_add_test(tc_, test_create_entry_all_options);
+    suite_add_tcase(s, tc_);
 
     return s;
 }

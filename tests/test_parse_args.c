@@ -94,7 +94,7 @@ START_TEST(test_parse_args_edit_normal) {
 END_TEST
 
 Suite *parse_args_suite(void) {
-    Suite *s = suite_create("parse_args");
+    Suite *s = suite_create("Parse Args");
 
     TCase *tc_add = tcase_create("Add");
     tcase_add_test(tc_add, test_parse_args_add_normal);

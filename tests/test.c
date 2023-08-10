@@ -3,8 +3,8 @@
 #include "test.h"
 
 int main() {
-    Suite *suite1 = ACEntry_suite();
-    Suite *suite2 = ACHashTable_suite();
+    Suite *suite1 = entry_suite();
+    Suite *suite2 = hash_table_suite();
     Suite *suite3 = parse_args_suite();
 
     SRunner *sr = srunner_create(suite1);
