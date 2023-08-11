@@ -5,7 +5,7 @@
 
 Entry *entry;
 HashTable *ht;
-const int initial_capacity = 17;
+const int initial_capacity = 7;
 const float load_factor = .5;
 
 void setup(void) {
@@ -24,7 +24,7 @@ void setup(void) {
 }
 
 void teardown(void) {
-    free_hash_table(ht);
+    // free_hash_table(ht);
 }
 
 START_TEST(test_create_hash_table) {
@@ -32,6 +32,16 @@ START_TEST(test_create_hash_table) {
     ck_assert_int_eq(ht->capacity, initial_capacity);
     ck_assert_int_eq(ht->size, 0);
     ck_assert_float_eq(ht->load_factor, load_factor);
+}
+END_TEST
+
+START_TEST(test_resize_backing_array) {
+    Status s = add_entry(entry, ht);
+    ck_assert(s == SUCCESS);
+    resize_backing_array(ht);
+    ck_assert_int_eq(ht->capacity, initial_capacity * 2 + 1);    
+    int hash = hash_alias(entry->alias, ht->capacity);
+    ck_assert_ptr_eq(entry, ht->backing_array[hash]);
 }
 END_TEST
 
@@ -59,6 +69,11 @@ START_TEST(test_add_entry_trigger_resize) {
         s = add_entry(entries[i], ht);
         ck_assert(s == SUCCESS);
         ck_assert_int_eq(ht->size, i + 1);
+    }
+
+    for (int i = 0, hash = 0; i < 4; i++) {
+        hash = hash_alias(entries[i]->alias, ht->capacity);
+        ck_assert_ptr_eq(ht->backing_array[hash], entries[i]);
     }
 
     ck_assert_int_eq(ht->capacity, initial_capacity * 2 + 1);
@@ -110,6 +125,7 @@ Suite *hash_table_suite(void) {
 
     TCase *tc_create = tcase_create("HashTableCreate");
     tcase_add_test(tc_create, test_create_hash_table);
+    tcase_add_test(tc_create, test_resize_backing_array);
     tcase_add_checked_fixture(tc_create, setup, teardown);
     suite_add_tcase(s, tc_create);
 

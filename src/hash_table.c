@@ -73,22 +73,16 @@ Status remove_entry(Entry **data_out, char *alias, HashTable *ht) {
     return ERR_NOT_FOUND;
 }
 
-static void free_backing_array(Entry **backing_array, int capacity) {
-    for (int i = 0; i < capacity; i++)
-        if (backing_array[i])
-            free_entry(backing_array[i]);
-    free(backing_array);
-}
-
 Status resize_backing_array(HashTable *ht) {
     int new_capacity = ht->capacity * 2 + 1;
-    Entry **new_array = malloc(new_capacity * sizeof(Entry));
+    Entry **new_array = calloc(new_capacity, sizeof(Entry));
     if (!new_array)
         return ERR_OUT_OF_MEMORY;
 
     int old_capacity = ht->capacity;
     Entry **old_array = ht->backing_array;
 
+    ht->size = 0;
     ht->capacity = new_capacity;
     ht->backing_array = new_array;
 
@@ -96,11 +90,16 @@ Status resize_backing_array(HashTable *ht) {
         if (old_array[i])
             add_entry(old_array[i], ht);
 
-    free_backing_array(ht->backing_array, ht->capacity);
+    free(old_array);
     return SUCCESS;
 }
 
 void free_hash_table(HashTable *ht) {
-    free_backing_array(ht->backing_array, ht->capacity);
+    if (ht->size > 0)
+        for (int i = 0; i < ht->capacity; i++)
+            if (ht->backing_array[i])
+                free_entry(ht->backing_array[i]);
+
+    free(ht->backing_array);
     free(ht);
 }
