@@ -62,14 +62,14 @@ START_TEST(test_parse_args_remove_all_flags) {
 }
 
 START_TEST(test_parse_args_tree_normal) {
-    int argc = 5;
-    char *argv[] = { "acronym", "tree", "run", "test", "-ad3" };
+    int argc = 6;
+    char *argv[] = { "acronym", "tree", "run", "test", "-ad", "~/dotfiles" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, TREE);
     struct Tree t = cli->cmd.tree;
     ck_assert_str_eq(t.aliases->data, "test");
     ck_assert_str_eq(t.aliases->next->data, "run");
-    ck_assert_int_eq(t.depth, 3);
+    ck_assert_str_eq(t.directory, "~/dotfiles");
     ck_assert(t.all);
 }
 END_TEST

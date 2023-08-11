@@ -22,7 +22,7 @@ struct argp_option remove_options[] = {
 struct argp remove_argp = { remove_options, remove_parse_opt }; 
 
 struct argp_option tree_options[] = {
-    { "depth", 'd', "DEPTH", 0, "Max display depth of the tree" },
+    { "directory", 'd', "DIRECTORY", 0, "Directory to start search" },
     { "all", 'a', 0, 0, "Start from home directory" },
     { 0 }
 };

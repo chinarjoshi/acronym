@@ -162,7 +162,9 @@ int tree_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Tree *tree = state->input; 
     switch (key) {
         case 'd':
-            tree->depth = atoi(arg);
+            if (!(tree->directory = malloc(strlen(arg) + 1)))
+                return 1;
+            strcpy(tree->directory, arg);
             break;
         case 'a':
             tree->all = true;

@@ -26,7 +26,7 @@ struct Remove {
 
 struct Tree {
     AliasListNode *aliases;
-    int depth;
+    char *directory;
     bool all;
 };
 
