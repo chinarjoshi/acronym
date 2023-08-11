@@ -5,37 +5,33 @@
 
 Entry *entry;
 HashTable *ht;
-const int initial_capacity = 7;
+const int initial_capacity = 17;
+const float load_factor = .5;
 
 void setup(void) {
     char *command = "git status";
     Status s = create_entry(&entry, command, NULL, NULL, false);
     if (s == ERR_OUT_OF_MEMORY) {
+        ck_abort_msg("Err: out of memory.");
         return;
     }
 
-    Status s2 = create_hash_table(&ht, initial_capacity, .5);
+    Status s2 = create_hash_table(&ht, initial_capacity, load_factor);
     if (s2 == ERR_OUT_OF_MEMORY) {
+        ck_abort_msg("Err: out of memory.");
         return;
     }
 }
 
 void teardown(void) {
-    free_entry(entry);
     free_hash_table(ht);
 }
 
 START_TEST(test_create_hash_table) {
-    HashTable *ht;
-    Status s = create_hash_table(&ht, 10, .5);
-    if (s == ERR_OUT_OF_MEMORY) {
-        return;
-    }
     ck_assert_ptr_nonnull(ht->backing_array);
-    ck_assert_int_eq(ht->capacity, 10);
+    ck_assert_int_eq(ht->capacity, initial_capacity);
     ck_assert_int_eq(ht->size, 0);
-    ck_assert_float_eq(ht->load_factor, .5);
-    free_hash_table(ht);
+    ck_assert_float_eq(ht->load_factor, load_factor);
 }
 END_TEST
 
@@ -114,6 +110,7 @@ Suite *hash_table_suite(void) {
 
     TCase *tc_create = tcase_create("HashTableCreate");
     tcase_add_test(tc_create, test_create_hash_table);
+    tcase_add_checked_fixture(tc_create, setup, teardown);
     suite_add_tcase(s, tc_create);
 
     TCase *tc_add = tcase_create("HashTableAdd");
@@ -121,6 +118,7 @@ Suite *hash_table_suite(void) {
     tcase_add_test(tc_add, test_add_entry);
     tcase_add_test(tc_add, test_add_entry_duplicate);
     tcase_add_test(tc_add, test_add_entry_trigger_resize);
+    tcase_add_checked_fixture(tc_add, setup, teardown);
     suite_add_tcase(s, tc_add);
 
     TCase *tc_remove = tcase_create("HashTableRemove");
@@ -128,6 +126,7 @@ Suite *hash_table_suite(void) {
     tcase_add_test(tc_add, test_remove_entry);
     tcase_add_test(tc_add, test_remove_entry_not_found);
     tcase_add_test(tc_add, test_remove_entry_empty);
+    tcase_add_checked_fixture(tc_remove, setup, teardown);
     suite_add_tcase(s, tc_remove);
 
     return s;
