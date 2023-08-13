@@ -3,15 +3,35 @@
 #include "parse_args.h"
 #include "entry.h"
 #include "hash_table.h"
-#include "toml.h"
+#include "toml/toml.h"
 
 int main(int argc, char **argv) {
     Cli *cli = parse_args(argc, argv);
     if (!cli)
         return 0;
 
+    Entry *entry;
+    HashTable *ht;
+    char *file_path = "~/.aliases";
     switch (cli->type) {
-        case ADD:
+        case ADD:;
+            struct Add a = cli->cmd.add;
+            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
+            if (a.local)
+                file_path = "./.env";    
+
+            FILE *f = fopen(file_path, "r+");
+            read_aliases(f, ht);
+            create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags); 
+            fclose(f);
+
+            if (a.local) {
+                // Read .env line by line, ignoring alias lines
+                // concatenate 
+            } 
+
+            write_aliases(f, ht);
+
             // Adds a global or directory-local alias.
             // 1. Open either ~/.aliases or ./.env
             // 2. Loop over all lines and find lines starting with 'alias'
@@ -24,7 +44,9 @@ int main(int argc, char **argv) {
 
             break;
 
-        case REMOVE:
+        case REMOVE:;
+            struct Remove r = cli->cmd.remove;
+            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
             // Removes a global or directory-local alias.
             // 1. Open either ~/.aliases or ./.env
             // 2. Loop over all lines and find lines starting with 'alias'
@@ -44,11 +66,12 @@ int main(int argc, char **argv) {
 
             break;
 
-        case SHOW:
+        case SHOW:;
             // Shows active aliases in the current or specified directory, in TOML format
             // These are aliases defined in .env files starting one after ~ to the directory,
             //   where aliases closer to this directory have priority. If 'all', then includes
             //   ~/.aliases
+            struct Show s = cli->cmd.show;
 
             break;
 
@@ -68,6 +91,46 @@ int main(int argc, char **argv) {
     }
 }
 
-Status read_aliases(char *path, HashTable *ht);
-Status write_aliases(char *path, HashTable *ht);
-Status hash_table_to_toml()
+Status read_aliases(FILE *f, HashTable *ht) {
+    char alias[32], command[256], section[32];
+    char *section_ptr = NULL;
+    Entry *entry;
+
+    while (1) {
+        if (fscanf(f, "alias %31s=%255s", alias, command) != 2) // Check if line is alias
+            continue;
+        if (fscanf(f, " ## %31s", section) == 1) // And optionally a category
+            section_ptr = section;
+        else
+            section_ptr = NULL;
+
+        if (create_entry(&entry, command, alias, section_ptr, false) == ERR_OUT_OF_MEMORY)
+            return ERR_OUT_OF_MEMORY;
+
+        add_entry(entry, ht);
+    }
+    return SUCCESS;
+}
+
+Status write_aliases(FILE *f, HashTable *ht) {
+    Entry *entry;
+    for (int i = 0; i < ht->capacity; i++) {
+        entry = ht->backing_array[i];
+        if (entry && !entry->is_removed) {
+            fprintf(f, "alias %s=%s ## %s\n", entry->alias, entry->command, entry->section);
+        }
+    }
+    return SUCCESS;
+}
+
+char **get_env_locations() {
+    FILE *f = fopen("", "r"); 
+    char buf[128];
+
+    while (fgets(buf, 128, f))
+    
+}
+
+Status hash_table_to_toml(HashTable *ht) {
+    return 0;
+}

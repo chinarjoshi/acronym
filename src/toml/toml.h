@@ -26,7 +26,7 @@
 #define TOML_H
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4996)
+#pragma warning(disable : 4996)
 #endif
 
 #include <stdint.h>
@@ -66,28 +66,28 @@ TOML_EXTERN void toml_free(toml_table_t *tab);
  * type, the hour, minute, second and z fields will be NULLs.
  */
 struct toml_timestamp_t {
-  struct { /* internal. do not use. */
-    int year, month, day;
-    int hour, minute, second, millisec;
-    char z[10];
-  } __buffer;
-  int *year, *month, *day;
-  int *hour, *minute, *second, *millisec;
-  char *z;
+    struct { /* internal. do not use. */
+        int year, month, day;
+        int hour, minute, second, millisec;
+        char z[10];
+    } __buffer;
+    int *year, *month, *day;
+    int *hour, *minute, *second, *millisec;
+    char *z;
 };
 
 /*-----------------------------------------------------------------
  *  Enhanced access methods
  */
 struct toml_datum_t {
-  int ok;
-  union {
-    toml_timestamp_t *ts; /* ts must be freed after use */
-    char *s;              /* string value. s must be freed after use */
-    int b;                /* bool value */
-    int64_t i;            /* int value */
-    double d;             /* double value */
-  } u;
+    int ok;
+    union {
+        toml_timestamp_t *ts; /* ts must be freed after use */
+        char *s;              /* string value. s must be freed after use */
+        int b;                /* bool value */
+        int64_t i;            /* int value */
+        double d;             /* double value */
+    } u;
 };
 
 /* on arrays: */

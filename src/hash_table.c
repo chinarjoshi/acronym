@@ -41,9 +41,12 @@ Status add_entry(Entry *data, HashTable *ht) {
                 return ERR_OUT_OF_MEMORY;
         }
 
-        // If key is in table, then return error
-        if (strcmp(ht->backing_array[hash]->alias, data->alias) == 0)
+        // If key is in table, then override it and return ERR
+        if (strcmp(ht->backing_array[hash]->alias, data->alias) == 0) {
+            free(ht->backing_array[hash]);
+            ht->backing_array[hash] = data;
             return ERR_DUPLICATE;
+        }
 
         hash = (hash + 1) % ht->capacity;
         count++;
