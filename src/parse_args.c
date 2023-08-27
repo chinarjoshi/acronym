@@ -131,7 +131,7 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'r':
             if (remove->interactive) {
                 perror("Force and interactive flags cannot be true at same time.");
-                return 1;
+                break;
             }
             remove->recursive = true;
             break;
@@ -141,7 +141,7 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'i':
             if (remove->force) {
                 perror("Force and interactive flags cannot be true at same time.");
-                return 1;
+                break;
             }
             remove->interactive = true;
             break;

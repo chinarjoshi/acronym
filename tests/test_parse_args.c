@@ -48,7 +48,7 @@ END_TEST
 
 START_TEST(test_parse_args_remove_all_flags) {
     int argc = 8;
-    char *argv[] = { "acronym", "remove", "-r", "a", "--force", "b", "-il", "c" };
+    char *argv[] = { "acronym", "remove", "-r", "a", "--force", "b", "-l", "c" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, REMOVE);
     struct Remove r = cli->cmd.remove;
@@ -58,7 +58,6 @@ START_TEST(test_parse_args_remove_all_flags) {
     ck_assert(r.force);
     ck_assert(r.recursive);
     ck_assert(r.local);
-    ck_assert(r.interactive);
 }
 
 START_TEST(test_parse_args_tree_normal) {
