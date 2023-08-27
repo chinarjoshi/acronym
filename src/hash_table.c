@@ -82,7 +82,8 @@ Status remove_section(char *section, HashTable *ht) {
 
     bool section_found = false;
     for (int i = 0; i < ht->capacity; i++) {
-        if (strcmp(ht->backing_array[i]->section, section) == 0) {
+        if (ht->backing_array[i] && 
+                strcmp(ht->backing_array[i]->section, section) == 0) {
             section_found = true;
             ht->backing_array[i]->is_removed = true;
             ht->size--;

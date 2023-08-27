@@ -126,6 +126,7 @@ START_TEST(test_remove_section) {
     create_entry(&entries[1], "cp", NULL, NULL, false);
     create_entry(&entries[2], "git push -u origin", NULL, NULL, false);
     entries[3] = entry;
+    ht->size = 4;
 
     for (int i = 0; i < 4; i++) {
         ht->backing_array[i] = entries[i];

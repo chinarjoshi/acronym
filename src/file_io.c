@@ -6,10 +6,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 const char *TMP_FNAME = "acronym_tmpfile";
+const char *ALIAS_PATTERN = "^alias ([^=]+)=([^#\n]+)(?: ## ?([^\n]+))?$";
+const char *FILE_DELIMITER = "# --- Aliases ---\n";
 
 // Using a compiled regex, match 'text' and put results in 'alias', 'command', and 'section'.
 // Returns false if it doesn't match, true if it does.
-static bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line, 
+bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line, 
                        char *alias, char *command, char *section) {
     int rc = pcre_exec(re, extras, line, strlen(line), 0, 0, ovector, 8);
     if (rc == PCRE_ERROR_NOMATCH)
@@ -35,14 +37,13 @@ static bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
  */
 FILE *read_aliases(FILE *f, HashTable *ht) {
     char line[512], alias[64], command[256], section[64];
-    const char *alias_pattern = "^alias ([^=]+)=([^#\n]+)(?: ## ?([^\n]+))?$";
     int ovector[8];
     Entry *entry;
     // Compile and optimize the regex
-    pcre *re = pcre_compile(alias_pattern, 0, 0, 0, 0);
+    pcre *re = pcre_compile(ALIAS_PATTERN, 0, 0, 0, 0);
     pcre_extra *extras = pcre_study(re, 0, 0);
     if (!re || !extras) {
-        printf("Error compiling regex: %s", alias_pattern);
+        printf("Error compiling regex: %s", ALIAS_PATTERN);
         return NULL;
     }
     // Open temporary file to append non-matching lines
@@ -63,7 +64,8 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
                 return NULL;
             }
             add_entry(entry, ht);
-        } else {
+        } else if (strcmp(line, FILE_DELIMITER)) {
+            // Add every line except the above
             fputs(line, tmp);
         }
     }
@@ -71,12 +73,15 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
     fclose(f);
     pcre_free(re);
     pcre_free_study(extras);
+    rewind(tmp);
     return tmp;
 }
 
 // Given a hash table of aliases, write all elements to the given file stream.
 bool write_aliases(FILE *f, HashTable *ht) {
     Entry *entry;
+    fputs("\n", f);
+    fputs(FILE_DELIMITER, f);
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
         if (entry && !entry->is_removed) {

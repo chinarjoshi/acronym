@@ -3,7 +3,7 @@ project('acronym', 'c',
   license : 'MIT')
 
 # Main executable
-pcre_dep = dependency('pcre')
+pcre_dep = dependency('libpcre')
 sources = ['src/main.c', 'src/entry.c', 'src/hash_table.c', 'src/parse_args.c', 'src/file_io.c', 'src/argp_helpers.c']
 executable('acronym', sources : sources, dependencies : pcre_dep)
 
