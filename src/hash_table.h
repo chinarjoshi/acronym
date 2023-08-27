@@ -12,6 +12,7 @@ typedef struct HashTable {
 Status create_hash_table(HashTable **data_out, int capacity, float load_factor);
 Status add_entry(Entry *data, HashTable *ht);
 Status remove_entry(Entry **data_out, char *alias, HashTable *ht);
+Status remove_section(char *section, HashTable *ht);
 Status resize_backing_array(HashTable *ht);
 void free_hash_table(HashTable *ht);
 

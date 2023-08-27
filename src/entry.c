@@ -28,7 +28,7 @@ Status create_entry(Entry **data_out, const char *command,
     strcpy(entry->alias, alias_override);
 
     // Same thing with the section name.
-    if (!section_override)
+    if (!section_override || section_override[0] == '\0')
         section_override = create_section_name(command);
     entry->section = malloc(strlen(section_override) + 1);
     strcpy(entry->section, section_override);

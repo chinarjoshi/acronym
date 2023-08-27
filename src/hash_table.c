@@ -76,6 +76,22 @@ Status remove_entry(Entry **data_out, char *alias, HashTable *ht) {
     return ERR_NOT_FOUND;
 }
 
+Status remove_section(char *section, HashTable *ht) {
+    if (ht->size == 0)
+        return ERR_NOT_FOUND;
+
+    bool section_found = false;
+    for (int i = 0; i < ht->capacity; i++) {
+        if (strcmp(ht->backing_array[i]->section, section) == 0) {
+            section_found = true;
+            ht->backing_array[i]->is_removed = true;
+            ht->size--;
+        }
+    }
+
+    return (section_found) ? SUCCESS : ERR_NOT_FOUND;
+}
+
 Status resize_backing_array(HashTable *ht) {
     int new_capacity = ht->capacity * 2 + 1;
     Entry **new_array = calloc(new_capacity, sizeof(Entry));
@@ -90,7 +106,7 @@ Status resize_backing_array(HashTable *ht) {
     ht->backing_array = new_array;
 
     for (int i = 0; i < old_capacity; i++)
-        if (old_array[i])
+        if (old_array[i] && !old_array[i]->is_removed)
             add_entry(old_array[i], ht);
 
     free(old_array);

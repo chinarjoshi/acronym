@@ -1,52 +1,66 @@
 #include <stdio.h>
-#include "main.h"
+#include <pcre.h>
+#include <stdlib.h>
+#include <string.h>
 #include "parse_args.h"
+#include "file_io.h"
 #include "entry.h"
 #include "hash_table.h"
 #include "toml/toml.h"
+#define INITIAL_CAPACITY 51
+#define LOAD_FACTOR .5
 
 int main(int argc, char **argv) {
     Cli *cli = parse_args(argc, argv);
-    if (!cli)
-        return 0;
+    if (!cli) {
+        perror("Error reading command line arguments.");
+        return 1;
+    }
 
+    FILE *f, *tmp;
     Entry *entry;
     HashTable *ht;
-    char *file_path = "~/.aliases";
+    const char *fname;
+    const char *env_fname = getenv("AUTOENV_ENV_FILENAME");
     switch (cli->type) {
         case ADD:;
-            struct Add a = cli->cmd.add;
-            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-            if (a.local)
-                file_path = "./.env";    
-
-            FILE *f = fopen(file_path, "r+");
-            read_aliases(f, ht);
-            create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags); 
-            fclose(f);
-
-            if (a.local) {
-                // Read .env line by line, ignoring alias lines
-                // concatenate 
-            } 
-
-            write_aliases(f, ht);
-
             // Adds a global or directory-local alias.
             // 1. Open either ~/.aliases or ./.env
             // 2. Loop over all lines and find lines starting with 'alias'
-            // 3. Add entries to hash table by finding the alias, command, and optionally section
+            // 3. Add entries to hash table by finding the alias, 
+            //      command, and optionally section
             // 4. Add the new provided alias-command pair
-            // (Note: Use of hash table in this operation is because the whole file must be read to enforce formatting)
-            // 5. Create a single string from the hash table in the form of "alias a=command # section\nalias ..."
-            // 6. If in local mode, then prune alias commands from .env, and concatenate aliases to the pruned file
+            // 5. Create a single string from the hash table in the 
+            //      form of "alias a=command # section\nalias ..."
+            // 6. If in local mode, then prune alias commands from .env, 
+            //      and concatenate aliases to the pruned file
             // 7. Write this string to correct file
-
+            struct Add a = cli->cmd.add;
+            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
+            // Open aliases file
+            fname = (a.local) ? env_fname : "~/.aliases";
+            f = fopen(fname, "r");
+            if (!f) {
+                fprintf(stderr, "Aliases file not found: %s", fname);
+                return 1;
+            }
+            // Read aliases into hash table and write non-matching lines to tmp
+            tmp = read_aliases(f, ht);
+            if (!tmp) {
+                fprintf(stderr, "Error reading aliases file: %s", fname);
+                return 2;
+            }
+            create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags);
+            if (add_entry(entry, ht) == ERR_DUPLICATE && cli->verbosity) {
+                printf("Duplicate alias: %s=\"%s\"", entry->alias, entry->command);
+                return 3;
+            }
+            write_aliases(tmp, ht);
+            fclose(tmp);
+            rename(TMP_FNAME, fname);
             break;
 
         case REMOVE:;
-            struct Remove r = cli->cmd.remove;
-            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
             // Removes a global or directory-local alias.
             // 1. Open either ~/.aliases or ./.env
             // 2. Loop over all lines and find lines starting with 'alias'
@@ -55,7 +69,55 @@ int main(int argc, char **argv) {
             // 5. Create a single string from the hash table in the form of "alias a=command # section\nalias ..."
             // 6. If in local mode, then prune existing alias commands from .env, and concatenate new aliases to the pruned file
             // 7. Write this string to correct file
+            struct Remove r = cli->cmd.remove;
+            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
+            fname = (r.local) ? "env" : "~/.aliases";
+            f = fopen(fname, "r");
+            if (!f) {
+                fprintf(stderr, "Aliases file not found: %s", fname);
+                return 1;
+            }
 
+            tmp = read_aliases(f, ht);
+            if (!tmp) {
+                fprintf(stderr, "Error reading aliases file: %s", fname);
+                return 1;
+            }
+
+            // Delete given aliases or sections, prompting unless force is given
+            while (r.aliases) {
+                if (r.recursive) {
+                    if (!r.force) {
+                        char answer;
+                        printf("Delete section: \"%s\"? [y/N]\n", r.aliases->data);
+                        scanf(" %c", &answer);
+                        if (answer != 'y' && answer != 'Y')
+                            continue;
+                    }
+                    if (remove_section(r.aliases->data, ht) == ERR_NOT_FOUND) {
+                        printf("Section not found: %s", r.aliases->data);
+                    } else if (cli->verbosity) {
+                        printf("Deleted section: %s", r.aliases->data);
+                    }
+                } else {
+                    if (r.interactive) {
+                        char answer;
+                        printf("Delete section: \"%s\"? [y/N]\n", r.aliases->data);
+                        scanf(" %c", &answer);
+                        if (answer != 'y' && answer != 'Y')
+                            continue;
+                    }
+                    if (remove_entry(&entry, r.aliases->data, ht) == ERR_NOT_FOUND) {
+                        printf("Alias not found: %s", r.aliases->data);
+                    } else if (cli->verbosity) {
+                        printf("Deleted alias: %s", r.aliases->data);
+                    }
+                }
+                r.aliases = r.aliases->next;
+            }
+            write_aliases(f, ht);
+            fclose(tmp);
+            rename(TMP_FNAME, fname);
             break;
 
         case TREE:
@@ -71,7 +133,7 @@ int main(int argc, char **argv) {
             // These are aliases defined in .env files starting one after ~ to the directory,
             //   where aliases closer to this directory have priority. If 'all', then includes
             //   ~/.aliases
-            struct Show s = cli->cmd.show;
+            //struct Show s = cli->cmd.show;
 
             break;
 
@@ -89,46 +151,6 @@ int main(int argc, char **argv) {
 
             break;
     }
-}
-
-Status read_aliases(FILE *f, HashTable *ht) {
-    char alias[32], command[256], section[32];
-    char *section_ptr = NULL;
-    Entry *entry;
-
-    while (1) {
-        if (fscanf(f, "alias %31s=%255s", alias, command) != 2) // Check if line is alias
-            continue;
-        if (fscanf(f, " ## %31s", section) == 1) // And optionally a category
-            section_ptr = section;
-        else
-            section_ptr = NULL;
-
-        if (create_entry(&entry, command, alias, section_ptr, false) == ERR_OUT_OF_MEMORY)
-            return ERR_OUT_OF_MEMORY;
-
-        add_entry(entry, ht);
-    }
-    return SUCCESS;
-}
-
-Status write_aliases(FILE *f, HashTable *ht) {
-    Entry *entry;
-    for (int i = 0; i < ht->capacity; i++) {
-        entry = ht->backing_array[i];
-        if (entry && !entry->is_removed) {
-            fprintf(f, "alias %s=%s ## %s\n", entry->alias, entry->command, entry->section);
-        }
-    }
-    return SUCCESS;
-}
-
-char **get_env_locations() {
-    FILE *f = fopen("", "r"); 
-    char buf[128];
-
-    while (fgets(buf, 128, f))
-    
 }
 
 Status hash_table_to_toml(HashTable *ht) {

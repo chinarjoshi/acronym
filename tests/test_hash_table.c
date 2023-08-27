@@ -120,6 +120,23 @@ START_TEST(test_remove_entry_not_found) {
 }
 END_TEST
 
+START_TEST(test_remove_section) {
+    Entry *entries[4];
+    create_entry(&entries[0], "git diff", NULL, NULL, false);
+    create_entry(&entries[1], "cp", NULL, NULL, false);
+    create_entry(&entries[2], "git push -u origin", NULL, NULL, false);
+    entries[3] = entry;
+
+    for (int i = 0; i < 4; i++) {
+        ht->backing_array[i] = entries[i];
+    }
+
+    Status s = remove_section("git", ht);
+    ck_assert(s == SUCCESS);
+    ck_assert_int_eq(ht->size, 1);
+}
+END_TEST
+
 Suite *hash_table_suite(void) {
     Suite *s = suite_create("Hash Table");
 
@@ -139,9 +156,10 @@ Suite *hash_table_suite(void) {
 
     TCase *tc_remove = tcase_create("HashTableRemove");
     tcase_add_checked_fixture(tc_add, setup, teardown);
-    tcase_add_test(tc_add, test_remove_entry);
-    tcase_add_test(tc_add, test_remove_entry_not_found);
-    tcase_add_test(tc_add, test_remove_entry_empty);
+    tcase_add_test(tc_remove, test_remove_entry);
+    tcase_add_test(tc_remove, test_remove_entry_not_found);
+    tcase_add_test(tc_remove, test_remove_entry_empty);
+    tcase_add_test(tc_remove, test_remove_section);
     tcase_add_checked_fixture(tc_remove, setup, teardown);
     suite_add_tcase(s, tc_remove);
 
