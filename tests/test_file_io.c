@@ -15,7 +15,10 @@ void setup_match_line() {
     memset(ovector, 0, sizeof(ovector));
 }
 
-void teardown_match_line() {}
+void teardown_match_line() {
+    pcre_free(re);
+    pcre_free_study(extras);
+}
 
 START_TEST(test_match_line_basic) {
     char *line = "alias jup=jupyter";
@@ -81,19 +84,86 @@ START_TEST(test_read_aliases) {
 
     FILE *f = fopen("acronym_test_tmpfile", "w");
     fputs(
-"alias build=\"meson compile -C ~/projects/acronym/builds\""
-"alias run='~/projects/acronym/builds/acronym' ## acronym"
-"alias test='CK_FORK=yes ~/projects/acronym/builds/tests'"
-"alias debug=\"gdb -q ~/projects/acronym/builds/tests\" ##bug"
+"alias build=\"meson compile -C ~/projects/acronym/builds\"\n"
+"alias run='~/projects/acronym/builds/acronym' ## acronym\n"
+"alias test='CK_FORK=yes ~/projects/acronym/builds/tests'\n"
+"alias debug=\"gdb -q ~/projects/acronym/builds/tests\" ##bug\n"
 "\n"
-"CK_RUN_SUITE=\"Hash Table\""
-"CK_FORK=no"
-"DEBUG_EXECUTABLE=~/projects/acronym/builds/tests", f);
+"CK_RUN_SUITE=\"Hash Table\"\n"
+"CK_FORK=no\n"
+"# --- Aliases ---\n"
+"DEBUG_EXECUTABLE=~/projects/acronym/builds/tests\n", f);
     rewind(f);
+
+    FILE *tmp = read_aliases(f, ht);
+    
+    Entry *e = ht->backing_array[hash_alias("build", capacity)];
+    ck_assert_str_eq(e->alias, "build");
+    ck_assert_str_eq(e->section, "");
+    ck_assert_str_eq(e->command, "meson compile -C ~/projects/acronym/builds");
+
+    e = ht->backing_array[hash_alias("run", capacity)];
+    ck_assert_str_eq(e->alias, "run");
+    ck_assert_str_eq(e->section, "acronym");
+    ck_assert_str_eq(e->command, "~/projects/acronym/builds/acronym");
+
+    e = ht->backing_array[hash_alias("test", capacity)];
+    ck_assert_str_eq(e->alias, "test");
+    ck_assert_str_eq(e->section, "");
+    ck_assert_str_eq(e->command, "CK_FORK=yes ~/projects/acronym/builds/tests");
+
+    e = ht->backing_array[hash_alias("debug", capacity)];
+    ck_assert_str_eq(e->alias, "debug");
+    ck_assert_str_eq(e->section, "bug");
+    ck_assert_str_eq(e->command, "gdb -q ~/projects/acronym/builds/tests");
+
+    char line[512];
+    fgets(line, sizeof(line), tmp);
+    ck_assert_str_eq(line, "CK_RUN_SUITE=\"Hash Table\"\n");
+    fgets(line, sizeof(line), tmp);
+    ck_assert_str_eq(line, "CK_FORK=no\n");
+    fgets(line, sizeof(line), tmp);
+    // Skip the --- ALIAS --- delimiter
+    ck_assert_str_eq(line, "DEBUG_EXECUTABLE=~/projects/acronym/builds/tests\n");
+    ck_assert(!fgets(line, sizeof(line), tmp));
 }
 END_TEST
 
 START_TEST(test_write_aliases) {
+    HashTable *ht;
+    int capacity = 71;
+    create_hash_table(&ht, capacity, .5);
+
+    Entry *entries[4];
+    create_entry(&entries[0], "git diff", 0, 0, 0);
+    create_entry(&entries[1], "ls -al", 0, 0, 0);
+    create_entry(&entries[2], "git push -u origin", 0, 0, 0);
+    create_entry(&entries[3], "git status", 0, 0, 0);
+    for (int i = 0; i < 4; i++)
+        add_entry(entries[i], ht);
+
+    FILE *f = fopen("acronym_test_tmpfile", "w");
+    fputs("CK_FORK=no\n", f);
+
+    write_aliases(f, ht);
+    rewind(f);
+
+    char line[512];
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "CK_FORK=no\n");
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "\n");
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, FILE_DELIMITER);
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "alias gd=\"git diff\" ## git\n");
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "alias l=\"ls -al\" ## ls\n");
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "alias gp=\"git push -u origin\" ## git\n");
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "alias gs=\"git status\" ## git\n");
+    ck_assert(!fgets(line, sizeof(line), f));
 }
 END_TEST
 
