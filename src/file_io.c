@@ -85,7 +85,7 @@ bool write_aliases(FILE *f, HashTable *ht) {
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
         if (entry && !entry->is_removed) {
-            fprintf(f, "alias %s=%s ## %s\n", entry->alias, entry->command, entry->section);
+            fprintf(f, "alias %s=\"%s\" ## %s\n", entry->alias, entry->command, entry->section);
         }
     }
     return true;
