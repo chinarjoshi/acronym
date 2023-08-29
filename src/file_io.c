@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 const char *TMP_FNAME = "acronym_tmpfile";
-const char *ALIAS_PATTERN = "^alias ([^=]+)=([^#\n]+)(?: ## ?([^\n]+))?$";
+const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+))?$";
 const char *FILE_DELIMITER = "# --- Aliases ---\n";
 
 // Using a compiled regex, match 'text' and put results in 'alias', 'command', and 'section'.

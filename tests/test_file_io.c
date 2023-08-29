@@ -7,8 +7,10 @@ pcre_extra *extras;
 char alias[64], command[256], section[64];
 int ovector[8];
 void setup_match_line() {
-    re = pcre_compile(ALIAS_PATTERN, 0, 0, 0, 0);
-    extras = pcre_study(re, 0, 0);
+    const char *error;
+    int erroffset;
+    re = pcre_compile(ALIAS_PATTERN, 0, &error, &erroffset, NULL);
+    extras = pcre_study(re, 0, &error);
     memset(alias, 0, sizeof(alias));
     memset(command, 0, sizeof(command));
     memset(section, 0, sizeof(section));
@@ -82,7 +84,7 @@ START_TEST(test_read_aliases) {
     int capacity = 71;
     create_hash_table(&ht, capacity, .5);
 
-    FILE *f = fopen("acronym_test_tmpfile", "w");
+    FILE *f = fopen("/tmp/acronym_test_read_tmpfile", "w");
     fputs(
 "alias build=\"meson compile -C ~/projects/acronym/builds\"\n"
 "alias run='~/projects/acronym/builds/acronym' ## acronym\n"
@@ -142,7 +144,7 @@ START_TEST(test_write_aliases) {
     for (int i = 0; i < 4; i++)
         add_entry(entries[i], ht);
 
-    FILE *f = fopen("acronym_test_tmpfile", "w");
+    FILE *f = fopen("/tmp/acronym_test_write_tmpfile", "w");
     fputs("CK_FORK=no\n", f);
 
     write_aliases(f, ht);
