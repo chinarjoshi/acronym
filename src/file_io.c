@@ -8,17 +8,24 @@
 const char *TMP_FNAME = "acronym_tmpfile";
 const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+))?$";
 const char *FILE_DELIMITER = "# --- Aliases ---\n";
+const int OVECTOR_LEN = 30;
 
 // Using a compiled regex, match 'text' and put results in 'alias', 'command', and 'section'.
 // Returns false if it doesn't match, true if it does.
 bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line, 
                        char *alias, char *command, char *section) {
-    int rc = pcre_exec(re, extras, line, strlen(line), 0, 0, ovector, 8);
+    int rc = pcre_exec(re, extras, line, strlen(line), 0, 0, ovector, OVECTOR_LEN);
     if (rc == PCRE_ERROR_NOMATCH)
         return false;
 
     strncpy(alias, line + ovector[2], ovector[3] - ovector[2]);
     strncpy(command, line + ovector[4], ovector[5] - ovector[4]);
+
+    int command_len = ovector[5] - ovector[4];
+    while (command[command_len] == '\'' || command[command_len] == '"' || command[command_len] == ' ') {
+        command_len--;
+    }
+    command[command_len] = '\0';
 
     if (ovector[6] != -1) {
         strncpy(section, line + ovector[6], ovector[7] - ovector[6]);

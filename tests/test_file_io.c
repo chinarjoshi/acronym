@@ -5,7 +5,7 @@
 pcre *re;
 pcre_extra *extras;
 char alias[64], command[256], section[64];
-int ovector[8];
+int ovector[30];
 void setup_match_line() {
     const char *error;
     int erroffset;
@@ -23,7 +23,7 @@ void teardown_match_line() {
 }
 
 START_TEST(test_match_line_basic) {
-    char *line = "alias jup=jupyter";
+    char *line = "alias jup=jupyter\n";
     bool result = match_line(re, extras, ovector, line, alias, command, section);
     ck_assert(result);
     ck_assert_str_eq(alias, "jup");
