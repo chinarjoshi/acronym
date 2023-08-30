@@ -49,11 +49,13 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
  */
 FILE *read_aliases(FILE *f, HashTable *ht) {
     char line[512], alias[64], command[256], section[64];
-    int ovector[8];
+    int ovector[OVECTOR_LEN];
     Entry *entry;
     // Compile and optimize the regex
-    pcre *re = pcre_compile(ALIAS_PATTERN, 0, 0, 0, 0);
-    pcre_extra *extras = pcre_study(re, 0, 0);
+    const char *error;
+    int erroffset;
+    pcre *re = pcre_compile(ALIAS_PATTERN, 0, &error, &erroffset, NULL);
+    pcre_extra *extras = pcre_study(re, 0, &error);
     if (!re || !extras) {
         printf("Error compiling regex: %s", ALIAS_PATTERN);
         return NULL;

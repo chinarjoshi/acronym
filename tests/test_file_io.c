@@ -1,5 +1,6 @@
 #include <check.h>
 #include <pcre.h>
+#include <stdio.h>
 #include "../src/file_io.h"
 
 pcre *re;
@@ -95,6 +96,7 @@ START_TEST(test_read_aliases) {
 "CK_FORK=no\n"
 "# --- Aliases ---\n"
 "DEBUG_EXECUTABLE=~/projects/acronym/builds/tests\n", f);
+    fflush(f);
     rewind(f);
 
     FILE *tmp = read_aliases(f, ht);
