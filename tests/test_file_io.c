@@ -84,8 +84,7 @@ START_TEST(test_read_aliases) {
     HashTable *ht;
     int capacity = 71;
     create_hash_table(&ht, capacity, .5);
-
-    FILE *f = fopen("/tmp/acronym_test_read_tmpfile", "w");
+    FILE *f = fopen("/tmp/acronym_test_read_tmpfile", "r+");
     fputs(
 "alias build=\"meson compile -C ~/projects/acronym/builds\"\n"
 "alias run='~/projects/acronym/builds/acronym' ## acronym\n"
@@ -146,7 +145,7 @@ START_TEST(test_write_aliases) {
     for (int i = 0; i < 4; i++)
         add_entry(entries[i], ht);
 
-    FILE *f = fopen("/tmp/acronym_test_write_tmpfile", "w");
+    FILE *f = fopen("/tmp/acronym_test_write_tmpfile", "r+");
     fputs("CK_FORK=no\n", f);
 
     write_aliases(f, ht);

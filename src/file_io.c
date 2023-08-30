@@ -78,7 +78,7 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
                 return NULL;
             }
             add_entry(entry, ht);
-        } else if (strcmp(line, FILE_DELIMITER)) {
+        } else if (strcmp(line, FILE_DELIMITER) != 0) {
             // Add every line except the above
             fputs(line, tmp);
         }
