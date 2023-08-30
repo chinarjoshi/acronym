@@ -33,14 +33,14 @@ START_TEST(test_match_line_basic) {
 END_TEST
 
 START_TEST(test_match_line_mismatch) {
-    char *line = "alias jup = jupyter # code";
+    char *line = "alias jup = jupyter # code\n";
     bool result = match_line(re, extras, ovector, line, alias, command, section);
     ck_assert(!result);
 }
 END_TEST
 
 START_TEST(test_match_line_single_quotes) {
-    char *line = "alias ll='ls -alf'";
+    char *line = "alias ll='ls -alf'\n";
     bool result = match_line(re, extras, ovector, line, alias, command, section);
     ck_assert(result);
     ck_assert_str_eq(alias, "ll");
@@ -50,7 +50,7 @@ START_TEST(test_match_line_single_quotes) {
 END_TEST
 
 START_TEST(test_match_line_double_quotes) {
-    char *line = "alias ga=\"git add -A\"";
+    char *line = "alias ga=\"git add -A\"\n";
     bool result = match_line(re, extras, ovector, line, alias, command, section);
     ck_assert(result);
     ck_assert_str_eq(alias, "ga");
@@ -60,7 +60,7 @@ START_TEST(test_match_line_double_quotes) {
 END_TEST
 
 START_TEST(test_match_line_with_section) {
-    char *line = "alias l=ls ## etc ";
+    char *line = "alias l=ls ## etc \n";
     bool result = match_line(re, extras, ovector, line, alias, command, section);
     ck_assert(result);
     ck_assert_str_eq(alias, "l");
@@ -70,7 +70,7 @@ START_TEST(test_match_line_with_section) {
 END_TEST
 
 START_TEST(test_match_line_single_quotes_section) {
-    char *line = "alias gd='git diff HEAD~' ##git";
+    char *line = "alias gd='git diff HEAD~' ##git\n";
     bool result = match_line(re, extras, ovector, line, alias, command, section);
     ck_assert(result);
     ck_assert_str_eq(alias, "gd");

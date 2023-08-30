@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 const char *TMP_FNAME = "acronym_tmpfile";
-const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+))?$";
+const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+?))?\\n";
 const char *FILE_DELIMITER = "# --- Aliases ---\n";
 const int OVECTOR_LEN = 30;
 
@@ -21,14 +21,19 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
     strncpy(alias, line + ovector[2], ovector[3] - ovector[2]);
     strncpy(command, line + ovector[4], ovector[5] - ovector[4]);
 
-    int command_len = ovector[5] - ovector[4];
+    int command_len = ovector[5] - ovector[4] - 1;
     while (command[command_len] == '\'' || command[command_len] == '"' || command[command_len] == ' ') {
         command_len--;
     }
-    command[command_len] = '\0';
+    command[command_len + 1] = '\0';
 
     if (ovector[6] != -1) {
         strncpy(section, line + ovector[6], ovector[7] - ovector[6]);
+        int section_len = ovector[7] - ovector[6] - 1;
+        while (section[section_len] == ' ') {
+            section_len--;
+        }
+        section[section_len + 1] = '\0';
     } else {
         section[0] = '\0';
     }
