@@ -88,7 +88,7 @@ START_TEST(test_read_aliases) {
     fputs(
 "alias build=\"meson compile -C ~/projects/acronym/builds\"\n"
 "alias run='~/projects/acronym/builds/acronym' ## acronym\n"
-"alias test='CK_FORK=yes ~/projects/acronym/builds/tests'\n"
+"alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## check test\n"
 "alias debug=\"gdb -q ~/projects/acronym/builds/tests\" ##bug\n"
 "\n"
 "CK_RUN_SUITE=\"Hash Table\"\n"
@@ -104,7 +104,7 @@ START_TEST(test_read_aliases) {
     
     Entry *e = ht->backing_array[hash_alias("build", capacity)];
     ck_assert_str_eq(e->alias, "build");
-    ck_assert_str_eq(e->section, "");
+    ck_assert_str_eq(e->section, "meson");
     ck_assert_str_eq(e->command, "meson compile -C ~/projects/acronym/builds");
 
     e = ht->backing_array[hash_alias("run", capacity)];
@@ -114,7 +114,7 @@ START_TEST(test_read_aliases) {
 
     e = ht->backing_array[hash_alias("test", capacity)];
     ck_assert_str_eq(e->alias, "test");
-    ck_assert_str_eq(e->section, "");
+    ck_assert_str_eq(e->section, "check test");
     ck_assert_str_eq(e->command, "CK_FORK=yes ~/projects/acronym/builds/tests");
 
     e = ht->backing_array[hash_alias("debug", capacity)];
@@ -163,11 +163,11 @@ START_TEST(test_write_aliases) {
     fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "alias gd=\"git diff\" ## git\n");
     fgets(line, sizeof(line), f);
-    ck_assert_str_eq(line, "alias l=\"ls -al\" ## ls\n");
-    fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "alias gp=\"git push -u origin\" ## git\n");
     fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "alias gs=\"git status\" ## git\n");
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, "alias l=\"ls -al\" ## ls\n");
     ck_assert(!fgets(line, sizeof(line), f));
 }
 END_TEST
