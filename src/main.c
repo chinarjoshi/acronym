@@ -2,6 +2,7 @@
 #include <pcre.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "parse_args.h"
 #include "file_io.h"
 #include "entry.h"
@@ -9,6 +10,9 @@
 #include "toml/toml.h"
 #define INITIAL_CAPACITY 51
 #define LOAD_FACTOR .5
+const char *TOML_FNAME = "/tmp/acronym_aliases.toml";
+static int free_resources(const char *message, const char *message_arg, 
+                          HashTable *ht, FILE *f, const char *fname_to_remove);
 
 int main(int argc, char **argv) {
     Cli *cli = parse_args(argc, argv);
@@ -30,18 +34,13 @@ int main(int argc, char **argv) {
             // Open aliases file according to 'local'
             alias_fname = (a.local) ? env_fname : "~/.aliases";
             alias_f = fopen(alias_fname, "w+");
-            if (!alias_f) {
-                fprintf(stderr, "Error: aliases file cannot be opened: %s", alias_fname);
-                free_hash_table(ht);
-                return 1;
-            }
+            if (!alias_f)
+                return free_resources("Error: aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);
+
             // Read aliases into hash table and write non-matching lines to tmp
             tmp_f = read_aliases(alias_f, ht);
-            if (!tmp_f) {
-                fclose(alias_f);
-                free_hash_table(ht);
-                return 1;
-            }
+            if (!tmp_f)
+                return free_resources(0, 0, ht, alias_f, 0);
 
             // Create entry from command line args
             create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags);
@@ -49,22 +48,14 @@ int main(int argc, char **argv) {
             // Add new entry to hash table and check for duplicate
             if (add_entry(entry, ht) == ERR_DUPLICATE) {
                 if (cli->verbosity)
-                    printf("Duplicate alias: %s=\"%s\"", entry->alias, entry->command);
-                fclose(tmp_f);
-                free_hash_table(ht);
+                    printf("Duplicate alias: %s=\"%s\"\n", entry->alias, entry->command);
                 free_entry(entry);
-                remove(TMP_FNAME);
-                return 1;
+                return free_resources(0, 0, ht, tmp_f, TMP_FNAME);
             }
 
             // Write new aliases back to file and check for write permission
-            if (!write_aliases(tmp_f, ht)) {
-                perror("Error: unable to write to alias file");
-                free_hash_table(ht);
-                fclose(tmp_f);
-                remove(TMP_FNAME);
-                return 1;
-            }
+            if (!write_aliases(tmp_f, ht))
+                return free_resources("Error: unable to write to alias file", 0, ht, tmp_f, TMP_FNAME);
 
             free_hash_table(ht);
             fclose(tmp_f);
@@ -77,18 +68,13 @@ int main(int argc, char **argv) {
             // Open aliases file according to 'local'
             alias_fname = (r.local) ? env_fname : "~/.aliases";
             FILE *alias_f = fopen(alias_fname, "w+");
-            if (!alias_f) {
-                fprintf(stderr, "Error: aliases file not found: %s", alias_fname);
-                free_hash_table(ht);
-                return 1;
-            }
+            if (!alias_f)
+                return free_resources("Error: aliases file not found: %s\n", alias_fname, ht, 0, 0);
+
             // Read aliases into hash table and write non-matching lines to tmp
             FILE *tmp_f = read_aliases(alias_f, ht);
-            if (!tmp_f) {
-                fclose(alias_f);
-                free_hash_table(ht);
-                return 1;
-            }
+            if (!tmp_f)
+                return free_resources(0, 0, ht, alias_f, 0);
 
             // Delete given aliases or sections, prompting unless force is given
             while (r.aliases) {
@@ -101,9 +87,9 @@ int main(int argc, char **argv) {
                             continue;
                     }
                     if (remove_section(r.aliases->data, ht) == ERR_NOT_FOUND) {
-                        printf("Section not found: %s", r.aliases->data);
+                        printf("Section not found: %s\n", r.aliases->data);
                     } else if (cli->verbosity) {
-                        printf("Deleted section: %s", r.aliases->data);
+                        printf("Deleted section: %s\n", r.aliases->data);
                     }
                 } else {
                     if (r.interactive) {
@@ -114,22 +100,17 @@ int main(int argc, char **argv) {
                             continue;
                     }
                     if (remove_entry(&entry, r.aliases->data, ht) == ERR_NOT_FOUND) {
-                        printf("Alias not found: %s", r.aliases->data);
+                        printf("Alias not found: %s\n", r.aliases->data);
                     } else if (cli->verbosity) {
-                        printf("Deleted alias: %s", r.aliases->data);
+                        printf("Deleted alias: %s\n", r.aliases->data);
                     }
                 }
                 r.aliases = r.aliases->next;
             }
 
             // Write new aliases back to file and check for write permission
-            if (!write_aliases(tmp_f, ht)) {
-                perror("Error: unable to write to alias file");
-                free_hash_table(ht);
-                fclose(tmp_f);
-                remove(TMP_FNAME);
-                return 1;
-            }
+            if (!write_aliases(tmp_f, ht))
+                return free_resources("Error: unable to write to alias file", 0, ht, tmp_f, TMP_FNAME);
 
             free_hash_table(ht);
             fclose(tmp_f);
@@ -153,7 +134,7 @@ int main(int argc, char **argv) {
 
             break;
 
-        case EDIT:
+        case EDIT:;
             // Edit either global or directory-specific aliases, in TOML format for readability
             // 1. Open either ~/.aliases or ./.env
             // 2. Loop over all lines and find lines starting with 'alias'
@@ -164,7 +145,85 @@ int main(int argc, char **argv) {
             // 7. Create a single string from the hash table in the form of "alias a=command # section\nalias ..."
             // 8. If in local mode, then prune existing alias commands from .env, and concatenate new aliases to the pruned file
             // 9. Write this string to correct file
+            struct Edit e = cli->cmd.edit;
+            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
+            // Open aliases file according to 'local'
+            alias_fname = (e.local) ? env_fname : "~/.aliases";
+            alias_f = fopen(alias_fname, "w+");
+            if (!alias_f) {
+                fprintf(stderr, "Error: aliases file cannot be opened: %s\n", alias_fname);
+                free_hash_table(ht);
+                return 1;
+            }
+            // Read aliases into hash table and write non-matching lines to tmp
+            tmp_f = read_aliases(alias_f, ht);
+            if (!tmp_f) {
+                fclose(alias_f);
+                free_hash_table(ht);
+                return 1;
+            }
+
+            // Now we have existing aliases in ht. Convert ht into a toml file, open the file with editor, 
+            // convert the new toml file back into ht, and write it to original file
+            FILE *toml_f = fopen(TOML_FNAME, "w+");
+            if (!toml_f) {
+                fprintf(stderr, "Error: toml tmpfile cannot be opened: %s\n", TOML_FNAME);
+                free_hash_table(ht);
+                return 1;
+            }
+
+            ht_to_toml(ht, toml_f);
+
+            char *editor = getenv("EDITOR");
+            if (e.editor) {
+                if (access(e.editor, X_OK)) {
+                    editor = e.editor; 
+                } else {
+                    fprintf(stderr, "Error: editor program not found: %s\n", e.editor);
+                    fclose(toml_f);
+                    remove(TOML_FNAME);
+                    free_hash_table(ht);
+                    return 1;
+                }
+            }
+
+            int result = system(editor);
+            if (!result) {
+                fprintf(stderr, "Error: failed to launch the editor: %s\n", e.editor);
+                fclose(toml_f);
+                remove(TOML_FNAME);
+                free_hash_table(ht);
+                return 1;
+            }
+
+            // Write new aliases back to file and check for write permission
+            if (!write_aliases(tmp_f, ht)) {
+                perror("Error: unable to write to alias file");
+                free_hash_table(ht);
+                fclose(tmp_f);
+                remove(TMP_FNAME);
+                return 1;
+            }
+
+            free_hash_table(ht);
+            fclose(tmp_f);
+            rename(TMP_FNAME, alias_fname);
+            break;
 
             break;
     }
+}
+
+static int free_resources(const char *message, const char *message_arg, 
+                          HashTable *ht, FILE *f, const char *fname_to_remove) {
+    if (message) {
+        if (message_arg)
+            fprintf(stderr, message, message_arg); 
+        else
+            fprintf(stderr, "%s", message); 
+    }
+    free_hash_table(ht);
+    fclose(f);
+    remove(fname_to_remove);
+    return 1;
 }
