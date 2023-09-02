@@ -9,6 +9,7 @@ const char *TMP_FNAME = "/tmp/acronym_tmpfile";
 const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+?))?\\n";
 const char *FILE_DELIMITER = "# --- Aliases ---\n";
 const int OVECTOR_LEN = 30;
+static void free_re_resources(pcre *re, pcre_extra *extras, FILE *f);
 
 // Using a compiled regex, match 'text' and put results in 'alias', 'command', and 'section'.
 // Returns false if it doesn't match, true if it does.
@@ -46,7 +47,7 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
 
 /* Reads a file handler with lines of the form "alias X=Y" (optionally "## Z"
  * at the end) into a hash table, where X is the key, and Y and Z are the values.
- * Prunes those lines from file, leaving all others alone. Closes the given 
+ * Prunes those lines from file, leaving all others alone. *Closes the given 
  * file handler and returns a new one. Returns NULL if regex, file I/O, or 
  * memory allocation fails, and a valid handler otherwise.
  */
@@ -60,13 +61,14 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
     pcre *re = pcre_compile(ALIAS_PATTERN, 0, &error, &erroffset, NULL);
     pcre_extra *extras = pcre_study(re, 0, &error);
     if (!re || !extras) {
-        printf("Error compiling regex: %s", ALIAS_PATTERN);
+        printf("Error: compiling regex: %s", ALIAS_PATTERN);
         return NULL;
     }
     // Open temporary file to append non-matching lines
     FILE *tmp = fopen(TMP_FNAME, "w+");
     if (!tmp) {
-        printf("Error opening file: %s", TMP_FNAME);
+        printf("Error: opening file: %s", TMP_FNAME);
+        free_re_resources(re, extras, f);
         return NULL;
     }
 
@@ -76,8 +78,10 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
             if (create_entry(&entry, command, alias, section, false) == ERR_OUT_OF_MEMORY) {
-                printf("Out of memory while creating entry.");
-                fclose(tmp);
+                printf("Error: out of memory while creating entry.");
+                free_re_resources(re, extras, tmp);
+                fclose(f);
+                remove(TMP_FNAME);
                 return NULL;
             }
             add_entry(entry, ht);
@@ -87,9 +91,7 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
         }
     }
 
-    fclose(f);
-    pcre_free(re);
-    pcre_free_study(extras);
+    free_re_resources(re, extras, f);
     rewind(tmp);
     return tmp;
 }
@@ -97,7 +99,10 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
 // Given a hash table of aliases, write all elements to the given file stream.
 bool write_aliases(FILE *f, HashTable *ht) {
     Entry *entry;
-    fputs("\n", f);
+    if (!fputs("\n", f)) {
+        printf("Error: unable to write to file");
+        return false;
+    }
     fputs(FILE_DELIMITER, f);
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
@@ -106,4 +111,10 @@ bool write_aliases(FILE *f, HashTable *ht) {
         }
     }
     return true;
+}
+
+static void free_re_resources(pcre *re, pcre_extra *extras, FILE *f) {
+    pcre_free(re);
+    pcre_free_study(extras);
+    fclose(f);
 }

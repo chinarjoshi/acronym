@@ -13,74 +13,80 @@
 int main(int argc, char **argv) {
     Cli *cli = parse_args(argc, argv);
     if (!cli) {
-        perror("Error reading command line arguments.");
+        perror("Error: invalid command line arguments.");
         return 1;
     }
 
-    FILE *f, *tmp;
     Entry *entry;
     HashTable *ht;
-    const char *fname;
-    const char *env_fname = getenv("AUTOENV_ENV_FILENAME");
+    FILE *alias_f, *tmp_f;
+    const char *alias_fname, *env_fname = getenv("AUTOENV_ENV_FILENAME");
+    if (!env_fname)
+        env_fname = ".env";
     switch (cli->type) {
         case ADD:;
-            // Adds a global or directory-local alias.
-            // 1. Open either ~/.aliases or ./.env
-            // 2. Loop over all lines and find lines starting with 'alias'
-            // 3. Add entries to hash table by finding the alias, 
-            //      command, and optionally section
-            // 4. Add the new provided alias-command pair
-            // 5. Create a single string from the hash table in the 
-            //      form of "alias a=command # section\nalias ..."
-            // 6. If in local mode, then prune alias commands from .env, 
-            //      and concatenate aliases to the pruned file
-            // 7. Write this string to correct file
             struct Add a = cli->cmd.add;
             create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-            // Open aliases file
-            fname = (a.local) ? env_fname : "~/.aliases";
-            f = fopen(fname, "r");
-            if (!f) {
-                fprintf(stderr, "Aliases file not found: %s", fname);
+            // Open aliases file according to 'local'
+            alias_fname = (a.local) ? env_fname : "~/.aliases";
+            alias_f = fopen(alias_fname, "w+");
+            if (!alias_f) {
+                fprintf(stderr, "Error: aliases file cannot be opened: %s", alias_fname);
+                free_hash_table(ht);
                 return 1;
             }
             // Read aliases into hash table and write non-matching lines to tmp
-            tmp = read_aliases(f, ht);
-            if (!tmp) {
-                fprintf(stderr, "Error reading aliases file: %s", fname);
-                return 2;
-            }
-            create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags);
-            if (add_entry(entry, ht) == ERR_DUPLICATE && cli->verbosity) {
-                printf("Duplicate alias: %s=\"%s\"", entry->alias, entry->command);
-                return 3;
-            }
-            write_aliases(tmp, ht);
-            fclose(tmp);
-            rename(TMP_FNAME, fname);
-            break;
-
-        case REMOVE:;
-            // Removes a global or directory-local alias.
-            // 1. Open either ~/.aliases or ./.env
-            // 2. Loop over all lines and find lines starting with 'alias'
-            // 3. Add entries to hash table by finding the alias, command, and optionally section
-            // 4. Remove the specified aliases
-            // 5. Create a single string from the hash table in the form of "alias a=command # section\nalias ..."
-            // 6. If in local mode, then prune existing alias commands from .env, and concatenate new aliases to the pruned file
-            // 7. Write this string to correct file
-            struct Remove r = cli->cmd.remove;
-            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-            fname = (r.local) ? "env" : "~/.aliases";
-            f = fopen(fname, "r");
-            if (!f) {
-                fprintf(stderr, "Aliases file not found: %s", fname);
+            tmp_f = read_aliases(alias_f, ht);
+            if (!tmp_f) {
+                fclose(alias_f);
+                free_hash_table(ht);
                 return 1;
             }
 
-            tmp = read_aliases(f, ht);
-            if (!tmp) {
-                fprintf(stderr, "Error reading aliases file: %s", fname);
+            // Create entry from command line args
+            create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags);
+
+            // Add new entry to hash table and check for duplicate
+            if (add_entry(entry, ht) == ERR_DUPLICATE) {
+                if (cli->verbosity)
+                    printf("Duplicate alias: %s=\"%s\"", entry->alias, entry->command);
+                fclose(tmp_f);
+                free_hash_table(ht);
+                free_entry(entry);
+                remove(TMP_FNAME);
+                return 1;
+            }
+
+            // Write new aliases back to file and check for write permission
+            if (!write_aliases(tmp_f, ht)) {
+                perror("Error: unable to write to alias file");
+                free_hash_table(ht);
+                fclose(tmp_f);
+                remove(TMP_FNAME);
+                return 1;
+            }
+
+            free_hash_table(ht);
+            fclose(tmp_f);
+            rename(TMP_FNAME, alias_fname);
+            break;
+
+        case REMOVE:;
+            struct Remove r = cli->cmd.remove;
+            create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
+            // Open aliases file according to 'local'
+            alias_fname = (r.local) ? env_fname : "~/.aliases";
+            FILE *alias_f = fopen(alias_fname, "w+");
+            if (!alias_f) {
+                fprintf(stderr, "Error: aliases file not found: %s", alias_fname);
+                free_hash_table(ht);
+                return 1;
+            }
+            // Read aliases into hash table and write non-matching lines to tmp
+            FILE *tmp_f = read_aliases(alias_f, ht);
+            if (!tmp_f) {
+                fclose(alias_f);
+                free_hash_table(ht);
                 return 1;
             }
 
@@ -102,7 +108,7 @@ int main(int argc, char **argv) {
                 } else {
                     if (r.interactive) {
                         char answer;
-                        printf("Delete section: \"%s\"? [y/N]\n", r.aliases->data);
+                        printf("Delete alias: \"%s\"? [y/N]\n", r.aliases->data);
                         scanf(" %c", &answer);
                         if (answer != 'y' && answer != 'Y')
                             continue;
@@ -115,9 +121,19 @@ int main(int argc, char **argv) {
                 }
                 r.aliases = r.aliases->next;
             }
-            write_aliases(f, ht);
-            fclose(tmp);
-            rename(TMP_FNAME, fname);
+
+            // Write new aliases back to file and check for write permission
+            if (!write_aliases(tmp_f, ht)) {
+                perror("Error: unable to write to alias file");
+                free_hash_table(ht);
+                fclose(tmp_f);
+                remove(TMP_FNAME);
+                return 1;
+            }
+
+            free_hash_table(ht);
+            fclose(tmp_f);
+            rename(TMP_FNAME, alias_fname);
             break;
 
         case TREE:
@@ -151,8 +167,4 @@ int main(int argc, char **argv) {
 
             break;
     }
-}
-
-Status hash_table_to_toml(HashTable *ht) {
-    return 0;
 }

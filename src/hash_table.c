@@ -106,9 +106,15 @@ Status resize_backing_array(HashTable *ht) {
     ht->capacity = new_capacity;
     ht->backing_array = new_array;
 
+    // Loop over array. If entry is non-null and not removed, then add it.
+    // If entry is removed, then free it.
     for (int i = 0; i < old_capacity; i++)
-        if (old_array[i] && !old_array[i]->is_removed)
-            add_entry(old_array[i], ht);
+        if (old_array[i]) {
+            if (!old_array[i]->is_removed)
+                add_entry(old_array[i], ht);
+            else
+                free_entry(old_array[i]);
+        }
 
     free(old_array);
     return SUCCESS;
