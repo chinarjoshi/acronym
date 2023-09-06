@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "cli/parse_args.h"
 #include "file_io.h"
+#include "subcmds/subcmds.h"
+#include "parse_args/parse_args.h"
 #include "hash_table/entry.h"
 #include "hash_table/hash_table.h"
 #include "toml/toml.h"

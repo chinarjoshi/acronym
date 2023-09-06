@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <check.h>
-#include "../src/cli/parse_args.h"
+#include "../src/parse_args/parse_args.h"
 #include "test.h"
 
 START_TEST(test_parse_args_add_normal) {
