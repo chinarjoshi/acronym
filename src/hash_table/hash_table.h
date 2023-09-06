@@ -2,6 +2,8 @@
 #define HASHTABLE_H
 #include "entry.h"
 
+extern const int INITIAL_CAPACITY;
+extern const float LOAD_FACTOR;
 typedef struct HashTable {
     Entry **backing_array;
     int capacity;

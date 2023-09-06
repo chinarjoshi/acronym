@@ -3,6 +3,8 @@
 #include "entry.h"
 #include "hash_table.h"
 
+const int INITIAL_CAPACITY = 51;
+const float LOAD_FACTOR = .5;
 Status create_hash_table(HashTable **data_out, int capacity,
                           float load_factor) {
     HashTable *ht = malloc(sizeof(HashTable));

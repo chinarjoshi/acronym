@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../hash_table/hash_table.h"
 
 // Returns whether 'child_path' is a subdirectory of 'parent_path'. If 'reverse', return
 // the inverse.
@@ -43,4 +44,18 @@ char **get_env_paths(const char *start, bool return_parents, int *num_paths) {
 
     *num_paths = path_count;
     return paths;
+}
+
+int cleanup(const char *message, const char *message_arg, 
+                          HashTable *ht, FILE *f, const char *fname_to_remove) {
+    if (message) {
+        if (message_arg)
+            fprintf(stderr, message, message_arg); 
+        else
+            fprintf(stderr, "%s", message); 
+    }
+    free_hash_table(ht);
+    fclose(f);
+    remove(fname_to_remove);
+    return 1;
 }
