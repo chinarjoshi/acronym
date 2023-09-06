@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <check.h>
-#include "../src/entry.h"
+#include "../src/hash_table/entry.h"
 #include "test.h"
 
 START_TEST(test_create_alias_name) {

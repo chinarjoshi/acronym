@@ -1,6 +1,6 @@
 #include "file_io.h"
-#include "entry.h"
-#include "hash_table.h"
+#include "hash_table/entry.h"
+#include "hash_table/hash_table.h"
 #include <pcre.h>
 #include <string.h>
 #include <stdio.h>

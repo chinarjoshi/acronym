@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <check.h>
-#include "../src/hash_table.h"
+#include "../src/hash_table/hash_table.h"
 #include "test.h"
 
 Entry *entry;
