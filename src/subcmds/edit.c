@@ -3,7 +3,6 @@
 #include "../file_io.h"
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
-const char *TOML_FNAME = "/tmp/acronym_aliases.toml";
 
 bool edit_cmd(Cli *cli) {
     // Edit either global or directory-specific aliases, in TOML format for readability
@@ -17,14 +16,10 @@ bool edit_cmd(Cli *cli) {
     // 8. If in local mode, then prune existing alias commands from .env, and concatenate new aliases to the pruned file
     // 9. Write this string to correct file
     struct Edit e = cli->cmd.edit;
-    Entry *entry;
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     // Open aliases file according to 'local'
-    const char *env_fname = getenv("AUTOENV_ENV_FILENAME");
-    if (!env_fname)
-        env_fname = ".env";
-    const char *alias_fname = (e.local) ? env_fname : "~/.aliases";
+    const char *alias_fname = get_alias_fname(e.local);
     FILE *alias_f = fopen(alias_fname, "w+");
     if (!alias_f)
         return cleanup("Error: aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);

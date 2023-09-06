@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "subcmds.h"
 #include "../hash_table/hash_table.h"
+const char *TOML_FNAME = "/tmp/acronym_aliases.toml";
 
 // Returns whether 'child_path' is a subdirectory of 'parent_path'. If 'reverse', return
 // the inverse.
@@ -58,4 +60,11 @@ int cleanup(const char *message, const char *message_arg,
     fclose(f);
     remove(fname_to_remove);
     return 1;
+}
+
+const char *get_alias_fname(bool local) {
+    const char *env_fname = getenv("AUTOENV_ENV_FILENAME");
+    if (!env_fname)
+        env_fname = ".env";
+    return (local) ? env_fname : "~/.aliases";
 }

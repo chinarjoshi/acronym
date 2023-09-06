@@ -16,6 +16,7 @@ sources = [
   'src/subcmds/edit.c',
   'src/subcmds/tree.c',
   'src/subcmds/show.c',
+  'src/subcmds/helpers.c',
 ]
 executable('acronym', sources : sources, dependencies : pcre_dep)
 
@@ -33,6 +34,7 @@ test_sources = [
   'src/subcmds/edit.c',
   'src/subcmds/tree.c',
   'src/subcmds/show.c',
+  'src/subcmds/helpers.c',
   'tests/test_entry.c',
   'tests/test_hash_table.c',
   'tests/test_parse_args.c',

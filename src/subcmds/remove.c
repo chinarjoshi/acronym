@@ -10,10 +10,7 @@ bool remove_cmd(Cli *cli) {
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     // Open aliases file according to 'local'
-    const char *env_fname = getenv("AUTOENV_ENV_FILENAME");
-    if (!env_fname)
-        env_fname = ".env";
-    const char *alias_fname = (r.local) ? env_fname : "~/.aliases";
+    const char *alias_fname = get_alias_fname(r.local);
     FILE *alias_f = fopen(alias_fname, "w+");
     if (!alias_f)
         return cleanup("Error: aliases file not found: %s\n", alias_fname, ht, 0, 0);

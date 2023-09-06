@@ -10,6 +10,7 @@ bool remove_cmd(Cli *cli);
 bool tree_cmd(Cli *cli);
 bool show_cmd(Cli *cli);
 bool edit_cmd(Cli *cli);
+const char *get_alias_fname(bool local);
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove);
 
