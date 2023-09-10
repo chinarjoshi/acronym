@@ -1,10 +1,13 @@
+#include <sys/stat.h>
 #include "subcmds.h"
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
 #include "../file_io.h"
 
-bool add_cmd(Cli *cli, HashTable *ht) {
+bool add_cmd(Cli *cli) {
     // Initialize structures and variables
+    HashTable *ht;
+    create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     struct Add a = cli->cmd.add;
     Entry *entry;
 
@@ -36,7 +39,11 @@ bool add_cmd(Cli *cli, HashTable *ht) {
 
     free_hash_table(ht);
     fclose(tmp_f);
-    rename(TMP_FNAME, alias_fname);
+    chmod(TMP_FNAME, S_IRWXU | S_IRWXG | S_IRWXO);
+    if (rename(TMP_FNAME, alias_fname)) {
+        perror("Error renaming file.\n");
+        return false;
+    }
     // Cleanup cli
     return true;
 }

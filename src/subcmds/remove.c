@@ -4,9 +4,11 @@
 #include "../file_io.h"
 #include <stdlib.h>
 
-bool remove_cmd(Cli *cli, HashTable *ht) {
+bool remove_cmd(Cli *cli) {
     struct Remove r = cli->cmd.remove;
     Entry *entry;
+    HashTable *ht;
+    create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     const char *alias_fname = (r.local) ? AUTOENV_FNAME : ALIAS_FNAME;
     FILE *alias_f = fopen(alias_fname, "w+");
     if (!alias_f)

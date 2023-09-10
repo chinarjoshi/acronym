@@ -1,4 +1,3 @@
-#include "hash_table/hash_table.h"
 #include "subcmds/subcmds.h"
 
 int main(int argc, char **argv) {
@@ -7,23 +6,19 @@ int main(int argc, char **argv) {
     if (!cli)
         return 1;
 
-    // Set useful data structures and globals
-    HashTable *ht;
-    create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-    set_alias_and_autoenv_fnames();
-
     // Execute specified subcommand. The function is responsible for freeing
     // all allocated memory and returning correct exit code.
+    set_alias_and_autoenv_fnames();
     switch (cli->type) {
         case ADD:
-            return !add_cmd(cli, ht);
+            return !add_cmd(cli);
         case REMOVE:
-            return !remove_cmd(cli, ht);
+            return !remove_cmd(cli);
         case TREE:
-            return !tree_cmd(cli, ht);
+            return !tree_cmd(cli);
         case SHOW:
-            return !show_cmd(cli, ht);
+            return !show_cmd(cli);
         case EDIT:
-            return !edit_cmd(cli, ht);
+            return !edit_cmd(cli);
     }
 }

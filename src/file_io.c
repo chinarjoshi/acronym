@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
-const char *TMP_FNAME = "/tmp/acronym_tmpfile";
 const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+?))?\\n";
 const char *FILE_DELIMITER = "# --- Aliases ---\n";
 const int OVECTOR_LEN = 30;

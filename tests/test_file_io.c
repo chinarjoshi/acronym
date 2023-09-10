@@ -84,6 +84,7 @@ START_TEST(test_read_aliases) {
     HashTable *ht;
     int capacity = 71;
     create_hash_table(&ht, capacity, .5);
+    strcpy(TMP_FNAME, "/home/c/.acronym_tmpfile");
     FILE *f = fopen("/tmp/acronym_test_read_tmpfile", "w+");
     fputs(
 "alias build=\"meson compile -C ~/projects/acronym/builds\"\n"
@@ -130,6 +131,8 @@ START_TEST(test_read_aliases) {
     fgets(line, sizeof(line), tmp);
     // Skip the --- ALIAS --- delimiter
     ck_assert_str_eq(line, "DEBUG_EXECUTABLE=~/projects/acronym/builds/tests\n");
+    fgets(line, sizeof(line), tmp);
+    ck_assert_str_eq(line, "\n");
     ck_assert(!fgets(line, sizeof(line), tmp));
 }
 END_TEST
@@ -148,7 +151,7 @@ START_TEST(test_write_aliases) {
         add_entry(entries[i], ht);
 
     FILE *f = fopen("/tmp/acronym_test_write_tmpfile", "w+");
-    fputs("CK_FORK=no\n", f);
+    fputs("CK_FORK=no\n\n", f);
 
     write_aliases(f, ht);
     rewind(f);

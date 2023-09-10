@@ -4,7 +4,7 @@
 #include <pcre.h>
 #include <stdio.h>
 
-extern const char *TMP_FNAME;
+extern char TMP_FNAME[64];
 extern const char *ALIAS_PATTERN;
 extern const char *FILE_DELIMITER;
 extern const int OVECTOR_LEN;

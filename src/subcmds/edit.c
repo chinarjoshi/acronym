@@ -4,7 +4,7 @@
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
 
-bool edit_cmd(Cli *cli, HashTable *ht) {
+bool edit_cmd(Cli *cli) {
     // Edit either global or directory-specific aliases, in TOML format for readability
     // 1. Open either ~/.aliases or ./.env
     // 2. Loop over all lines and find lines starting with 'alias'
@@ -16,6 +16,8 @@ bool edit_cmd(Cli *cli, HashTable *ht) {
     // 8. If in local mode, then prune existing alias commands from .env, and concatenate new aliases to the pruned file
     // 9. Write this string to correct file
     struct Edit e = cli->cmd.edit;
+    HashTable *ht;
+    create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     // Open aliases file according to 'local'
     const char *alias_fname = (e.local) ? AUTOENV_FNAME : ALIAS_FNAME;
     FILE *alias_f = fopen(alias_fname, "w+");
