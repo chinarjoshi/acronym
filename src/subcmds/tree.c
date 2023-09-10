@@ -2,7 +2,7 @@
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
 
-bool tree_cmd(Cli *cli) {
+bool tree_cmd(Cli *cli, HashTable *ht) {
             // Displays a tree of how an alias changes over directories by finding all .env files in directories after this,
             // or starting from ~ if 'all'
             // 1. Use find/fd to generate a list of */.env paths starting from the specified directory

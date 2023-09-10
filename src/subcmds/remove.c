@@ -4,13 +4,10 @@
 #include "../file_io.h"
 #include <stdlib.h>
 
-bool remove_cmd(Cli *cli) {
+bool remove_cmd(Cli *cli, HashTable *ht) {
     struct Remove r = cli->cmd.remove;
     Entry *entry;
-    HashTable *ht;
-    create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-    // Open aliases file according to 'local'
-    const char *alias_fname = get_alias_fname(r.local);
+    const char *alias_fname = (r.local) ? AUTOENV_FNAME : ALIAS_FNAME;
     FILE *alias_f = fopen(alias_fname, "w+");
     if (!alias_f)
         return cleanup("Error: aliases file not found: %s\n", alias_fname, ht, 0, 0);

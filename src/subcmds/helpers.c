@@ -5,6 +5,8 @@
 #include "subcmds.h"
 #include "../hash_table/hash_table.h"
 const char *TOML_FNAME = "/tmp/acronym_aliases.toml";
+const char *AUTOENV_FNAME;
+char ALIAS_FNAME[64];
 
 // Returns whether 'child_path' is a subdirectory of 'parent_path'. If 'reverse', return
 // the inverse.
@@ -62,9 +64,13 @@ int cleanup(const char *message, const char *message_arg,
     return 1;
 }
 
-const char *get_alias_fname(bool local) {
-    const char *env_fname = getenv("AUTOENV_ENV_FILENAME");
-    if (!env_fname)
-        env_fname = ".env";
-    return (local) ? env_fname : "~/.aliases";
+// Sets 'ALIAS_FNAME' to expanded version of "~/.aliases"
+// Sets 'AUTOENV_FNAME' to its env variable, or '.env' if not found
+// (default: ".env"), otherwise returns the absolute path to ~/.aliases.
+void set_alias_and_autoenv_fnames() {
+    snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases", getenv("HOME"));
+
+    AUTOENV_FNAME = getenv("AUTOENV_ENV_FILENAME");
+    if (!AUTOENV_FNAME)
+        AUTOENV_FNAME = ".env";
 }

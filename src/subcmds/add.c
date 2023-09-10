@@ -3,13 +3,13 @@
 #include "../hash_table/hash_table.h"
 #include "../file_io.h"
 
-bool add_cmd(Cli *cli) {
+bool add_cmd(Cli *cli, HashTable *ht) {
+    // Initialize structures and variables
     struct Add a = cli->cmd.add;
     Entry *entry;
-    HashTable *ht;
-    create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-    // Open aliases file according to 'local'
-    const char *alias_fname = get_alias_fname(a.local);
+
+    const char *alias_fname = (a.local) ? AUTOENV_FNAME : ALIAS_FNAME;
+    // Open the correct alias file ('.env' if 'a.local', else '~/.aliases')
     FILE *alias_f = fopen(alias_fname, "w+");
     if (!alias_f)
         return cleanup("Error: aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);
