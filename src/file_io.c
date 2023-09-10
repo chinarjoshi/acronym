@@ -91,6 +91,7 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
         }
     }
 
+    fputs("\n", tmp);
     free_re_resources(re, extras, f);
     rewind(tmp);
     return tmp;
@@ -99,11 +100,10 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
 // Given a hash table of aliases, write all elements to the given file stream.
 bool write_aliases(FILE *f, HashTable *ht) {
     Entry *entry;
-    if (!fputs("\n", f)) {
+    if (!fputs(FILE_DELIMITER, f)) {
         printf("Error: unable to write to file");
         return false;
     }
-    fputs(FILE_DELIMITER, f);
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
         if (entry && !entry->is_removed) {
