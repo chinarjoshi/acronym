@@ -8,7 +8,7 @@ HashTable *ht;
 const int initial_capacity = 7;
 const float load_factor = .5;
 
-void setup(void) {
+static void setup(void) {
     char *command = "git status";
     Status s = create_entry(&entry, command, NULL, NULL, false);
     if (s == ERR_OUT_OF_MEMORY) {
@@ -23,7 +23,7 @@ void setup(void) {
     }
 }
 
-void teardown(void) {
+static void teardown(void) {
     // free_hash_table(ht);
 }
 

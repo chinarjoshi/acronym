@@ -7,7 +7,7 @@ pcre *re;
 pcre_extra *extras;
 char alias[64], command[256], section[64];
 int ovector[30];
-void setup_match_line() {
+static void setup() {
     const char *error;
     int erroffset;
     re = pcre_compile(ALIAS_PATTERN, 0, &error, &erroffset, NULL);
@@ -18,7 +18,7 @@ void setup_match_line() {
     memset(ovector, 0, sizeof(ovector));
 }
 
-void teardown_match_line() {
+static void teardown() {
     pcre_free(re);
     pcre_free_study(extras);
 }
@@ -185,7 +185,7 @@ Suite *file_io_suite(void) {
     tcase_add_test(tc_match, test_match_line_double_quotes);
     tcase_add_test(tc_match, test_match_line_with_section);
     tcase_add_test(tc_match, test_match_line_single_quotes_section);
-    tcase_add_checked_fixture(tc_match, setup_match_line, teardown_match_line);
+    tcase_add_checked_fixture(tc_match, setup, teardown);
     suite_add_tcase(s, tc_match);
 
     TCase *tc_read = tcase_create("Read");

@@ -7,6 +7,7 @@ char line[256];
 FILE *alias_f;
 static void setup() {
     strcpy(ALIAS_FNAME, "/tmp/acronym_test_cmd_alias");
+    strcpy(TMP_FNAME, "/tmp/acronym_test_cmd_tmpfile"); // MUST BE ON SAME DEVICE AS ABOVE
     AUTOENV_FNAME = "/tmp/acronym_test_cmd_autoenv";
     alias_f = fopen(ALIAS_FNAME, "w");
     fputs(
@@ -19,7 +20,10 @@ static void setup() {
     fclose(alias_f);
 }
 
-static void teardown() {}
+static void teardown() {
+    fclose(alias_f);
+    remove(ALIAS_FNAME);
+}
 
 START_TEST(test_add_cmd_normal) {
     Cli cli = {
@@ -35,6 +39,7 @@ START_TEST(test_add_cmd_normal) {
     int result = add_cmd(&cli);
     ck_assert(!result);
 
+    alias_f = fopen(ALIAS_FNAME, "r");
     bool found_new_line = false, found_old_line = false;
     while (fgets(line, sizeof(line), alias_f)) {
         if (strncmp("alias gc", line, 8)) {
@@ -63,6 +68,7 @@ START_TEST(test_add_cmd_duplicate) {
     int result = add_cmd(&cli);
     ck_assert(result);
 
+    alias_f = fopen(ALIAS_FNAME, "r");
     while (fgets(line, sizeof(line), alias_f)) {
         if (strncmp("alias gc", line, 8)) {
             ck_assert_str_eq("alias gc=\"grep --color=auto\" ## utils\n", line);
@@ -83,6 +89,7 @@ START_TEST(test_remove_cmd_normal) {
     int result = remove_cmd(&cli);
     ck_assert(!result);
 
+    alias_f = fopen(ALIAS_FNAME, "r");
     while (fgets(line, sizeof(line), alias_f)) {
         if (strncmp("alias test='CK_FORK=", line, 20)) {
             ck_abort();
