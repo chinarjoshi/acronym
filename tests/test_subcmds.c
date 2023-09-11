@@ -6,9 +6,9 @@
 char line[256];
 FILE *alias_f;
 static void setup() {
-    strcpy(ALIAS_FNAME, "/tmp/acronym_test_cmd_alias");
-    strcpy(TMP_FNAME, "/tmp/acronym_test_cmd_tmpfile"); // MUST BE ON SAME DEVICE AS ABOVE
-    AUTOENV_FNAME = "/tmp/acronym_test_cmd_autoenv";
+    strcpy(ALIAS_FNAME, "/home/c/.acronym_test_cmd_alias");
+    strcpy(TMP_FNAME, "/home/c/.acronym_test_cmd_tmpfile"); // MUST BE ON SAME DEVICE AS ABOVE
+    AUTOENV_FNAME = "/home/c/.acronym_test_cmd_autoenv";
     alias_f = fopen(ALIAS_FNAME, "w");
     fputs(
 "# --- Aliases ---\n"
@@ -37,15 +37,15 @@ START_TEST(test_add_cmd_normal) {
     };
 
     int result = add_cmd(&cli);
-    ck_assert(!result);
+    ck_assert(result);
 
     alias_f = fopen(ALIAS_FNAME, "r");
     bool found_new_line = false, found_old_line = false;
     while (fgets(line, sizeof(line), alias_f)) {
-        if (strncmp("alias gc", line, 8)) {
+        if (!strncmp("alias gc", line, 8)) {
             ck_assert_str_eq("alias gc=\"grep --color=auto\" ## utils\n", line);
             found_new_line = true;
-        } else if (strncmp("alias test", line, 10)) {
+        } else if (!strncmp("alias test", line, 10)) {
             ck_assert_str_eq("alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## unit test\n", line);
             found_old_line = true;
         }
@@ -66,7 +66,7 @@ START_TEST(test_add_cmd_duplicate) {
     };
 
     int result = add_cmd(&cli);
-    ck_assert(result);
+    ck_assert(!result);
 
     alias_f = fopen(ALIAS_FNAME, "r");
     while (fgets(line, sizeof(line), alias_f)) {

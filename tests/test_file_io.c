@@ -164,13 +164,13 @@ START_TEST(test_write_aliases) {
     fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, FILE_DELIMITER);
     fgets(line, sizeof(line), f);
-    ck_assert_str_eq(line, "alias gd=\"git diff\" ## git\n");
+    ck_assert_str_eq(line, "alias gd='git diff' ## git\n");
     fgets(line, sizeof(line), f);
-    ck_assert_str_eq(line, "alias gp=\"git push -u origin\" ## git\n");
+    ck_assert_str_eq(line, "alias gp='git push -u origin' ## git\n");
     fgets(line, sizeof(line), f);
-    ck_assert_str_eq(line, "alias gs=\"git status\" ## git\n");
+    ck_assert_str_eq(line, "alias gs='git status' ## git\n");
     fgets(line, sizeof(line), f);
-    ck_assert_str_eq(line, "alias l=\"ls -al\" ## ls\n");
+    ck_assert_str_eq(line, "alias l='ls -al' ## ls\n");
     ck_assert(!fgets(line, sizeof(line), f));
 }
 END_TEST

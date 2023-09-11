@@ -62,7 +62,7 @@ int cleanup(const char *message, const char *message_arg,
     free_hash_table(ht);
     fclose(f);
     remove(fname_to_remove);
-    return 1;
+    return 0;
 }
 
 // Sets 'ALIAS_FNAME' to expanded version of "~/.aliases"
