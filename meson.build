@@ -39,6 +39,7 @@ test_sources = [
   'tests/test_hash_table.c',
   'tests/test_parse_args.c',
   'tests/test_file_io.c',
+  'tests/test_subcmds.c',
   'tests/test.c',
 ]
 e = executable('tests', sources : test_sources, dependencies : [check_dep, pcre_dep])

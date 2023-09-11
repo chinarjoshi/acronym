@@ -15,6 +15,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
     Cli *cli = calloc(1, sizeof(Cli));
     if (!cli)
         return NULL;
+    cli->verbosity = 1;
 
     // Stop option processing at first subcommand, and v has an optional argument
     char *short_options = "+v::qhV";

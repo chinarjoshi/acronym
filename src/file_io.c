@@ -98,6 +98,9 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
 
 // Given a hash table of aliases, write all elements to the given file stream.
 bool write_aliases(FILE *f, HashTable *ht) {
+    if (ht->size == 0)
+        return true;
+
     Entry *entry;
     if (!fputs(FILE_DELIMITER, f)) {
         printf("Error: unable to write to file");

@@ -7,11 +7,13 @@ int main() {
     Suite *suite2 = hash_table_suite();
     Suite *suite3 = parse_args_suite();
     Suite *suite4 = file_io_suite();
+    Suite *suite5 = subcmds_suite();
 
     SRunner *sr = srunner_create(suite1);
     srunner_add_suite(sr, suite2);
     srunner_add_suite(sr, suite3);
     srunner_add_suite(sr, suite4);
+    srunner_add_suite(sr, suite5);
 
     srunner_run_all(sr, CK_NORMAL);
     int number_failed = srunner_ntests_failed(sr);

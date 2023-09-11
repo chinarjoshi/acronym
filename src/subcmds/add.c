@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <unistd.h>
 #include "subcmds.h"
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
@@ -12,8 +13,14 @@ bool add_cmd(Cli *cli) {
     Entry *entry;
 
     const char *alias_fname = (a.local) ? AUTOENV_FNAME : ALIAS_FNAME;
+    // Make sure the alias file exists
+    if (access(alias_fname, F_OK) == -1) {
+        FILE *f = fopen(alias_fname, "w"); 
+        fclose(f);
+    }
     // Open the correct alias file ('.env' if 'a.local', else '~/.aliases')
-    FILE *alias_f = fopen(alias_fname, "w+");
+    FILE *alias_f = fopen(alias_fname, "r");
+    // Make sure to create it if it doesn't exist
     if (!alias_f)
         return cleanup("Error: aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);
 
@@ -29,7 +36,6 @@ bool add_cmd(Cli *cli) {
     if (add_entry(entry, ht) == ERR_DUPLICATE) {
         if (cli->verbosity)
             printf("Duplicate alias: %s=\"%s\"\n", entry->alias, entry->command);
-        free_entry(entry);
         return cleanup(0, 0, ht, tmp_f, TMP_FNAME);
     }
 
