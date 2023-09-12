@@ -8,7 +8,7 @@
 
 struct Cli *parse_global_options(int argc, char **argv) {
     if (argc < 2) {
-        printf("invalid use: provide option or subcommand\n");
+        printf("Invalid use: provide option or subcommand\n");
         return NULL;
     }
 
@@ -105,7 +105,7 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(add->alias_override, arg);
             break;
         case 's':
-            if (!(add->alias_override = malloc(strlen(arg) + 1)))
+            if (!(add->section_override = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(add->section_override, arg);
             break;

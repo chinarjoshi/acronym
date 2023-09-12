@@ -17,6 +17,34 @@ START_TEST(test_parse_args_add_normal) {
 }
 END_TEST
 
+START_TEST(test_parse_args_add_section) {
+    int argc = 5;
+    char *argv[] = { "acronym", "add", "git add -A", "-s", "git stuff" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, ADD);
+    struct Add a = cli->cmd.add;
+    ck_assert_str_eq("git add -A", a.command);
+    ck_assert_ptr_null(a.alias_override);
+    ck_assert_str_eq("git stuff", a.section_override);
+    ck_assert(!a.include_flags);
+    ck_assert(!a.local);
+}
+END_TEST
+
+START_TEST(test_parse_args_add_section_and_alias_override) {
+    int argc = 7;
+    char *argv[] = { "acronym", "add", "git add -A", "-a", "gaa", "-ls", "git adding" };
+    Cli *cli = parse_args(argc, argv);
+    ck_assert_int_eq(cli->type, ADD);
+    struct Add a = cli->cmd.add;
+    ck_assert_str_eq("git add -A", a.command);
+    ck_assert_str_eq("gaa", a.alias_override);
+    ck_assert_str_eq("git adding", a.section_override);
+    ck_assert(!a.include_flags);
+    ck_assert(a.local);
+}
+END_TEST
+
 START_TEST(test_parse_args_add_alias_override_local) {
     int argc = 5;
     char *argv[] = { "acronym", "add", "git add -A", "-la", "ga" };
@@ -97,6 +125,8 @@ Suite *parse_args_suite(void) {
 
     TCase *tc_add = tcase_create("Add");
     tcase_add_test(tc_add, test_parse_args_add_normal);
+    tcase_add_test(tc_add, test_parse_args_add_section);
+    tcase_add_test(tc_add, test_parse_args_add_section_and_alias_override);
     tcase_add_test(tc_add, test_parse_args_add_alias_override_local);
     suite_add_tcase(s, tc_add);
 
