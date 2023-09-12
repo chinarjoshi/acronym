@@ -74,6 +74,7 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
     // Read every line of the file. If the pattern doesn't match, append it to
     // the temporary file. Otherwise, add it to the hash table. At the end,
     // replace the original file with the pruned one.
+    bool found_non_matching_line = false;
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
             if (create_entry(&entry, command, alias, section, false) == ERR_OUT_OF_MEMORY) {
@@ -87,10 +88,12 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
         } else if (line[0] != '\n' && strcmp(line, FILE_DELIMITER) != 0) {
             // Add every line except the above
             fputs(line, tmp);
+            found_non_matching_line = true;
         }
     }
 
-    fputs("\n", tmp);
+    if (found_non_matching_line)
+        fputs("\n", tmp);
     free_re_resources(re, extras, f);
     return tmp;
 }
