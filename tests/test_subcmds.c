@@ -43,7 +43,7 @@ START_TEST(test_add_cmd_normal) {
     bool found_new_line = false, found_old_line = false;
     while (fgets(line, sizeof(line), alias_f)) {
         if (!strncmp("alias gc", line, 8)) {
-            ck_assert_str_eq("alias gc=\"grep --color=auto\" ## utils\n", line);
+            ck_assert_str_eq("alias gc='grep --color=auto' ## utils\n", line);
             found_new_line = true;
         } else if (!strncmp("alias test", line, 10)) {
             ck_assert_str_eq("alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## unit test\n", line);
@@ -70,8 +70,8 @@ START_TEST(test_add_cmd_duplicate) {
 
     alias_f = fopen(ALIAS_FNAME, "r");
     while (fgets(line, sizeof(line), alias_f)) {
-        if (strncmp("alias gc", line, 8)) {
-            ck_assert_str_eq("alias gc=\"grep --color=auto\" ## utils\n", line);
+        if (!strncmp("alias test", line, 10)) {
+            ck_assert_str_eq("alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## unit test\n", line);
             return;
         }
     }
@@ -87,11 +87,11 @@ START_TEST(test_remove_cmd_normal) {
     };
 
     int result = remove_cmd(&cli);
-    ck_assert(!result);
+    ck_assert(result);
 
     alias_f = fopen(ALIAS_FNAME, "r");
     while (fgets(line, sizeof(line), alias_f)) {
-        if (strncmp("alias test='CK_FORK=", line, 20)) {
+        if (!strncmp("alias test='CK_FORK=", line, 20)) {
             ck_abort();
         }
     }
