@@ -34,7 +34,7 @@ bool add_cmd(Cli *cli) {
     // Add new entry to hash table and check for duplicate
     if (add_entry(entry, ht) == ERR_DUPLICATE) {
         if (cli->verbosity)
-            printf("Duplicate alias: %s=\"%s\"\n", entry->alias, entry->command);
+            printf("Duplicate: %s=\"%s\"\n", entry->alias, entry->command);
         return cleanup(0, 0, ht, tmp_f, TMP_FNAME);
     }
 

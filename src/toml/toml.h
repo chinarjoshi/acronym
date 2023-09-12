@@ -1,11 +1,7 @@
 #ifndef TOML_H
 #define TOML_H
-
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
-
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -18,6 +14,11 @@ typedef struct toml_timestamp_t toml_timestamp_t;
 typedef struct toml_table_t toml_table_t;
 typedef struct toml_array_t toml_array_t;
 typedef struct toml_datum_t toml_datum_t;
+
+int toml_add_subtable(toml_table_t *parent, const char *key, toml_table_t *sub);
+int toml_add_keyval(toml_table_t *table, const char *key, const char *val);
+void toml_dump(toml_table_t *table, char *buffer, int *pos);
+void toml_dump_to_file(toml_table_t *table, const char *filename);
 
 /* Parse a file. Return a table on success, or 0 otherwise.
  * Caller must toml_free(the-return-value) after use.
@@ -50,6 +51,53 @@ struct toml_timestamp_t {
   int *year, *month, *day;
   int *hour, *minute, *second, *millisec;
   char *z;
+};
+
+/*
+ *	TOML has 3 data structures: value, array, table.
+ *	Each of them can have identification key.
+ */
+typedef struct toml_keyval_t toml_keyval_t;
+struct toml_keyval_t {
+  const char *key; /* key to this value */
+  const char *val; /* the raw value */
+};
+
+typedef struct toml_arritem_t toml_arritem_t;
+struct toml_arritem_t {
+  int valtype; /* for value kind: 'i'nt, 'd'ouble, 'b'ool, 's'tring, 't'ime,
+                  'D'ate, 'T'imestamp */
+  char *val;
+  toml_array_t *arr;
+  toml_table_t *tab;
+};
+
+struct toml_array_t {
+  const char *key; /* key to this array */
+  int kind;        /* element kind: 'v'alue, 'a'rray, or 't'able, 'm'ixed */
+  int type;        /* for value kind: 'i'nt, 'd'ouble, 'b'ool, 's'tring, 't'ime,
+                      'D'ate, 'T'imestamp, 'm'ixed */
+
+  int nitem; /* number of elements */
+  toml_arritem_t *item;
+};
+
+struct toml_table_t {
+  const char *key; /* key to this table */
+  bool implicit;   /* table was created implicitly */
+  bool readonly;   /* no more modification allowed */
+
+  /* key-values in the table */
+  int nkval;
+  toml_keyval_t **kval;
+
+  /* arrays in the table */
+  int narr;
+  toml_array_t **arr;
+
+  /* tables in the table */
+  int ntab;
+  toml_table_t **tab;
 };
 
 /*-----------------------------------------------------------------

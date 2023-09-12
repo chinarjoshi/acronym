@@ -46,15 +46,15 @@ bool remove_cmd(Cli *cli) {
         } else {
             if (r.interactive) {
                 char answer;
-                printf("Delete alias: \"%s\"? [y/N]\n", r.aliases->data);
+                printf("Delete: \"%s\"? [y/N]\n", r.aliases->data);
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
             if (remove_entry(&entry, r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Alias not found: %s\n", r.aliases->data);
+                printf("Not found: \"%s\"\n", r.aliases->data);
             } else if (cli->verbosity) {
-                printf("Deleted alias: %s\n", r.aliases->data);
+                printf("Deleted: %s=\"%s\"\n", entry->alias, entry->command);
             }
         }
         r.aliases = r.aliases->next;

@@ -101,6 +101,7 @@ START_TEST(test_read_aliases) {
 
     FILE *tmp = read_aliases(f, ht);
     ck_assert_ptr_nonnull(tmp);
+    rewind(tmp);
     fflush(tmp);
     
     Entry *e = ht->backing_array[hash_alias("build", capacity)];
