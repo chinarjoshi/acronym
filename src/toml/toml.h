@@ -1,32 +1,8 @@
-/*
-  MIT License
-
-  Copyright (c) CK Tan
-  https://github.com/cktan/tomlc99
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
-*/
 #ifndef TOML_H
 #define TOML_H
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4996)
+#pragma warning(disable: 4996)
 #endif
 
 #include <stdint.h>
@@ -66,28 +42,28 @@ TOML_EXTERN void toml_free(toml_table_t *tab);
  * type, the hour, minute, second and z fields will be NULLs.
  */
 struct toml_timestamp_t {
-    struct { /* internal. do not use. */
-        int year, month, day;
-        int hour, minute, second, millisec;
-        char z[10];
-    } __buffer;
-    int *year, *month, *day;
-    int *hour, *minute, *second, *millisec;
-    char *z;
+  struct { /* internal. do not use. */
+    int year, month, day;
+    int hour, minute, second, millisec;
+    char z[10];
+  } __buffer;
+  int *year, *month, *day;
+  int *hour, *minute, *second, *millisec;
+  char *z;
 };
 
 /*-----------------------------------------------------------------
  *  Enhanced access methods
  */
 struct toml_datum_t {
-    int ok;
-    union {
-        toml_timestamp_t *ts; /* ts must be freed after use */
-        char *s;              /* string value. s must be freed after use */
-        int b;                /* bool value */
-        int64_t i;            /* int value */
-        double d;             /* double value */
-    } u;
+  int ok;
+  union {
+    toml_timestamp_t *ts; /* ts must be freed after use */
+    char *s;              /* string value. s must be freed after use */
+    int b;                /* bool value */
+    int64_t i;            /* int value */
+    double d;             /* double value */
+  } u;
 };
 
 /* on arrays: */

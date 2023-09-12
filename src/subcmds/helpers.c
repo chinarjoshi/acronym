@@ -69,7 +69,7 @@ int cleanup(const char *message, const char *message_arg,
 // Sets 'AUTOENV_FNAME' to its env variable, or '.env' if not found
 // (default: ".env"), otherwise returns the absolute path to ~/.aliases.
 void set_alias_and_autoenv_fnames() {
-    snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases.sh", getenv("HOME"));
+    snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases", getenv("HOME"));
     snprintf(TMP_FNAME, sizeof(TMP_FNAME), "%s/.acronym_tmpfile", getenv("HOME"));
     snprintf(TOML_FNAME, sizeof(TOML_FNAME), "%s/.acronym_tmpfile.toml", getenv("HOME"));
 
