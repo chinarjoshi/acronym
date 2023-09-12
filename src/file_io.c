@@ -92,7 +92,6 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
 
     fputs("\n", tmp);
     free_re_resources(re, extras, f);
-    rewind(tmp);
     return tmp;
 }
 

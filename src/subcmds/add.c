@@ -7,9 +7,9 @@
 
 bool add_cmd(Cli *cli) {
     // Initialize structures and variables
+    struct Add a = cli->cmd.add;
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
-    struct Add a = cli->cmd.add;
     Entry *entry;
 
     const char *alias_fname = (a.local) ? AUTOENV_FNAME : ALIAS_FNAME;
@@ -20,7 +20,6 @@ bool add_cmd(Cli *cli) {
     }
     // Open the correct alias file ('.env' if 'a.local', else '~/.aliases')
     FILE *alias_f = fopen(alias_fname, "r");
-    // Make sure to create it if it doesn't exist
     if (!alias_f)
         return cleanup("Error: aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);
 
@@ -45,7 +44,6 @@ bool add_cmd(Cli *cli) {
 
     free_hash_table(ht);
     fclose(tmp_f);
-    chmod(TMP_FNAME, S_IRWXU | S_IRWXG | S_IRWXO);
     if (rename(TMP_FNAME, alias_fname)) {
         perror("Error renaming file.\n");
         return false;

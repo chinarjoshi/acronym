@@ -3,14 +3,23 @@
 #include "../hash_table/hash_table.h"
 #include "../file_io.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 bool remove_cmd(Cli *cli) {
+    // Initialize structures and variables
     struct Remove r = cli->cmd.remove;
-    Entry *entry;
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
+    Entry *entry;
+
     const char *alias_fname = (r.local) ? AUTOENV_FNAME : ALIAS_FNAME;
-    FILE *alias_f = fopen(alias_fname, "w+");
+    // Make sure the alias file exists
+    if (access(alias_fname, F_OK) == -1) {
+        FILE *f = fopen(alias_fname, "w"); 
+        fclose(f);
+    }
+    // Open the correct alias file ('.env' if 'a.local', else '~/.aliases')
+    FILE *alias_f = fopen(alias_fname, "r");
     if (!alias_f)
         return cleanup("Error: aliases file not found: %s\n", alias_fname, ht, 0, 0);
 
@@ -57,7 +66,10 @@ bool remove_cmd(Cli *cli) {
 
     free_hash_table(ht);
     fclose(tmp_f);
-    rename(TMP_FNAME, alias_fname);
+    if (rename(TMP_FNAME, alias_fname)) {
+        perror("Error renaming file.\n");
+        return false;
+    }
     // Cleanup cli
     return true;
 }

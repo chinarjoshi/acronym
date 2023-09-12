@@ -13,6 +13,7 @@ static void setup() {
     fputs(
 "# --- Aliases ---\n"
 "alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## unit test\n"
+"alias gd='git diff' ## git\n"
 "\n"
 "CK_RUN_SUITE=\"Hash Table\"\n"
 "CK_FORK=no\n"
@@ -90,11 +91,20 @@ START_TEST(test_remove_cmd_normal) {
     ck_assert(result);
 
     alias_f = fopen(ALIAS_FNAME, "r");
+    bool found_original_line = false;
+    bool found_env_variable = false;
     while (fgets(line, sizeof(line), alias_f)) {
         if (!strncmp("alias test='CK_FORK=", line, 20)) {
             ck_abort();
+        } else if (!strncmp("alias gd", line, 8)) {
+            ck_assert_str_eq("alias gd='git diff' ## git\n", line);
+            found_original_line = true;
+        } else if (!strncmp("CK_RUN_SUITE", line, 12)) {
+            ck_assert_str_eq("CK_RUN_SUITE=\"Hash Table\"\n", line);
+            found_env_variable = true;
         }
     }
+    ck_assert(found_original_line && found_env_variable);
 }
 END_TEST
 
