@@ -11,12 +11,19 @@ int ht_to_toml_file(HashTable *ht, const char *toml_fname) {
     if (!fp)
         return -1;
    
-    toml_table_t *t;
+    toml_table_t *t = 0;
     ht_to_toml_table(ht, t);
     toml_dump(t, fp, TOML_INDENT);
     
     fclose(fp);
     return 0;
+}
+
+static toml_table_t *create_toml_table(const char *key) {
+    toml_table_t *t = calloc(1, sizeof(toml_table_t));
+    if (!t) return NULL;
+    t->key = key; 
+    return t;
 }
 
 int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
@@ -30,13 +37,6 @@ int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
     
     fclose(fp);
     return 0;
-}
-
-static toml_table_t *create_toml_table(const char *key) {
-    toml_table_t *t = calloc(1, sizeof(toml_table_t));
-    if (!t) return NULL;
-    t->key = key; 
-    return t;
 }
 
 void ht_to_toml_table(HashTable *ht, toml_table_t *root) {
@@ -131,7 +131,8 @@ void toml_dump(toml_table_t *table, FILE *fp, int indent) {
 
     // Dump sub-tables
     for (int i = 0; i < table->ntab; ++i) {
-        for (int j = 0; j < indent; ++j) fprintf(fp, "  ");
+        for (int j = 0; j < indent; ++j)
+            fprintf(fp, "  ");
         fprintf(fp, "[%s]\n", table->tab[i]->key);
         toml_dump(table->tab[i], fp, indent * 2);
     }

@@ -10,7 +10,7 @@ bool edit_cmd(Cli *cli) {
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
 
-    // Pick the alias file ('.env' if 'a.local', else '~/.aliases')
+    // Pick the alias file name ('.env' if 'a.local', else '~/.aliases')
     const char *alias_fname = (e.local) ? AUTOENV_FNAME : ALIAS_FNAME;
     // Make sure it exists
     if (access(alias_fname, F_OK) == -1) {
@@ -27,10 +27,11 @@ bool edit_cmd(Cli *cli) {
         return cleanup(0, 0, ht, alias_f, 0);
 
     // Serialize hash table to TOML_FNAME
-    if (!ht_to_toml_file(ht, TOML_FNAME)) return 0;
+    if (ht_to_toml_file(ht, TOML_FNAME))
+        return 0;
 
     // Open the toml tmpfile with editor
-    char command[64];
+    char command[128];
     char *editor = getenv("EDITOR");
     if (e.editor) {
         if (access(e.editor, X_OK)) {
@@ -42,10 +43,11 @@ bool edit_cmd(Cli *cli) {
     snprintf(command, sizeof(command), "%s %s", editor, TOML_FNAME);
 
     int result = system(command);
-    if (!result)
+    if (result)
         return cleanup("Error: failed to run command: %s\n", command, ht, 0, TOML_FNAME);
 
-    if (!toml_file_to_ht(ht, TOML_FNAME)) return 0;
+    if (toml_file_to_ht(ht, TOML_FNAME))
+        return 0;
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
