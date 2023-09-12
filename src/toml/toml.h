@@ -15,11 +15,6 @@ typedef struct toml_table_t toml_table_t;
 typedef struct toml_array_t toml_array_t;
 typedef struct toml_datum_t toml_datum_t;
 
-int toml_add_subtable(toml_table_t *parent, const char *key, toml_table_t *sub);
-int toml_add_keyval(toml_table_t *table, const char *key, const char *val);
-void toml_dump(toml_table_t *table, char *buffer, int *pos);
-void toml_dump_to_file(toml_table_t *table, const char *filename);
-
 /* Parse a file. Return a table on success, or 0 otherwise.
  * Caller must toml_free(the-return-value) after use.
  */

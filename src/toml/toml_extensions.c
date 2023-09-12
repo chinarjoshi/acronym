@@ -2,6 +2,74 @@
 #include <stdlib.h>
 #include <string.h>
 #include "toml.h"
+#include "toml_extensions.h"
+#include "../hash_table/hash_table.h"
+#define TOML_INDENT 4
+
+int ht_to_toml_file(HashTable *ht, const char *toml_fname) {
+    FILE *fp = fopen(toml_fname, "w");
+    if (!fp)
+        return -1;
+   
+    toml_table_t *t;
+    ht_to_toml_table(ht, t);
+    toml_dump(t, fp, TOML_INDENT);
+    
+    fclose(fp);
+    return 0;
+}
+
+int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
+    FILE *fp = fopen(toml_fname, "r");
+    if (!fp)
+        return -1;
+   
+    char errbuf[128];
+    toml_table_t *t = toml_parse_file(fp, errbuf, sizeof(errbuf));
+    toml_table_to_ht(ht, t);
+    
+    fclose(fp);
+    return 0;
+}
+
+static toml_table_t *create_toml_table(const char *key) {
+    toml_table_t *t = calloc(1, sizeof(toml_table_t));
+    if (!t) return NULL;
+    t->key = key; 
+    return t;
+}
+
+void ht_to_toml_table(HashTable *ht, toml_table_t *root) {
+    if (!root) {
+        root = create_toml_table(0);
+        if (!root) return;
+    }
+
+    for (int i = 0; i < ht->capacity; i++) {
+        Entry *entry = ht->backing_array[i];
+        if (entry && !entry->is_removed) {
+            toml_table_t *section = toml_table_in(root, entry->section);
+            if (!section) {
+                section = create_toml_table(entry->section);
+                toml_add_subtable(root, entry->section, section);
+            }
+            toml_add_keyval(section, entry->alias, entry->command);
+        }
+    }
+}
+
+void toml_table_to_ht(HashTable *ht, toml_table_t *root) {
+    // Loop through each subtable (section)
+    Entry *entry;
+    for (int i = 0; i < root->ntab; ++i) {
+        toml_table_t *section = root->tab[i];
+        for (int j = 0; j < section->nkval; ++j) {
+            toml_keyval_t *toml_entry = section->kval[j];
+            create_entry(&entry, toml_entry->val, toml_entry->key, section->key, 0);
+            add_entry(entry, ht);
+        }
+    }
+}
 
 // Add a subtable to an existing table
 int toml_add_subtable(toml_table_t *parent, const char *key, toml_table_t *sub) {
@@ -37,7 +105,7 @@ int toml_add_keyval(toml_table_t *table, const char *key, const char *val) {
 
 // Dump a toml_table_t to a string (recursive)
 // Assume buffer is pre-allocated
-void toml_dump(toml_table_t *table, char *buffer, int *pos) {
+void toml_dumps(toml_table_t *table, char *buffer, int *pos) {
     if (!table || !buffer || !pos) return;
 
     for (int i = 0; i < table->nkval; ++i) {
@@ -48,11 +116,11 @@ void toml_dump(toml_table_t *table, char *buffer, int *pos) {
     for (int i = 0; i < table->ntab; ++i) {
         sprintf(buffer + *pos, "[%s]\n", table->tab[i]->key);
         *pos += strlen(table->tab[i]->key) + 3;
-        toml_dump(table->tab[i], buffer, pos);
+        toml_dumps(table->tab[i], buffer, pos);
     }
 }
 
-static void toml_dump_helper(FILE *fp, toml_table_t *table, int indent) {
+void toml_dump(toml_table_t *table, FILE *fp, int indent) {
     if (!fp || !table) return;
 
     // Dump key-value pairs
@@ -65,18 +133,6 @@ static void toml_dump_helper(FILE *fp, toml_table_t *table, int indent) {
     for (int i = 0; i < table->ntab; ++i) {
         for (int j = 0; j < indent; ++j) fprintf(fp, "  ");
         fprintf(fp, "[%s]\n", table->tab[i]->key);
-        toml_dump_helper(fp, table->tab[i], indent + 1);
+        toml_dump(table->tab[i], fp, indent * 2);
     }
-}
-
-// Dump a toml_table_t to a file
-void toml_dump_to_file(toml_table_t *table, const char *filename) {
-    if (!table || !filename) return;
-
-    FILE *fp = fopen(filename, "w");
-    if (!fp) return;  // File opening failure
-
-    toml_dump_helper(fp, table, 0);
-
-    fclose(fp);
 }
