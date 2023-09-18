@@ -18,11 +18,15 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
     if (rc == PCRE_ERROR_NOMATCH)
         return false;
 
+    // Extract alias
     int alias_length = ovector[3] - ovector[2];
     strncpy(alias, line + ovector[2], alias_length);
     alias[alias_length] = '\0';
 
+    // Extract command
     int command_len = ovector[5] - ovector[4];
+    if (line[ovector[4]] == '"' || line[ovector[4]] == '\'')
+        ovector[4]++;
     strncpy(command, line + ovector[4], command_len);
     while (command[command_len - 1] == '\'' || command[command_len - 1] == '"' 
             || command[command_len - 1] == ' ') {
@@ -30,6 +34,7 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
     }
     command[command_len] = '\0';
 
+    // Extract section
     if (ovector[6] != -1) {
         int section_len = ovector[7] - ovector[6];
         strncpy(section, line + ovector[6], section_len);
