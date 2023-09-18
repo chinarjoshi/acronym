@@ -12,30 +12,46 @@ static toml_table_t *create_toml_table(const char *key) {
     return t;
 }
 
+static int alias_cmp(const char *s1, const char *s2) {
+    int s1_len = strlen(s1);
+    int s2_len = strlen(s2);
+    if (s1_len != s2_len)
+        return s1_len - s2_len;
+    return strcasecmp(s1, s2);
+}
+
+static toml_keyval_t *create_toml_keyval(const char *key, const char *val) {
+    toml_keyval_t *kv = malloc(sizeof(toml_table_t));
+    if (!kv) return NULL;
+    kv->key = key; 
+    kv->val = val; 
+    return kv;
+}
+
 int ht_to_toml_file(HashTable *ht, const char *toml_fname) {
     FILE *fp = fopen(toml_fname, "w");
     if (!fp)
-        return -1;
+        return 0;
    
     toml_table_t *t = create_toml_table(0);
     ht_to_toml_table(ht, t);
     toml_dump(t, fp);
     
     fclose(fp);
-    return 0;
+    return 1;
 }
 
 int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
     FILE *fp = fopen(toml_fname, "r");
     if (!fp)
-        return -1;
+        return 0;
    
     char errbuf[128];
     toml_table_t *t = toml_parse_file(fp, errbuf, sizeof(errbuf));
     toml_table_to_ht(ht, t);
     
     fclose(fp);
-    return 0;
+    return 1;
 }
 
 void ht_to_toml_table(HashTable *ht, toml_table_t *root) {
@@ -48,9 +64,12 @@ void ht_to_toml_table(HashTable *ht, toml_table_t *root) {
             toml_table_t *section = toml_table_in(root, entry->section);
             if (!section) {
                 section = create_toml_table(entry->section);
+                if (!section) return;
                 toml_add_subtable(root, section);
             }
-            toml_add_keyval(section, entry->alias, entry->command);
+            toml_keyval_t *kv = create_toml_keyval(entry->alias, entry->command);
+            if (!kv) return;
+            toml_add_keyval(section, kv);
         }
     }
 }
@@ -78,17 +97,21 @@ int toml_add_subtable(toml_table_t *parent, toml_table_t *sub) {
     toml_table_t **new_tab = malloc((parent->ntab + 1) * sizeof(toml_table_t));
     if (!new_tab)
         return 0;
-    parent->ntab++;
 
     // Insert subtable in alphabetical order
-    int i;
-    while (i < parent->ntab) {
-        if (strcmp(sub->key, parent->tab[i]->key) > 0) {
+    int i, inserted = 0;
+    for (i = 0; i < parent->ntab; i++) {
+        if (!inserted && alias_cmp(sub->key, parent->tab[i]->key) > 0) {
             new_tab[i] = sub;
-            continue;
+            inserted = 1;
+            parent->ntab++;
         }
-        new_tab[i] = parent->tab[i];
-        i++;
+        new_tab[i + inserted] = parent->tab[i];
+    }
+
+    if (!inserted) {
+        new_tab[i] = sub;
+        parent->ntab++;
     }
 
     free(parent->tab);
@@ -97,25 +120,28 @@ int toml_add_subtable(toml_table_t *parent, toml_table_t *sub) {
 }
 
 // Add a key-value pair to a table
-int toml_add_keyval(toml_table_t *table, const char *key, const char *val) {
+int toml_add_keyval(toml_table_t *table, toml_keyval_t *kv) {
     if (!table)
         return 0;
     
     toml_keyval_t **new_kv = malloc((table->nkval + 1) * sizeof(toml_table_t));
     if (!new_kv)
         return 0;
-    table->nkval++;
 
     // Insert subtable in alphabetical order
-    int i;
-    while (i < table->nkval) {
-        if (strcmp(key, table->kval[i]->key) > 0) {
-            new_kv[i]->key = strdup(key);
-            new_kv[i]->val = strdup(val);
-            continue;
+    int i, inserted = 0;
+    for (i = 0; i < table->nkval; i++) {
+        if (!inserted && alias_cmp(table->kval[i]->key, kv->key) > 0) {
+            new_kv[i] = kv;
+            inserted = 1;
+            table->nkval++;
         }
-        new_kv[i] = table->kval[i];
-        i++;
+        new_kv[i + inserted] = table->kval[i];
+    }
+
+    if (!inserted) {
+        new_kv[i] = kv;
+        table->nkval++;
     }
 
     free(table->kval);
@@ -171,6 +197,8 @@ void toml_dump(toml_table_t *table, FILE *fp) {
         for (int j = 0; j < tab->nkval; j++) {
             fprintf(fp, "%s = \"%s\"\n", tab->kval[j]->key, tab->kval[j]->val);
         }
-        fprintf(fp, "\n");
+        if (i < table->ntab - 1) {
+            fprintf(fp, "\n");
+        }
     }
 }

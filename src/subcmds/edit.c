@@ -27,7 +27,7 @@ bool edit_cmd(Cli *cli) {
         return cleanup(0, 0, ht, alias_f, 0);
 
     // Serialize hash table to TOML_FNAME
-    if (ht_to_toml_file(ht, TOML_FNAME))
+    if (!ht_to_toml_file(ht, TOML_FNAME))
         return 0;
 
     // Open the toml tmpfile with editor
@@ -46,8 +46,9 @@ bool edit_cmd(Cli *cli) {
     if (result)
         return cleanup("Error: failed to run command: %s\n", command, ht, 0, TOML_FNAME);
 
-    if (toml_file_to_ht(ht, TOML_FNAME))
+    if (!toml_file_to_ht(ht, TOML_FNAME))
         return 0;
+    remove(TOML_FNAME);
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
