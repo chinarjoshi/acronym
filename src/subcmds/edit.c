@@ -55,6 +55,9 @@ bool edit_cmd(Cli *cli) {
 
     free_hash_table(ht);
     fclose(tmp_f);
-    rename(TMP_FNAME, alias_fname);
+    if (rename(TMP_FNAME, alias_fname)) {
+        perror("Error renaming file.\n");
+        return false;
+    }
     return true;
 }
