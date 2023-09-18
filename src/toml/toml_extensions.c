@@ -12,14 +12,6 @@ static toml_table_t *create_toml_table(const char *key) {
     return t;
 }
 
-static int alias_cmp(const char *s1, const char *s2) {
-    int s1_len = strlen(s1);
-    int s2_len = strlen(s2);
-    if (s1_len != s2_len)
-        return s1_len - s2_len;
-    return strcasecmp(s1, s2);
-}
-
 static toml_keyval_t *create_toml_keyval(const char *key, const char *val) {
     toml_keyval_t *kv = malloc(sizeof(toml_table_t));
     if (!kv) return NULL;
@@ -48,9 +40,10 @@ int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
    
     char errbuf[128];
     toml_table_t *t = toml_parse_file(fp, errbuf, sizeof(errbuf));
-    toml_table_to_ht(ht, t);
-    
     fclose(fp);
+
+    empty_hash_table(ht);
+    toml_table_to_ht(ht, t);
     return 1;
 }
 
@@ -101,7 +94,7 @@ int toml_add_subtable(toml_table_t *parent, toml_table_t *sub) {
     // Insert subtable in alphabetical order
     int i, inserted = 0;
     for (i = 0; i < parent->ntab; i++) {
-        if (!inserted && alias_cmp(sub->key, parent->tab[i]->key) > 0) {
+        if (!inserted && strcasecmp(parent->tab[i]->key, sub->key) > 0) {
             new_tab[i] = sub;
             inserted = 1;
             parent->ntab++;
@@ -117,6 +110,15 @@ int toml_add_subtable(toml_table_t *parent, toml_table_t *sub) {
     free(parent->tab);
     parent->tab = new_tab;
     return 1;
+}
+
+// Compare two strings based on length, then case-insensitive string comparison
+static int alias_cmp(const char *s1, const char *s2) {
+    int s1_len = strlen(s1);
+    int s2_len = strlen(s2);
+    if (s1_len != s2_len)
+        return s1_len - s2_len;
+    return strcasecmp(s1, s2);
 }
 
 // Add a key-value pair to a table

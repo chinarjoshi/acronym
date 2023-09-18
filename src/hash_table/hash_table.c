@@ -122,12 +122,19 @@ Status resize_backing_array(HashTable *ht) {
     return SUCCESS;
 }
 
-void free_hash_table(HashTable *ht) {
-    if (ht->size > 0)
-        for (int i = 0; i < ht->capacity; i++)
-            if (ht->backing_array[i])
-                free_entry(ht->backing_array[i]);
+void empty_hash_table(HashTable *ht) {
+    if (ht->size == 0)
+        return;
+    for (int i = 0; i < ht->capacity; i++) {
+        if (ht->backing_array[i]) {
+            free_entry(ht->backing_array[i]);
+            ht->backing_array[i] = NULL;
+        }
+    }
+}
 
+void free_hash_table(HashTable *ht) {
+    empty_hash_table(ht);
     free(ht->backing_array);
     free(ht);
 }

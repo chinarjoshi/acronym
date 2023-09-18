@@ -17,5 +17,6 @@ Status remove_entry(Entry **data_out, char *alias, HashTable *ht);
 Status remove_section(char *section, HashTable *ht);
 Status resize_backing_array(HashTable *ht);
 void free_hash_table(HashTable *ht);
+void empty_hash_table(HashTable *ht);
 
 #endif
