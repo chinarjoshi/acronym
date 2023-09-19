@@ -99,7 +99,7 @@ START_TEST(test_read_aliases) {
     fflush(f);
     rewind(f);
 
-    FILE *tmp = read_aliases(f, ht);
+    FILE *tmp = read_aliases(f, ht, true);
     ck_assert_ptr_nonnull(tmp);
     rewind(tmp);
     fflush(tmp);

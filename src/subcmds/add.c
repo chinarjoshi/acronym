@@ -23,7 +23,7 @@ bool add_cmd(Cli *cli) {
         return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", alias_fname, ht, 0, 0, cli);
 
     // Read aliases into hash table and write non-matching lines to tmp
-    FILE *tmp_f = read_aliases(alias_f, ht);
+    FILE *tmp_f = read_aliases(alias_f, ht, true);
     if (!tmp_f)
         return cleanup(0, 0, ht, alias_f, 0, cli);
 

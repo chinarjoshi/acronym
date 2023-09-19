@@ -24,7 +24,9 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
     alias[alias_length] = '\0';
 
     // Extract command
-    int command_len = ovector[5] - ovector[4] - 1; // -1 for end quote
+    int command_len = ovector[5] - ovector[4];
+    if (line[ovector[5] - 1] == '"' || line[ovector[5] - 1] == '\'')
+        command_len--;
     strncpy(command, line + ovector[4], command_len);
     command[command_len] = '\0';
 
@@ -46,10 +48,10 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
 /* Reads a file handler with lines of the form "alias X=Y" (optionally "## Z"
  * at the end) into a hash table, where X is the key, and Y and Z are the values.
  * Prunes those lines from file, leaving all others alone. *Closes the given 
- * file handler and returns a new one. Returns NULL if regex, file I/O, or 
- * memory allocation fails, and a valid handler otherwise.
+ * file handler and returns a new one. Returns NULL if not output_non_matches,
+ * regex, file I/O, or memory allocation fails, and a valid handler otherwise.
  */
-FILE *read_aliases(FILE *f, HashTable *ht) {
+FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     char line[512], alias[64], command[256], section[64];
     int ovector[OVECTOR_LEN];
     Entry *entry;
@@ -59,15 +61,18 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
     pcre *re = pcre_compile(ALIAS_PATTERN, 0, &error, &erroffset, NULL);
     pcre_extra *extras = pcre_study(re, 0, &error);
     if (!re || !extras) {
-        printf("Error: compiling regex: %s", ALIAS_PATTERN);
+        printf("Error (regex): failure compiling regex: \"%s\".\n", ALIAS_PATTERN);
         return NULL;
     }
     // Open temporary file to append non-matching lines
-    FILE *tmp = fopen(TMP_FNAME, "w+");
-    if (!tmp) {
-        printf("Error: opening file: %s", TMP_FNAME);
-        free_re_resources(re, extras, f);
-        return NULL;
+    FILE *tmp_f = NULL;
+    if (output_non_matches) {
+        tmp_f = fopen(TMP_FNAME, "w+");
+        if (!tmp_f) {
+            printf("Error (file I/O): cannot open file: \"%s\".", TMP_FNAME);
+            free_re_resources(re, extras, f);
+            return NULL;
+        }
     }
 
     // Read every line of the file. If the pattern doesn't match, append it to
@@ -77,24 +82,25 @@ FILE *read_aliases(FILE *f, HashTable *ht) {
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
             if (create_entry(&entry, command, alias, section, false) == ERR_OUT_OF_MEMORY) {
-                printf("Error: out of memory while creating entry.");
-                free_re_resources(re, extras, tmp);
+                printf("Error (memory): out of memory while creating entry.\n");
+                free_re_resources(re, extras, tmp_f);
                 fclose(f);
-                remove(TMP_FNAME);
+                if (output_non_matches)
+                    remove(TMP_FNAME);
                 return NULL;
             }
             add_entry(entry, ht);
-        } else if (line[0] != '\n' && strcmp(line, FILE_DELIMITER) != 0) {
-            // Add every line except the above
-            fputs(line, tmp);
+        } else if (output_non_matches && line[0] != '\n' && strcmp(line, FILE_DELIMITER) != 0) {
+            // Add every line except new line and delimiter
+            fputs(line, tmp_f);
             found_non_matching_line = true;
         }
     }
 
-    if (found_non_matching_line)
-        fputs("\n", tmp);
+    if (output_non_matches && found_non_matching_line)
+        fputs("\n", tmp_f);
     free_re_resources(re, extras, f);
-    return tmp;
+    return tmp_f;
 }
 
 // Given a hash table of aliases, write all elements to the given file stream.
@@ -104,7 +110,7 @@ bool write_aliases(FILE *f, HashTable *ht) {
 
     Entry *entry;
     if (!fputs(FILE_DELIMITER, f)) {
-        printf("Error: unable to write to file");
+        printf("Error (file I/O): unable to write to file");
         return false;
     }
     for (int i = 0; i < ht->capacity; i++) {
