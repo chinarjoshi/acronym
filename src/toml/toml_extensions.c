@@ -28,7 +28,6 @@ int ht_to_toml_file(HashTable *ht, const char *toml_fname) {
     toml_table_t *t = create_toml_table(0);
     ht_to_toml_table(ht, t);
     toml_dump(t, fp);
-    
     fclose(fp);
     return 1;
 }
@@ -40,10 +39,8 @@ int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
    
     char errbuf[128];
     toml_table_t *t = toml_parse_file(fp, errbuf, sizeof(errbuf));
-    fclose(fp);
-
-    empty_hash_table(ht);
     toml_table_to_ht(ht, t);
+    fclose(fp);
     return 1;
 }
 
@@ -75,8 +72,9 @@ void toml_table_to_ht(HashTable *ht, toml_table_t *root) {
     for (int i = 0; i < root->ntab; ++i) {
         toml_table_t *section = root->tab[i];
         for (int j = 0; j < section->nkval; ++j) {
-            toml_keyval_t *toml_entry = section->kval[j];
-            create_entry(&entry, toml_entry->val, toml_entry->key, section->key, 0);
+            const char *key = toml_key_in(section, j);
+            toml_datum_t d = toml_string_in(section, key);
+            create_entry(&entry, d.u.s, key, section->key, 0);
             add_entry(entry, ht);
         }
     }

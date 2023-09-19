@@ -24,14 +24,8 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
     alias[alias_length] = '\0';
 
     // Extract command
-    int command_len = ovector[5] - ovector[4];
-    if (line[ovector[4]] == '"' || line[ovector[4]] == '\'')
-        ovector[4]++;
+    int command_len = ovector[5] - ovector[4] - 1; // -1 for end quote
     strncpy(command, line + ovector[4], command_len);
-    while (command[command_len - 1] == '\'' || command[command_len - 1] == '"' 
-            || command[command_len - 1] == ' ') {
-        command_len--;
-    }
     command[command_len] = '\0';
 
     // Extract section

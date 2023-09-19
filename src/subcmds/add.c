@@ -6,7 +6,6 @@
 #include "../file_io.h"
 
 bool add_cmd(Cli *cli) {
-    // Initialize structures and validate inputs
     struct Add a = cli->cmd.add;
     if (!a.command) {
         printf("Error invalid args: must provide command to alias.\n");

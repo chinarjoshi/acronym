@@ -30,6 +30,9 @@ bool edit_cmd(Cli *cli) {
     if (!ht_to_toml_file(ht, TOML_FNAME))
         return 0;
 
+    // Empty table because entries will be arbitrarily added and removed
+    empty_hash_table(ht);
+
     // Open the toml tmpfile with editor
     char command[128];
     char *editor = getenv("EDITOR");

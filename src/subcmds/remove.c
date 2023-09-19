@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 bool remove_cmd(Cli *cli) {
-    // Initialize structures and validate inputs
     struct Remove r = cli->cmd.remove;
     if (!r.aliases) {
         printf("No %s provided.\n", r.recursive ? "section" : "alias"); 
