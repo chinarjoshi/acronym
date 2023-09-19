@@ -248,13 +248,12 @@ Cli *validate_args(Cli *cli) {
 
 void free_AliasList(AliasListNode *node) {
     AliasListNode *tmp;
-    while (node->next) {
+    while (node) {
+        tmp = node;
         free(node->data);
-        tmp = node->next;
-        free(node);
-        node = tmp;
+        node = node->next;
+        free(tmp);
     } 
-    free(node);
 }
 
 void free_Cli(Cli *cli) {
