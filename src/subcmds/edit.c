@@ -35,14 +35,7 @@ bool edit_cmd(Cli *cli) {
 
     // Open the toml tmpfile with editor
     char command[128];
-    char *editor = getenv("EDITOR");
-    if (e.editor) {
-        if (access(e.editor, X_OK)) {
-            editor = e.editor; 
-        } else {
-            return cleanup("Error (system): editor program not found: \"%s\".\n", e.editor, ht, 0, TOML_FNAME, cli);
-        }
-    }
+    char *editor = e.editor ? e.editor : getenv("EDITOR");
     snprintf(command, sizeof(command), "%s %s", editor, TOML_FNAME);
 
     int result = system(command);

@@ -238,6 +238,13 @@ Cli *validate_args(Cli *cli) {
             printf("Error (invalid args): no %s provided.\n", c.remove.recursive ? "section" : "alias"); 
             invalid = true;
         }
+    } else if (cli->type == EDIT && c.edit.editor) {
+        char command[128];
+        snprintf(command, 128, "command -v %s > /dev/null", c.edit.editor);
+        if (system(command)) {
+            printf("Error (system): editor program not found: \"%s\".\n", c.edit.editor);
+            invalid = true;
+        }
     }
     if (invalid) {
         free_Cli(cli);
