@@ -15,6 +15,6 @@ bool show_cmd(Cli *cli);
 bool edit_cmd(Cli *cli);
 void set_alias_and_autoenv_fnames();
 int cleanup(const char *message, const char *message_arg, 
-                          HashTable *ht, FILE *f, const char *fname_to_remove);
+                          HashTable *ht, FILE *f, const char *fname_to_remove, Cli *cli);
 
 #endif
