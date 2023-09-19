@@ -52,7 +52,7 @@ char **get_env_paths(const char *start, bool return_parents, int *num_paths) {
 }
 
 int cleanup(const char *message, const char *message_arg, 
-                          HashTable *ht, FILE *f, const char *fname_to_remove, Cli *cli) {
+                          HashTable *ht, FILE *f, const char *fname_to_remove) {
     if (message) {
         if (message_arg)
             fprintf(stderr, message, message_arg); 
@@ -62,7 +62,6 @@ int cleanup(const char *message, const char *message_arg,
     free_hash_table(ht);
     fclose(f);
     remove(fname_to_remove);
-    free_Cli(cli);
     return 0;
 }
 

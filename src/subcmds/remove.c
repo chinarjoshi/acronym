@@ -21,12 +21,12 @@ bool remove_cmd(Cli *cli) {
     }
     FILE *alias_f = fopen(alias_fname, "r");
     if (!alias_f)
-        return cleanup("Error (file I/O): aliases file not found: \"%s\".\n", alias_fname, ht, 0, 0, cli);
+        return cleanup("Error (file I/O): aliases file not found: \"%s\".\n", alias_fname, ht, 0, 0);
 
     // Read aliases into hash table and write non-matching lines to tmp
     FILE *tmp_f = read_aliases(alias_f, ht, true);
     if (!tmp_f)
-        return cleanup(0, 0, ht, alias_f, 0, cli);
+        return cleanup(0, 0, ht, alias_f, 0);
 
     // Delete given aliases or sections, prompting unless force is given
     bool something_removed = false;
@@ -65,16 +65,15 @@ bool remove_cmd(Cli *cli) {
         r.aliases = r.aliases->next;
     }
     if (!something_removed)
-        return cleanup(0, 0, ht, tmp_f, TMP_FNAME, cli);
+        return cleanup(0, 0, ht, tmp_f, TMP_FNAME);
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
-        return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".\n", TMP_FNAME, ht, tmp_f, TMP_FNAME, cli);
+        return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".\n", TMP_FNAME, ht, tmp_f, TMP_FNAME);
 
     free_hash_table(ht);
     fclose(tmp_f);
-    free_Cli(cli);
     if (rename(TMP_FNAME, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_FNAME, 0);
+        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_FNAME);
     return true;
 }
