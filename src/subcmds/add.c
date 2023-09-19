@@ -7,10 +7,6 @@
 
 bool add_cmd(Cli *cli) {
     struct Add a = cli->cmd.add;
-    if (!a.command) {
-        printf("Error invalid args: must provide command to alias.\n");
-        return false;
-    }
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     Entry *entry;
@@ -24,7 +20,7 @@ bool add_cmd(Cli *cli) {
     }
     FILE *alias_f = fopen(alias_fname, "r");
     if (!alias_f)
-        return cleanup("Error: aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);
+        return cleanup("Error (file I/O): aliases file cannot be opened: %s\n", alias_fname, ht, 0, 0);
 
     // Read aliases into hash table and write non-matching lines to tmp
     FILE *tmp_f = read_aliases(alias_f, ht);
@@ -43,12 +39,12 @@ bool add_cmd(Cli *cli) {
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
-        return cleanup("Error: unable to write to alias file", 0, ht, tmp_f, TMP_FNAME);
+        return cleanup("Error (file I/O): unable to write to alias file", 0, ht, tmp_f, TMP_FNAME);
 
     free_hash_table(ht);
     fclose(tmp_f);
     if (rename(TMP_FNAME, alias_fname)) {
-        perror("Error renaming file.\n");
+        perror("Error (file I/O): cannot rename file.\n");
         return false;
     }
     return true;

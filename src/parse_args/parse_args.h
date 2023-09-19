@@ -69,6 +69,7 @@ int show_parse_opt(int key, char *arg, struct argp_state *state);
 int edit_parse_opt(int key, char *arg, struct argp_state *state);
 struct Cli *parse_args(int argc, char **argv);
 struct Cli *parse_global_args(int argc, char **argv);
+struct Cli *validate_args(Cli *cli);
 void free_Cli(Cli *cli);
 void free_AliasList(AliasListNode *node);
 

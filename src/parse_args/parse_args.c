@@ -8,7 +8,7 @@
 
 struct Cli *parse_global_options(int argc, char **argv) {
     if (argc < 2) {
-        printf("Invalid use: provide option or subcommand\n");
+        printf("Error (invalid args): provide option or subcommand\n");
         return NULL;
     }
 
@@ -35,7 +35,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 if (optarg) {
                     int verbosity = atoi(optarg);
                     if (verbosity < 0 || verbosity > 3) {
-                        printf("Verbosity must be between 0-3. Provided: %s", optarg);
+                        printf("Error (invalid args): verbosity must be between 0-3. Provided: %s\n", optarg);
                         return NULL;
                     }
                     cli->verbosity = verbosity;
@@ -53,12 +53,12 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 break;
             case 'V':
                 // Print the version
-                printf("0.1.0\n");
+                printf("1.0.0\n");
                 return NULL;
                 break;
             case '?':
             default:
-                printf("Error: invalid option\n");
+                printf("Error (invalid args): unknown option: %c\n", opt);
                 return NULL;
                 break;
         }
@@ -91,9 +91,10 @@ struct Cli *parse_args(int argc, char **argv) {
         cli->type = EDIT; 
         argp_parse(&edit_argp, argc, argv, 0, 0, &cli->cmd.edit);
     } else {
-        printf("Invalid subcommand: %s", subcommand);
+        printf("Error (invalid args): invalid subcommand: %s\n", subcommand);
     }
-    return cli;
+
+    return validate_args(cli);
 }
 
 int add_parse_opt(int key, char *arg, struct argp_state *state) {
@@ -130,20 +131,12 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Remove *remove = state->input;
     switch (key) {
         case 'r':
-            if (remove->interactive) {
-                perror("Force and interactive flags cannot be true at same time.");
-                break;
-            }
             remove->recursive = true;
             break;
         case 'f':
             remove->force = true;
             break;
         case 'i':
-            if (remove->force) {
-                perror("Force and interactive flags cannot be true at same time.");
-                break;
-            }
             remove->interactive = true;
             break;
         case 'l':
@@ -228,6 +221,29 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
             return ARGP_ERR_UNKNOWN;
     }
     return 0;
+}
+
+Cli *validate_args(Cli *cli) {
+    union Cmd c = cli->cmd;
+    bool invalid = false;
+    if (cli->type == ADD && !c.add.command) {
+        printf("Error (invalid args): must provide command to alias.\n");
+        invalid = true;
+    } else if (cli->type == REMOVE) {
+        if (c.remove.recursive && c.remove.interactive) {
+            printf("Error (invalid args): force and interactive flags cannot be true at same time.");
+            invalid = true;
+        }
+        if (!c.remove.aliases) {
+            printf("Error (invalid args): no %s provided.\n", c.remove.recursive ? "section" : "alias"); 
+            invalid = true;
+        }
+    }
+    if (invalid) {
+        free_Cli(cli);
+        return NULL;
+    }
+    return cli;
 }
 
 void free_AliasList(AliasListNode *node) {

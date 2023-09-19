@@ -7,9 +7,6 @@
 
 bool remove_cmd(Cli *cli) {
     struct Remove r = cli->cmd.remove;
-    if (!r.aliases) {
-        printf("No %s provided.\n", r.recursive ? "section" : "alias"); 
-    }
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     Entry *entry;
