@@ -19,11 +19,12 @@ bool is_valid_dir(const char *dir) {
 // Returns whether 'child_path' is a subdirectory of 'parent_path'. If 'reverse', return
 // the inverse.
 bool is_child_path(const char *child_path, const char *parent_path, bool reverse) {
-    if (strlen(child_path) < strlen(parent_path))
+    if (strlen(child_path) > strlen(parent_path))
         return false;
 
     int len = strlen(reverse ? parent_path : child_path);
-    return strncmp(child_path, parent_path, len + 1) == 0;
+    // Compare length - 6 characters of the paths (-5 because of /.env at the end)
+    return strncmp(child_path, parent_path, len - 5) == 0;
 }
 
 // Returns an array of .env paths that are children or parents of 'start', according to 

@@ -22,7 +22,7 @@ bool show_cmd(Cli *cli) {
 
     // Get a list of .env file paths from AUTOENV_AUTH_FILE
     int num_paths;
-    char **env_paths = get_env_paths(cwd, &num_paths, true);
+    char **env_paths = get_env_paths(cwd, &num_paths, false);
     if (!env_paths)
         return false;
 
@@ -33,16 +33,13 @@ bool show_cmd(Cli *cli) {
     if (s.all) {
         FILE *alias_f = fopen(ALIAS_FNAME, "r");
         read_aliases(alias_f, ht, false);
-        fclose(alias_f);
     }
 
     // Load in .env aliases starting from root directory to current directory
     for (int i = 0; i < num_paths; i++) {
         FILE *env_f = fopen(env_paths[i], "r");
-        if (!env_f)
-            return cleanup("Error (file I/O): invalid file name: \"%s\".\n", env_paths[i], ht, env_f, 0);
+        if (!env_f) continue;
         read_aliases(env_f, ht, false);
-        fclose(env_f);
     }
 
     printf("%s", ht_to_toml_str(ht));

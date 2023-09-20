@@ -176,17 +176,19 @@ char *toml_dumps(toml_table_t *table) {
 
     char *toml_str = malloc(len);
 
-    int pos;
+    int pos = 0;
     for (int i = 0; i < table->ntab; i++) {
         tab = table->tab[i];
         sprintf(toml_str + pos, "[%s]\n", tab->key);
         pos += strlen(tab->key) + 3;
         for (int j = 0; j < tab->nkval; j++) {
             sprintf(toml_str + pos, "%s = \"%s\"\n", tab->kval[j]->key, tab->kval[j]->val);
-            len += strlen(tab->kval[j]->key) + strlen(tab->kval[j]->val) + 6;
+            pos += strlen(tab->kval[j]->key) + strlen(tab->kval[j]->val) + 6;
         }
-        sprintf(toml_str + pos, "\n");
-        len += 1; // "\n"
+        if (i < table->ntab - 1) {
+            sprintf(toml_str + pos, "\n");
+            pos += 1; // "\n"
+        }
     }
     toml_str[pos + 1] = '\0';
     return toml_str;
