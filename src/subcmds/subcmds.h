@@ -13,7 +13,9 @@ bool remove_cmd(Cli *cli);
 bool tree_cmd(Cli *cli);
 bool show_cmd(Cli *cli);
 bool edit_cmd(Cli *cli);
+bool is_valid_dir(const char *dir);
 void set_alias_and_autoenv_fnames();
+char **get_env_paths(const char *start, int *num_paths, bool return_parents);
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove);
 

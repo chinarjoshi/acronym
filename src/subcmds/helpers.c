@@ -2,12 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "subcmds.h"
 #include "../hash_table/hash_table.h"
 char ALIAS_FNAME[64];
 char TOML_FNAME[64];
 char TMP_FNAME[64];
 const char *AUTOENV_FNAME;
+static void insert_path(const char *path, char **path_arr, int num_paths);
+
+bool is_valid_dir(const char *dir) {
+    struct stat statbuf;
+    return !stat(dir, &statbuf) && S_ISDIR(statbuf.st_mode);
+}
 
 // Returns whether 'child_path' is a subdirectory of 'parent_path'. If 'reverse', return
 // the inverse.
@@ -15,33 +22,34 @@ bool is_child_path(const char *child_path, const char *parent_path, bool reverse
     if (strlen(child_path) < strlen(parent_path))
         return false;
 
-    int len = strlen((reverse) ? parent_path : child_path);
+    int len = strlen(reverse ? parent_path : child_path);
     return strncmp(child_path, parent_path, len + 1) == 0;
 }
 
 // Returns an array of .env paths that are children or parents of 'start', according to 
 // 'return_parents', in the form of 'num_paths' char pointers that must be freed.
-char **get_env_paths(const char *start, bool return_parents, int *num_paths) {
+// The array is ordered from shortest to longest path.
+char **get_env_paths(const char *start, int *num_paths, bool return_parents) {
     const char *auth_fname = getenv("AUTOENV_AUTH_FILE");
     FILE *auth_f = fopen(auth_fname, "r");
     if (!auth_f) {
-        fprintf(stderr, "Error opening autoenv auth file: %s\n", auth_fname);
+        fprintf(stderr, "Error (file I/O): cannot open autoenv auth file: \"%s\".\n", auth_fname);
         return NULL;
     }
 
-    char line[256];
-    int max_paths = 15, path_count = 0;
+    char line[PATH_MAX];
+    int max_paths = 32, path_count = 0;
     char** paths = malloc(max_paths * sizeof(char *));
 
     while (fgets(line, sizeof(line), auth_f)) {
         char* path = strtok(line, ":");
         if (path && is_child_path(path, start, return_parents)) {
-            path_count++;
-            if (path_count > max_paths) {
+            if (path_count + 1 > max_paths) {
                 max_paths *= 2;
                 paths = realloc(paths, max_paths * sizeof(char *));
             }
-            paths[path_count - 1] = strdup(path);
+            insert_path(path, paths, path_count);
+            path_count++;
         }
     }
 
@@ -49,6 +57,24 @@ char **get_env_paths(const char *start, bool return_parents, int *num_paths) {
 
     *num_paths = path_count;
     return paths;
+}
+
+// Insert 'path' into 'path_arr', which is length 'num_paths' and ascending in length.
+static void insert_path(const char *path, char **path_arr, int num_paths) {
+    int path_len = strlen(path);
+    int i;
+
+    // Find the position to insert the new path
+    for (i = num_paths - 1; i >= 0; --i) {
+        if (strlen(path_arr[i]) <= path_len) {
+            break;
+        }
+        // Shift elements to make room for the new path
+        path_arr[i + 1] = path_arr[i];
+    }
+    
+    // Insert the new path
+    path_arr[i + 1] = strdup(path);
 }
 
 int cleanup(const char *message, const char *message_arg, 

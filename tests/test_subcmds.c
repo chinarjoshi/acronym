@@ -108,6 +108,50 @@ START_TEST(test_remove_cmd_normal) {
 }
 END_TEST
 
+START_TEST(test_show_cmd_normal) {
+    Cli cli = {
+        .type = SHOW,
+        .verbosity = 1,
+    };
+
+    ck_assert(show_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_show_cmd_all) {
+    Cli cli = {
+        .type = SHOW,
+        .verbosity = 1,
+        .cmd.show.all = true
+    };
+
+    ck_assert(show_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_tree_cmd_normal) {
+    AliasListNode a = { .data = "test", .next = NULL };
+    Cli cli = {
+        .type = TREE,
+        .verbosity = 1,
+        .cmd.tree.aliases = &a 
+    };
+
+    ck_assert(tree_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_tree_cmd_all) {
+    Cli cli = {
+        .type = TREE,
+        .verbosity = 1,
+        .cmd.tree.all = 1
+    };
+
+    ck_assert(tree_cmd(&cli));
+}
+END_TEST
+
 Suite *subcmds_suite(void) {
     Suite *s = suite_create("Subcmds");
 
@@ -122,13 +166,15 @@ Suite *subcmds_suite(void) {
     tcase_add_checked_fixture(tc_remove, setup, teardown);
     suite_add_tcase(s, tc_remove);
 
-    // TCase *tc_show = tcase_create("Show cmd");
-    // tcase_add_test(tc_show, test_create_alias_name_include_flags);
-    // suite_add_tcase(s, tc_show);
-    //
-    // TCase *tc_tree = tcase_create("Tree cmd");
-    // tcase_add_test(tc_tree, test_create_alias_name_include_flags);
-    // suite_add_tcase(s, tc_tree);
-    //
+    TCase *tc_show = tcase_create("Show cmd");
+    tcase_add_test(tc_show, test_show_cmd_normal);
+    tcase_add_test(tc_show, test_show_cmd_all);
+    suite_add_tcase(s, tc_show);
+
+    TCase *tc_tree = tcase_create("Tree cmd");
+    tcase_add_test(tc_tree, test_tree_cmd_normal);
+    tcase_add_test(tc_tree, test_tree_cmd_all);
+    suite_add_tcase(s, tc_tree);
+
     return s;
 }

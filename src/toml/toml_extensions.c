@@ -32,6 +32,12 @@ int ht_to_toml_file(HashTable *ht, const char *toml_fname) {
     return 1;
 }
 
+char *ht_to_toml_str(HashTable *ht) {
+    toml_table_t *t = create_toml_table(0);
+    ht_to_toml_table(ht, t);
+    return toml_dumps(t);
+}
+
 int toml_file_to_ht(HashTable *ht, const char *toml_fname) {
     FILE *fp = fopen(toml_fname, "r");
     if (!fp)
