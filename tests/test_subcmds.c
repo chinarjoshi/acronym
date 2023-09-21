@@ -152,6 +152,20 @@ START_TEST(test_tree_cmd_all) {
 }
 END_TEST
 
+START_TEST(test_compare_paths) {
+    char *env_file = "/home/c/projects/.env";
+    char *path1 = "/home/c/projects";
+    char *outside_path = "/home/c/asdf";
+    char *child_path = "/home/c/projects/acronym";
+    char *parent_path = "/home/c";
+
+    ck_assert(compare_paths(env_file, path1) == PATH_EQ);
+    ck_assert(compare_paths(env_file, outside_path) == PATH_UNRELATED);
+    ck_assert(compare_paths(env_file, child_path) == PATH_CHILD);
+    ck_assert(compare_paths(env_file, parent_path) == PATH_PARENT);
+}
+END_TEST
+
 Suite *subcmds_suite(void) {
     Suite *s = suite_create("Subcmds");
 
@@ -176,5 +190,8 @@ Suite *subcmds_suite(void) {
     tcase_add_test(tc_tree, test_tree_cmd_all);
     suite_add_tcase(s, tc_tree);
 
+    TCase *tc_helpers = tcase_create("Subcmd helpers");
+    tcase_add_test(tc_helpers, test_compare_paths);
+    suite_add_tcase(s, tc_helpers);
     return s;
 }

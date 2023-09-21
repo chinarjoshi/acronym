@@ -22,7 +22,7 @@ bool show_cmd(Cli *cli) {
 
     // Get a list of .env file paths from AUTOENV_AUTH_FILE
     int num_paths;
-    char **env_paths = get_env_paths(cwd, &num_paths, false);
+    char **env_paths = get_env_paths(cwd, &num_paths);
     if (!env_paths)
         return false;
 

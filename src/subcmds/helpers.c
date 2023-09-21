@@ -16,21 +16,28 @@ bool is_valid_dir(const char *dir) {
     return !stat(dir, &statbuf) && S_ISDIR(statbuf.st_mode);
 }
 
-// Returns whether 'child_path' is a subdirectory of 'parent_path'. If 'reverse', return
-// the inverse.
-bool is_child_path(const char *child_path, const char *parent_path, bool reverse) {
-    if (strlen(child_path) > strlen(parent_path))
-        return false;
+enum PathCmp compare_paths(const char *env_fname, const char *directory) {
+    int env_fname_len = strlen(env_fname) - 5;
+    int directory_len = strlen(directory);
 
-    int len = strlen(reverse ? parent_path : child_path);
-    // Compare length - 6 characters of the paths (-5 because of /.env at the end)
-    return strncmp(child_path, parent_path, len - 5) == 0;
+    int cmp_env_fname_len = !strncmp(env_fname, directory, env_fname_len);
+    int cmp_directory_len = !strncmp(env_fname, directory, directory_len);
+
+    if (env_fname_len == directory_len && cmp_env_fname_len) {
+        return PATH_EQ;
+    } else if (env_fname_len < directory_len && cmp_env_fname_len) {
+        return PATH_CHILD;
+    } else if (env_fname_len > directory_len && cmp_directory_len) {
+        return PATH_PARENT;
+    }
+
+    return PATH_UNRELATED;
 }
 
 // Returns an array of .env paths that are children or parents of 'start', according to 
 // 'return_parents', in the form of 'num_paths' char pointers that must be freed.
 // The array is ordered from shortest to longest path.
-char **get_env_paths(const char *start, int *num_paths, bool return_parents) {
+char **get_env_paths(const char *start, int *num_paths) {
     const char *auth_fname = getenv("AUTOENV_AUTH_FILE");
     FILE *auth_f = fopen(auth_fname, "r");
     if (!auth_f) {
@@ -44,7 +51,8 @@ char **get_env_paths(const char *start, int *num_paths, bool return_parents) {
 
     while (fgets(line, sizeof(line), auth_f)) {
         char* path = strtok(line, ":");
-        if (path && is_child_path(path, start, return_parents)) {
+        enum PathCmp pcmp = compare_paths(path, start);
+        if (path && (pcmp == PATH_EQ || pcmp == PATH_CHILD)) {
             if (path_count + 1 > max_paths) {
                 max_paths *= 2;
                 paths = realloc(paths, max_paths * sizeof(char *));
