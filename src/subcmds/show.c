@@ -46,5 +46,7 @@ bool show_cmd(Cli *cli) {
         filter_hash_table(ht, s.aliases, s.section);
 
     printf("%s", ht_to_toml_str(ht));
+    free_hash_table(ht);
+    free_env_paths(env_paths, num_paths);
     return true;
 }

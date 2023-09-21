@@ -109,13 +109,13 @@ START_TEST(test_remove_cmd_normal) {
 END_TEST
 
 START_TEST(test_show_cmd_normal) {
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
     };
 
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
     ck_assert(show_cmd(&cli));
 }
 END_TEST
@@ -130,6 +130,58 @@ START_TEST(test_show_cmd_local) {
     };
 
     ck_assert(show_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_show_cmd_aliases) {
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
+    AliasListNode b = { .data = "gp", .next = NULL };
+    AliasListNode a = { .data = "a", .next = &b };
+    Cli cli = {
+        .type = SHOW,
+        .verbosity = 1,
+        .cmd.show.aliases = &a
+    };
+
+    ck_assert(show_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_show_cmd_commit_hash) {
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
+    Cli cli = {
+        .type = SHOW,
+        .verbosity = 1,
+        .cmd.show.commit_hash = "724976b"
+    };
+
+    ck_assert(show_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_sync_cmd_normal) {
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
+    Cli cli = {
+        .type = SYNC,
+        .verbosity = 1,
+    };
+
+    ck_assert(sync_cmd(&cli));
+}
+END_TEST
+
+START_TEST(test_reccomend_cmd_normal) {
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
+    Cli cli = {
+        .type = RECCOMEND,
+        .verbosity = 1,
+    };
+
+    ck_assert(reccomend_cmd(&cli));
 }
 END_TEST
 
@@ -163,8 +215,18 @@ Suite *subcmds_suite(void) {
 
     TCase *tc_show = tcase_create("Show cmd");
     tcase_add_test(tc_show, test_show_cmd_normal);
+    tcase_add_test(tc_show, test_show_cmd_aliases);
+    tcase_add_test(tc_show, test_show_cmd_commit_hash);
     tcase_add_test(tc_show, test_show_cmd_local);
     suite_add_tcase(s, tc_show);
+
+    TCase *tc_sync = tcase_create("Sync cmd");
+    tcase_add_test(tc_sync, test_sync_cmd_normal);
+    suite_add_tcase(s, tc_sync);
+
+    TCase *tc_reccomend = tcase_create("Reccomend cmd");
+    tcase_add_test(tc_reccomend, test_reccomend_cmd_normal);
+    suite_add_tcase(s, tc_reccomend);
 
     TCase *tc_helpers = tcase_create("Subcmd helpers");
     tcase_add_test(tc_helpers, test_compare_paths);

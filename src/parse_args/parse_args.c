@@ -201,6 +201,15 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'l':
             show->local = true;
             break;
+        case 'c':
+            if (show->commit_hash) {
+                printf("Error (invalid args): multiple commit hashes provided.\n");
+                return 1;
+            }
+            if (!(show->commit_hash = malloc(strlen(arg) + 1)))
+                return 1;
+            strcpy(show->commit_hash, arg);
+            break;
         case ARGP_KEY_ARG:;
             AliasListNode *new_node;
             if (!(new_node = malloc(sizeof(AliasListNode))))

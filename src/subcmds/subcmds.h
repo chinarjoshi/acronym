@@ -19,15 +19,17 @@ extern bool (*sub_cmds[])(Cli *);
 
 bool add_cmd(Cli *cli);
 bool remove_cmd(Cli *cli);
-bool tree_cmd(Cli *cli);
-bool show_cmd(Cli *cli);
 bool edit_cmd(Cli *cli);
+bool show_cmd(Cli *cli);
+bool sync_cmd(Cli *cli);
+bool reccomend_cmd(Cli *cli);
 bool is_valid_dir(const char *dir);
 void setup_fname_buffers();
 char **get_env_paths(const char *start, int *num_paths);
 enum PathCmp compare_paths(const char *env_fname, const char *directory);
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove);
+void free_env_paths(char **paths, int num_paths);
 void filter_hash_table(HashTable *ht, AliasListNode *l, bool section);
 
 #endif

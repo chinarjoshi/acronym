@@ -107,6 +107,13 @@ int cleanup(const char *message, const char *message_arg,
     return 0;
 }
 
+void free_env_paths(char **paths, int num_paths) {
+    for (int i = 0; i < num_paths; ++i) {
+        free(paths[i]);
+    }
+    free(paths);
+}
+
 // Sets 'ALIAS_FNAME' to the value of environmental variable "ACRONYM_ALIAS_FILE",
 // or if not found, the expansion of "~/.aliases"
 // Sets 'AUTOENV_FNAME' to its env variable, or '.env' if not found
