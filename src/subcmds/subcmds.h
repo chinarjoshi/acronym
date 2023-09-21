@@ -28,5 +28,6 @@ char **get_env_paths(const char *start, int *num_paths);
 enum PathCmp compare_paths(const char *env_fname, const char *directory);
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove);
+void filter_hash_table(HashTable *ht, AliasListNode *l, bool section);
 
 #endif

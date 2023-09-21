@@ -34,31 +34,32 @@ bool remove_cmd(Cli *cli) {
         if (r.section) {
             if (!r.force) {
                 char answer;
-                printf("Delete section: \"%s\"? [y/N]: ", r.aliases->data);
+                printf("Delete section: \033[32m\"%s\"\033[0m? [y/N]: ", r.aliases->data);
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
             if (remove_section(r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Section not found: \"%s\"\n", r.aliases->data);
+                printf("Section not found: \033[32m\"%s\"\033[0m\n", r.aliases->data);
             } else {
                 if (cli->verbosity)
-                    printf("Deleted section: \"%s\"\n", r.aliases->data);
+                    printf("Deleted section: \033[32m\"%s\"\033[0m\n", r.aliases->data);
                 something_removed = true;
             }
         } else {
             if (r.interactive) {
                 char answer;
-                printf("Delete: \"%s\"? [y/N]: ", r.aliases->data);
+                printf("Delete: \033[32m\"%s\"\033[0m? [y/N]: ", r.aliases->data);
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
             if (remove_entry(&entry, r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Not found: \"%s\"\n", r.aliases->data);
+                printf("Not found: \033[32m\"%s\"\033[0m\n", r.aliases->data);
             } else {
                 if (cli->verbosity)
-                    printf("Deleted: %s=\"%s\"\n", entry->alias, entry->command);
+                    printf("Deleted: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n", 
+                           entry->alias, entry->command, entry->section);
                 something_removed = true;
             }
         }

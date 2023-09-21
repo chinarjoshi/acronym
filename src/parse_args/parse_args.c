@@ -7,7 +7,36 @@
 #include "parse_args.h"
 #include "../subcmds/subcmds.h"
 
+struct Cli *parse_args(int argc, char **argv) {
+    Cli *cli = parse_global_options(argc, argv);
+    if (!cli)
+        return NULL;
+
+    // Move forward argc and argv to subcommand
+    argc -= optind;
+    argv += optind;
+    char *subcommand = argv[0];
+
+    int found = 0;
+    for (size_t i = 0; i < NUM_SUBCMDS; i++) {
+        if (!strcmp(subcommand, argp_subcmds[i].name)) {
+            cli->type = argp_subcmds[i].type;
+            argp_parse(argp_subcmds[i].argp_parser, argc, argv, 0, 0, cli);
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Error (invalid args): invalid subcommand: %s\n", subcommand);
+        return NULL;
+    }
+
+    return validate_args(cli);
+}
+
 struct Cli *parse_global_options(int argc, char **argv) {
+    // If invoked without arguments, then print the alias file path
     if (argc < 2) {
         printf("%s\n", ALIAS_FNAME);
         return NULL;
@@ -67,43 +96,23 @@ struct Cli *parse_global_options(int argc, char **argv) {
     return cli;
 }
 
-struct Cli *parse_args(int argc, char **argv) {
-    Cli *cli = parse_global_options(argc, argv);
-    if (!cli)
-        return NULL;
-
-    // Move forward argc and argv to subcommand
-    argc -= optind;
-    argv += optind;
-    char *subcommand = argv[0];
-    if (strcmp(subcommand, "add") == 0) {
-        cli->type = ADD; 
-        argp_parse(&add_argp, argc, argv, 0, 0, &cli->cmd.add);
-    } else if (strcmp(subcommand, "remove") == 0) {
-        cli->type = REMOVE; 
-        argp_parse(&remove_argp, argc, argv, 0, 0, &cli->cmd.remove);
-    } else if (strcmp(subcommand, "show") == 0) {
-        cli->type = SHOW; 
-        argp_parse(&show_argp, argc, argv, 0, 0, &cli->cmd.show);
-    } else if (strcmp(subcommand, "edit") == 0) {
-        cli->type = EDIT; 
-        argp_parse(&edit_argp, argc, argv, 0, 0, &cli->cmd.edit);
-    } else {
-        printf("Error (invalid args): invalid subcommand: %s\n", subcommand);
-    }
-
-    return validate_args(cli);
-}
-
 int add_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Add *add = state->input;
+    struct Add *add = &((Cli *)state->input)->cmd.add;
     switch (key) {
         case 'a':
+            if (add->alias_override) {
+                printf("Error (invalid args): multiple alias overrides provided.\n");
+                return 1;
+            }
             if (!(add->alias_override = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(add->alias_override, arg);
             break;
         case 's':
+            if (add->section_override) {
+                printf("Error (invalid args): multiple section overrides provided.\n");
+                return 1;
+            }
             if (!(add->section_override = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(add->section_override, arg);
@@ -115,6 +124,10 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
             add->local = true;
             break;
         case ARGP_KEY_ARG:;
+            if (add->command) {
+                printf("Error (invalid args): multiple commands provided.\n");
+                return 1;
+            }
             if (!(add->command = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(add->command, arg);
@@ -126,7 +139,7 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int remove_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Remove *remove = state->input;
+    struct Remove *remove = &((Cli *)state->input)->cmd.remove;
     switch (key) {
         case 's':
             remove->section = true;
@@ -159,9 +172,13 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int edit_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Edit *edit = state->input;
+    struct Edit *edit = &((Cli *)state->input)->cmd.edit;
     switch (key) {
         case 'e':
+            if (edit->editor) {
+                printf("Error (invalid args): multiple editors provided.\n");
+                return 1;
+            }
             if (!(edit->editor = malloc(strlen(arg) + 1)))
                 return 1;
             strcpy(edit->editor, arg);
@@ -176,7 +193,7 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int show_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Show *show = state->input;
+    struct Show *show = &((Cli *)state->input)->cmd.show;
     switch (key) {
         case 's':
             show->section = true;
@@ -195,6 +212,45 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(new_node->data, arg);
             new_node->next = show->aliases;
             show->aliases = new_node;
+            break;
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+int sync_parse_opt(int key, char *arg, struct argp_state *state) {
+    struct Sync *sync = &((Cli *)state->input)->cmd.sync;
+    switch (key) {
+        case 'r':
+            sync->rollback = atoi(arg);
+            break;
+        case 'f':
+            sync->forward = atoi(arg);
+            break;
+        case ARGP_KEY_ARG:;
+            if (sync->commit_hash) {
+                printf("Error (invalid args): multiple commit hashes provided.\n");
+                return 1;
+            }
+            if (!(sync->commit_hash = malloc(strlen(arg) + 1)))
+                return 1;
+            strcpy(sync->commit_hash, arg);
+            break;
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+int reccomend_parse_opt(int key, char *arg, struct argp_state *state) {
+    struct Reccomend *reccomend = &((Cli *)state->input)->cmd.reccomend;
+    switch (key) {
+        case 'n':
+            reccomend->num_recs = atoi(arg);
+            break;
+        case 'l':
+            reccomend->interactive = true;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -224,15 +280,23 @@ Cli *validate_args(Cli *cli) {
             printf("Error (system): editor program not found: \"%s\".\n", c.edit.editor);
             invalid = true;
         }
+    } else if (cli->type == SYNC) {
+        if (c.sync.forward && c.sync.rollback) {
+            printf("Error (invalid args): cannot provide both forward and rollback.\n");
+            invalid = true;
+        } else if (c.sync.commit_hash && (c.sync.forward || c.sync.rollback)) {
+            printf("Error (invalid args): cannot provide both commit hash and offset value.\n");
+            invalid = true;
+        }
     }
     if (invalid) {
-        free_Cli(cli);
+        free_cli(cli);
         return NULL;
     }
     return cli;
 }
 
-void free_AliasList(AliasListNode *node) {
+void free_alias_list(AliasListNode *node) {
     AliasListNode *tmp;
     while (node) {
         tmp = node;
@@ -242,7 +306,7 @@ void free_AliasList(AliasListNode *node) {
     } 
 }
 
-void free_Cli(Cli *cli) {
+void free_cli(Cli *cli) {
     switch (cli->type) {
         case ADD:
             free(cli->cmd.add.command);
@@ -250,10 +314,10 @@ void free_Cli(Cli *cli) {
             free(cli->cmd.add.section_override);
             break;
         case REMOVE:
-            free_AliasList(cli->cmd.remove.aliases);
+            free_alias_list(cli->cmd.remove.aliases);
             break;
         case SHOW:
-            free_AliasList(cli->cmd.show.aliases);
+            free_alias_list(cli->cmd.show.aliases);
             break;
         case EDIT:
             free(cli->cmd.edit.editor);

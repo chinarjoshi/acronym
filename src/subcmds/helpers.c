@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include "subcmds.h"
 #include "../hash_table/hash_table.h"
-#define ALIAS_FNAME_ENV "ACRONYM_ALIAS_FILE"
 static void insert_path(const char *path, char **path_arr, int num_paths);
 char ALIAS_FNAME[64];
 char TOML_FNAME[64];
@@ -18,7 +17,6 @@ bool (*sub_cmds[])(Cli *) = {
     [EDIT] = edit_cmd,
     [SHOW] = show_cmd,
 };
-
 
 bool is_valid_dir(const char *dir) {
     struct stat statbuf;
@@ -114,8 +112,8 @@ int cleanup(const char *message, const char *message_arg,
 // Sets 'AUTOENV_FNAME' to its env variable, or '.env' if not found
 // (default: ".env"), otherwise returns the absolute path to ~/.aliases.
 void setup_fname_buffers() {
-    const char *alias_fname = getenv(ALIAS_FNAME_ENV);
-    if (alias_fname) {
+    const char *alias_fname = getenv("ACRONYM_DIRECTORY");
+    if (alias_fname && strlen(alias_fname) > 0) {
         snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s", alias_fname);
     } else {
         snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases", getenv("HOME"));

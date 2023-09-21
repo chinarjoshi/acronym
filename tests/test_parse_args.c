@@ -61,7 +61,7 @@ END_TEST
 
 START_TEST(test_parse_args_remove_normal) {
     int argc = 5;
-    char *argv[] = { "acronym", "remove", "a", "b", "-rf" };
+    char *argv[] = { "acronym", "remove", "a", "b", "-sf" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, REMOVE);
     struct Remove r = cli->cmd.remove;
