@@ -28,6 +28,10 @@ bool show_cmd(Cli *cli) {
     // Include the global alias file if not 'local'
     if (!s.local) {
         FILE *alias_f = fopen(ALIAS_FNAME, "r");
+        if (!alias_f) {
+            perror("Error (file I/O): unable to open alias file: \"%s\".\n");
+            return false;
+        }
         read_aliases(alias_f, ht, false);
     }
 

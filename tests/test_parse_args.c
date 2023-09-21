@@ -89,7 +89,7 @@ START_TEST(test_parse_args_remove_all_flags) {
 }
 
 START_TEST(test_parse_args_show_normal) {
-    int argc = 4;
+    int argc = 2;
     char *argv[] = { "acronym", "show" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, SHOW);

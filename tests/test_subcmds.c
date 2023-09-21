@@ -114,6 +114,8 @@ START_TEST(test_show_cmd_normal) {
         .verbosity = 1,
     };
 
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
     ck_assert(show_cmd(&cli));
 }
 END_TEST
