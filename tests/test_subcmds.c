@@ -119,6 +119,8 @@ START_TEST(test_show_cmd_normal) {
 END_TEST
 
 START_TEST(test_show_cmd_all) {
+    const char *path = "/home/c/.aliases";
+    strncpy(ALIAS_FNAME, path, strlen(path));
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,

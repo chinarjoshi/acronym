@@ -160,12 +160,12 @@ char *toml_dumps(toml_table_t *table) {
     if (!table)
         return 0;
 
-    // First determine length of string, including ANSI escape codes
+    // First determine length of string, including ANSI escape color codes
     int len = 0;
     toml_table_t *tab;
     for (int i = 0; i < table->ntab; i++) {
         tab = table->tab[i];
-        len += strlen(tab->key) + 28; // \033[1;34m[\033[1;35m%s\033[1;34m]\033[0m\n
+        len += strlen(tab->key) + 22; // \033[34m[\033[35m%s\033[34m]\033[0m\n
         for (int j = 0; j < tab->nkval; j++) {
             // "%s = \"%s\"\n"
             // %s \033[34m=\033[32m\"%s\"\033[0m\n
@@ -181,8 +181,8 @@ char *toml_dumps(toml_table_t *table) {
     int pos = 0;
     for (int i = 0; i < table->ntab; i++) {
         tab = table->tab[i];
-        sprintf(toml_str + pos, "\033[1;34m[\033[1;35m%s\033[1;34m]\033[0m\n", tab->key);
-        pos += strlen(tab->key) + 28;
+        sprintf(toml_str + pos, "\033[34m[\033[35m%s\033[34m]\033[0m\n", tab->key);
+        pos += strlen(tab->key) + 22;
         for (int j = 0; j < tab->nkval; j++) {
             sprintf(toml_str + pos, "%s \033[34m= \033[32m\"%s\"\033[0m\n", tab->kval[j]->key, tab->kval[j]->val);
             pos += strlen(tab->kval[j]->key) + strlen(tab->kval[j]->val) + 20;
