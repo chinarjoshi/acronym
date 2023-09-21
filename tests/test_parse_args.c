@@ -68,7 +68,7 @@ START_TEST(test_parse_args_remove_normal) {
     ck_assert_str_eq(r.aliases->data, "b");
     ck_assert_str_eq(r.aliases->next->data, "a");
     ck_assert(r.force);
-    ck_assert(r.recursive);
+    ck_assert(r.section);
     ck_assert(!r.local);
     ck_assert(!r.interactive);
 }
@@ -76,7 +76,7 @@ END_TEST
 
 START_TEST(test_parse_args_remove_all_flags) {
     int argc = 8;
-    char *argv[] = { "acronym", "remove", "-r", "a", "--force", "b", "-l", "c" };
+    char *argv[] = { "acronym", "remove", "-s", "a", "--force", "b", "-l", "c" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, REMOVE);
     struct Remove r = cli->cmd.remove;
@@ -84,30 +84,16 @@ START_TEST(test_parse_args_remove_all_flags) {
     ck_assert_str_eq(r.aliases->next->data, "b");
     ck_assert_str_eq(r.aliases->next->next->data, "a");
     ck_assert(r.force);
-    ck_assert(r.recursive);
+    ck_assert(r.section);
     ck_assert(r.local);
 }
 
-START_TEST(test_parse_args_tree_normal) {
-    int argc = 6;
-    char *argv[] = { "acronym", "tree", "run", "test", "-ad", "~/dotfiles" };
-    Cli *cli = parse_args(argc, argv);
-    ck_assert_int_eq(cli->type, TREE);
-    struct Tree t = cli->cmd.tree;
-    ck_assert_str_eq(t.aliases->data, "test");
-    ck_assert_str_eq(t.aliases->next->data, "run");
-    ck_assert_str_eq(t.directory, "~/dotfiles");
-    ck_assert(t.all);
-}
-END_TEST
-
 START_TEST(test_parse_args_show_normal) {
     int argc = 4;
-    char *argv[] = { "acronym", "show", "-d", "~/projects/acronym" };
+    char *argv[] = { "acronym", "show" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, SHOW);
-    ck_assert_str_eq(cli->cmd.show.directory, "~/projects/acronym");
-    ck_assert(!cli->cmd.show.all);
+    ck_assert(!cli->cmd.show.local);
 }
 END_TEST
 
@@ -134,10 +120,6 @@ Suite *parse_args_suite(void) {
     tcase_add_test(tc_remove, test_parse_args_remove_normal);
     tcase_add_test(tc_remove, test_parse_args_remove_all_flags);
     suite_add_tcase(s, tc_remove);
-
-    TCase *tc_tree = tcase_create("Tree");
-    tcase_add_test(tc_tree, test_parse_args_tree_normal);
-    suite_add_tcase(s, tc_tree);
 
     TCase *tc_show = tcase_create("Show");
     tcase_add_test(tc_show, test_parse_args_show_normal);

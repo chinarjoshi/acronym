@@ -21,16 +21,9 @@ struct argp_option remove_options[] = {
 };
 struct argp remove_argp = { remove_options, remove_parse_opt }; 
 
-struct argp_option tree_options[] = {
-    { "directory", 'd', "DIRECTORY", 0, "Directory to start search" },
-    { "all", 'a', 0, 0, "Start from home directory" },
-    { 0 }
-};
-struct argp tree_argp = { tree_options, tree_parse_opt }; 
-
 struct argp_option show_options[] = {
-    { "directory", 'd', "DIRECTORY", 0, "Directory to show active aliases" },
-    { "all", 'a', 0, 0, "Show all active aliases, not just overriden ones" },
+    { "section", 's', 0, 0, "Show aliases in a given section" },
+    { "local", 'l', 0, 0, "Show only directory-specific aliases" },
     { 0 }
 };
 struct argp show_argp = { show_options, show_parse_opt }; 

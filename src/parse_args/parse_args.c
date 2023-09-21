@@ -5,10 +5,11 @@
 #include <stdbool.h>
 #include <argp.h>
 #include "parse_args.h"
+#include "../subcmds/subcmds.h"
 
 struct Cli *parse_global_options(int argc, char **argv) {
     if (argc < 2) {
-        printf("Error (invalid args): provide option or subcommand\n");
+        printf("%s\n", ALIAS_FNAME);
         return NULL;
     }
 
@@ -58,7 +59,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 break;
             case '?':
             default:
-                printf("Error (invalid args): unknown option: %c\n", opt);
+                printf("Error (invalid args): unknown option: \"%c\".\n", opt);
                 return NULL;
                 break;
         }
@@ -81,9 +82,6 @@ struct Cli *parse_args(int argc, char **argv) {
     } else if (strcmp(subcommand, "remove") == 0) {
         cli->type = REMOVE; 
         argp_parse(&remove_argp, argc, argv, 0, 0, &cli->cmd.remove);
-    } else if (strcmp(subcommand, "tree") == 0) {
-        cli->type = TREE; 
-        argp_parse(&tree_argp, argc, argv, 0, 0, &cli->cmd.tree);
     } else if (strcmp(subcommand, "show") == 0) {
         cli->type = SHOW; 
         argp_parse(&show_argp, argc, argv, 0, 0, &cli->cmd.show);
@@ -130,8 +128,8 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
 int remove_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Remove *remove = state->input;
     switch (key) {
-        case 'r':
-            remove->recursive = true;
+        case 's':
+            remove->section = true;
             break;
         case 'f':
             remove->force = true;
@@ -160,52 +158,6 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
     return 0;
 }
 
-int tree_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Tree *tree = state->input; 
-    switch (key) {
-        case 'd':
-            if (!(tree->directory = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(tree->directory, arg);
-            break;
-        case 'a':
-            tree->all = true;
-            break;
-        case ARGP_KEY_ARG:;
-            AliasListNode *new_node;
-            if (!(new_node = malloc(sizeof(AliasListNode))))
-                return 1;
-            if (!(new_node->data = malloc(strlen(arg) + 1))) {
-                free(new_node);
-                return 1;
-            }
-            strcpy(new_node->data, arg);
-            new_node->next = tree->aliases;
-            tree->aliases = new_node;
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
-    }
-    return 0;
-}
-
-int show_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Show *show = state->input;
-    switch (key) {
-        case 'd':
-            if (!(show->directory = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(show->directory, arg);
-            break;
-        case 'a':
-            show->all = true;
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
-    }
-    return 0;
-}
-
 int edit_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Edit *edit = state->input;
     switch (key) {
@@ -223,6 +175,33 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
     return 0;
 }
 
+int show_parse_opt(int key, char *arg, struct argp_state *state) {
+    struct Show *show = state->input;
+    switch (key) {
+        case 's':
+            show->section = true;
+            break;
+        case 'l':
+            show->local = true;
+            break;
+        case ARGP_KEY_ARG:;
+            AliasListNode *new_node;
+            if (!(new_node = malloc(sizeof(AliasListNode))))
+                return 1;
+            if (!(new_node->data = malloc(strlen(arg) + 1))) {
+                free(new_node);
+                return 1;
+            }
+            strcpy(new_node->data, arg);
+            new_node->next = show->aliases;
+            show->aliases = new_node;
+            break;
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
 Cli *validate_args(Cli *cli) {
     union Cmd c = cli->cmd;
     bool invalid = false;
@@ -230,12 +209,12 @@ Cli *validate_args(Cli *cli) {
         printf("Error (invalid args): must provide command to alias.\n");
         invalid = true;
     } else if (cli->type == REMOVE) {
-        if (c.remove.recursive && c.remove.interactive) {
+        if (c.remove.force && c.remove.interactive) {
             printf("Error (invalid args): force and interactive flags cannot be true at same time.");
             invalid = true;
         }
         if (!c.remove.aliases) {
-            printf("Error (invalid args): no %s provided.\n", c.remove.recursive ? "section" : "alias"); 
+            printf("Error (invalid args): no %s provided.\n", c.remove.section ? "section" : "alias"); 
             invalid = true;
         }
     } else if (cli->type == EDIT && c.edit.editor) {
@@ -273,14 +252,15 @@ void free_Cli(Cli *cli) {
         case REMOVE:
             free_AliasList(cli->cmd.remove.aliases);
             break;
-        case TREE:
-            free_AliasList(cli->cmd.tree.aliases);
-            break;
         case SHOW:
-            free(cli->cmd.show.directory);
+            free_AliasList(cli->cmd.show.aliases);
             break;
         case EDIT:
             free(cli->cmd.edit.editor);
+            break;
+        case SYNC:
+            break;
+        case RECCOMEND:
             break;
     }
     free(cli);

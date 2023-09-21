@@ -31,7 +31,7 @@ bool remove_cmd(Cli *cli) {
     // Delete given aliases or sections, prompting unless force is given
     bool something_removed = false;
     while (r.aliases) {
-        if (r.recursive) {
+        if (r.section) {
             if (!r.force) {
                 char answer;
                 printf("Delete section: \"%s\"? [y/N]: ", r.aliases->data);

@@ -5,11 +5,20 @@
 #include <sys/stat.h>
 #include "subcmds.h"
 #include "../hash_table/hash_table.h"
+#define ALIAS_FNAME_ENV "ACRONYM_ALIAS_FILE"
+static void insert_path(const char *path, char **path_arr, int num_paths);
 char ALIAS_FNAME[64];
 char TOML_FNAME[64];
 char TMP_FNAME[64];
 const char *AUTOENV_FNAME;
-static void insert_path(const char *path, char **path_arr, int num_paths);
+
+bool (*sub_cmds[])(Cli *) = {
+    [ADD] = add_cmd,
+    [REMOVE] = remove_cmd,
+    [EDIT] = edit_cmd,
+    [SHOW] = show_cmd,
+};
+
 
 bool is_valid_dir(const char *dir) {
     struct stat statbuf;
@@ -100,11 +109,17 @@ int cleanup(const char *message, const char *message_arg,
     return 0;
 }
 
-// Sets 'ALIAS_FNAME' to expanded version of "~/.aliases"
+// Sets 'ALIAS_FNAME' to the value of environmental variable "ACRONYM_ALIAS_FILE",
+// or if not found, the expansion of "~/.aliases"
 // Sets 'AUTOENV_FNAME' to its env variable, or '.env' if not found
 // (default: ".env"), otherwise returns the absolute path to ~/.aliases.
-void set_alias_and_autoenv_fnames() {
-    snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases", getenv("HOME"));
+void setup_fname_buffers() {
+    const char *alias_fname = getenv(ALIAS_FNAME_ENV);
+    if (alias_fname) {
+        snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s", alias_fname);
+    } else {
+        snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases", getenv("HOME"));
+    }
     snprintf(TMP_FNAME, sizeof(TMP_FNAME), "%s/.acronym_tmpfile", getenv("HOME"));
     snprintf(TOML_FNAME, sizeof(TOML_FNAME), "%s/.acronym_tmpfile.toml", getenv("HOME"));
 

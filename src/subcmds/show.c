@@ -11,13 +11,9 @@ bool show_cmd(Cli *cli) {
 
     // Read up until 'directory' if provided, or current directory
     char cwd[PATH_MAX];
-    if (is_valid_dir(s.directory)) {
-        strncpy(cwd, s.directory, strlen(s.directory)); 
-    } else {
-        if (!getcwd(cwd, sizeof(cwd))) {
-            perror("Error (system): getcwd() error.\n");
-            return false;
-        }
+    if (!getcwd(cwd, sizeof(cwd))) {
+        perror("Error (system): getcwd() error.\n");
+        return false;
     }
 
     // Get a list of .env file paths from AUTOENV_AUTH_FILE
@@ -29,8 +25,8 @@ bool show_cmd(Cli *cli) {
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
 
-    // Include the global alias file if 'all'
-    if (s.all) {
+    // Include the global alias file if not 'local'
+    if (!s.local) {
         FILE *alias_f = fopen(ALIAS_FNAME, "r");
         read_aliases(alias_f, ht, false);
     }

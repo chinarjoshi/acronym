@@ -41,9 +41,11 @@ bool add_cmd(Cli *cli) {
     if (!write_aliases(tmp_f, ht))
         return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".", TMP_FNAME, ht, tmp_f, TMP_FNAME);
 
+    if (rename(TMP_FNAME, alias_fname))
+        return cleanup("Error (file I/O): cannot rename file.\n", 0, ht, tmp_f, TMP_FNAME);
+
+    printf("Added: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n", entry->alias, entry->command, entry->section);
     free_hash_table(ht);
     fclose(tmp_f);
-    if (rename(TMP_FNAME, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_FNAME);
     return true;
 }
