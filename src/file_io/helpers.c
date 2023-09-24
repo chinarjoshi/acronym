@@ -16,14 +16,17 @@ const char *AUTOENV_FNAME;
 // (default: ".env"), otherwise returns the absolute path to ~/.aliases.
 void setup_fname_buffers() {
     const char *acronym_dirname = getenv("ACRONYM_DIRECTORY");
+    char *home = getenv("HOME");
     if (acronym_dirname && strlen(acronym_dirname) > 0) {
         snprintf(ACRONYM_DIRNAME, strlen(acronym_dirname), "%s", acronym_dirname);
     } else {
-        snprintf(ACRONYM_DIRNAME, strlen(ACRONYM_DIRNAME), "%s/.acronym", getenv("HOME"));
+        snprintf(ACRONYM_DIRNAME, strlen(home) + 10, "%s/.acronym", home);
     }
 
-    snprintf(TMP_FNAME, sizeof(TMP_FNAME), "%s/.tmpfile", ACRONYM_DIRNAME);
-    snprintf(TOML_FNAME, sizeof(TOML_FNAME), "%s/.tmpfile.toml", ACRONYM_DIRNAME);
+    int dirname_len = strlen(ACRONYM_DIRNAME);
+    snprintf(ALIAS_FNAME, dirname_len + 12, "%s/aliases.sh", ACRONYM_DIRNAME);
+    snprintf(TMP_FNAME, dirname_len + 10, "%s/.tmpfile", ACRONYM_DIRNAME);
+    snprintf(TOML_FNAME, dirname_len + 15, "%s/.tmpfile.toml", ACRONYM_DIRNAME);
     AUTOENV_FNAME = getenv("AUTOENV_ENV_FILENAME");
     if (!AUTOENV_FNAME)
         AUTOENV_FNAME = ".env";

@@ -110,8 +110,7 @@ START_TEST(test_remove_cmd_normal) {
 END_TEST
 
 START_TEST(test_show_cmd_normal) {
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
+    setup_fname_buffers();
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
@@ -122,8 +121,7 @@ START_TEST(test_show_cmd_normal) {
 END_TEST
 
 START_TEST(test_show_cmd_local) {
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
+    setup_fname_buffers();
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
@@ -135,8 +133,7 @@ START_TEST(test_show_cmd_local) {
 END_TEST
 
 START_TEST(test_show_cmd_aliases) {
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
+    setup_fname_buffers();
     AliasListNode b = { .data = "gp", .next = NULL };
     AliasListNode a = { .data = "a", .next = &b };
     Cli cli = {
@@ -150,8 +147,7 @@ START_TEST(test_show_cmd_aliases) {
 END_TEST
 
 START_TEST(test_show_cmd_commit_hash) {
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
+    setup_fname_buffers();
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
@@ -163,8 +159,7 @@ START_TEST(test_show_cmd_commit_hash) {
 END_TEST
 
 START_TEST(test_sync_cmd_normal) {
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
+    setup_fname_buffers();
     Cli cli = {
         .type = SYNC,
         .verbosity = 1,
@@ -175,8 +170,7 @@ START_TEST(test_sync_cmd_normal) {
 END_TEST
 
 START_TEST(test_reccomend_cmd_normal) {
-    const char *path = "/home/c/.aliases";
-    strncpy(ALIAS_FNAME, path, strlen(path));
+    setup_fname_buffers();
     Cli cli = {
         .type = RECCOMEND,
         .verbosity = 1,
