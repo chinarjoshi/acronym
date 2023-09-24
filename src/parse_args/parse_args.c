@@ -195,6 +195,9 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
 int show_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Show *show = &((Cli *)state->input)->cmd.show;
     switch (key) {
+        case 'a':
+            show->alias = true;
+            break;
         case 's':
             show->section = true;
             break;
@@ -219,8 +222,8 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
                 return 1;
             }
             strcpy(new_node->data, arg);
-            new_node->next = show->aliases;
-            show->aliases = new_node;
+            new_node->next = show->prefixes;
+            show->prefixes = new_node;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -270,33 +273,55 @@ int reccomend_parse_opt(int key, char *arg, struct argp_state *state) {
 Cli *validate_args(Cli *cli) {
     union Cmd c = cli->cmd;
     bool invalid = false;
-    if (cli->type == ADD && !c.add.command) {
-        printf("Error (invalid args): must provide command to alias.\n");
-        invalid = true;
-    } else if (cli->type == REMOVE) {
-        if (c.remove.force && c.remove.interactive) {
-            printf("Error (invalid args): force and interactive flags cannot be true at same time.");
-            invalid = true;
-        }
-        if (!c.remove.aliases) {
-            printf("Error (invalid args): no %s provided.\n", c.remove.section ? "section" : "alias"); 
-            invalid = true;
-        }
-    } else if (cli->type == EDIT && c.edit.editor) {
-        char command[128];
-        snprintf(command, 128, "command -v %s > /dev/null", c.edit.editor);
-        if (system(command)) {
-            printf("Error (system): editor program not found: \"%s\".\n", c.edit.editor);
-            invalid = true;
-        }
-    } else if (cli->type == SYNC) {
-        if (c.sync.forward && c.sync.rollback) {
-            printf("Error (invalid args): cannot provide both forward and rollback.\n");
-            invalid = true;
-        } else if (c.sync.commit_hash && (c.sync.forward || c.sync.rollback)) {
-            printf("Error (invalid args): cannot provide both commit hash and offset value.\n");
-            invalid = true;
-        }
+
+
+    switch (cli->type) {
+        case ADD:
+            if (!c.add.command) {
+                printf("Error (invalid args): must provide command to alias.\n");
+                invalid = true;
+            }
+            break;
+        case REMOVE:
+            if (c.remove.force && c.remove.interactive) {
+                printf("Error (invalid args): force and interactive flags " \
+                       "cannot be true at same time.\n");
+                invalid = true;
+            }
+            if (!c.remove.aliases) {
+                printf("Error (invalid args): no %s provided.\n", 
+                       c.remove.section ? "section" : "alias"); 
+                invalid = true;
+            }
+            break;
+        case EDIT:
+            if (!c.edit.editor)
+                break;
+            char command[128];
+            snprintf(command, 128, "command -v %s > /dev/null", c.edit.editor);
+            if (system(command)) {
+                printf("Error (system): editor program not found: \"%s\".\n", c.edit.editor);
+                invalid = true;
+            }
+            break;
+        case SHOW:
+            if (c.show.alias && c.show.section) {
+                printf("Error (invalid args): alias and section flags" \
+                       "cannot be true at the same time.\n");
+                invalid = true;
+            }
+            break;
+        case SYNC:
+            if (c.sync.forward && c.sync.rollback) {
+                printf("Error (invalid args): cannot provide both forward and rollback.\n");
+                invalid = true;
+            } else if (c.sync.commit_hash && (c.sync.forward || c.sync.rollback)) {
+                printf("Error (invalid args): cannot provide both commit hash and offset value.\n");
+                invalid = true;
+            }
+            break;
+        case RECCOMEND:
+            break;
     }
     if (invalid) {
         free_cli(cli);
@@ -326,7 +351,7 @@ void free_cli(Cli *cli) {
             free_alias_list(cli->cmd.remove.aliases);
             break;
         case SHOW:
-            free_alias_list(cli->cmd.show.aliases);
+            free_alias_list(cli->cmd.show.prefixes);
             break;
         case EDIT:
             free(cli->cmd.edit.editor);

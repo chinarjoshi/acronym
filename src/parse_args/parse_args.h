@@ -27,8 +27,9 @@ struct Edit {
 };
 
 struct Show {
-    AliasListNode *aliases;
+    AliasListNode *prefixes;
     char *commit_hash;
+    bool alias;
     bool section;
     bool local;
 };

@@ -32,6 +32,7 @@ Status create_entry(Entry **data_out, const char *command,
         section_override = create_section_name(command);
     entry->section = malloc(strlen(section_override) + 1);
     strcpy(entry->section, section_override);
+    entry->is_removed = false;
 
     *data_out = entry;
     return SUCCESS;

@@ -42,8 +42,8 @@ bool show_cmd(Cli *cli) {
         read_aliases(env_f, ht, false);
     }
 
-    if (s.aliases)
-        filter_hash_table(ht, s.aliases, s.section);
+    if (s.prefixes)
+        filter_hash_table(ht, s.prefixes, s.alias, s.section);
 
     printf("%s", ht_to_toml_str(ht));
     free_hash_table(ht);

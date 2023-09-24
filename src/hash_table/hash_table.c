@@ -123,31 +123,6 @@ Status resize_backing_array(HashTable *ht) {
     return SUCCESS;
 }
 
-static void remove_index(HashTable *ht, int index) {
-    free_entry(ht->backing_array[index]);
-    ht->backing_array[index] = NULL;
-    ht->size--;
-}
-
-// Removes all entries of 'ht' of which no string in 'l' is a substring
-// of the alias field if not 'section', or the section field if 'section'.
-void filter_hash_table(HashTable *ht, AliasListNode *l, bool section) {
-    for (int i = 0; i < ht->capacity; i++) {
-        bool keep_entry = false;
-        Entry *entry = ht->backing_array[i]; 
-        if (!entry)
-            remove_index(ht, i);
-            
-        char *data = section ? entry->section : entry->alias;
-        for (AliasListNode *node = l; node; node = node->next)
-            if (!strncmp(node->data, data, strlen(data)))
-                keep_entry = true; 
-
-        if (!keep_entry)
-            remove_index(ht, i);
-    }
-}
-
 void empty_hash_table(HashTable *ht) {
     if (ht->size == 0)
         return;

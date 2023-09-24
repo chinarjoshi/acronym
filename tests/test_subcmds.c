@@ -141,7 +141,7 @@ START_TEST(test_show_cmd_aliases) {
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
-        .cmd.show.aliases = &a
+        .cmd.show.prefixes = &a
     };
 
     ck_assert(show_cmd(&cli));

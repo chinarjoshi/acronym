@@ -30,6 +30,6 @@ enum PathCmp compare_paths(const char *env_fname, const char *directory);
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove);
 void free_env_paths(char **paths, int num_paths);
-void filter_hash_table(HashTable *ht, AliasListNode *l, bool section);
+void filter_hash_table(HashTable *ht, AliasListNode *l, bool alias, bool section);
 
 #endif
