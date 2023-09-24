@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <check.h>
 #include "../src/subcmds/subcmds.h"
+#include "../src/file_io/file_io.h"
 #include "test.h"
 
 char line[256];

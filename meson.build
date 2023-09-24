@@ -6,7 +6,8 @@ project('acronym', 'c',
 pcre_dep = dependency('libpcre')
 sources = [
   'src/main.c', 
-  'src/file_io.c',
+  'src/file_io/file_io.c',
+  'src/file_io/helpers.c',
   'src/hash_table/entry.c', 
   'src/hash_table/hash_table.c', 
   'src/parse_args/parse_args.c', 
@@ -27,7 +28,8 @@ executable('acronym', sources : sources, dependencies : pcre_dep)
 check_dep = dependency('check')
 
 test_sources = [
-  'src/file_io.c',
+  'src/file_io/file_io.c',
+  'src/file_io/helpers.c',
   'src/hash_table/entry.c', 
   'src/hash_table/hash_table.c', 
   'src/parse_args/parse_args.c', 

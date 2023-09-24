@@ -1,6 +1,6 @@
 #include "subcmds.h"
 #include <unistd.h>
-#include "../file_io.h"
+#include "../file_io/file_io.h"
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
 #include "../toml/toml_extensions.h"
@@ -12,11 +12,6 @@ bool edit_cmd(Cli *cli) {
 
     // Pick the alias file name ('.env' if 'a.local', else '~/.aliases')
     const char *alias_fname = (e.local) ? AUTOENV_FNAME : ALIAS_FNAME;
-    // Make sure it exists
-    if (access(alias_fname, F_OK) == -1) {
-        FILE *f = fopen(alias_fname, "w"); 
-        fclose(f);
-    }
     FILE *alias_f = fopen(alias_fname, "r");
     if (!alias_f)
         return cleanup("Error (file I/O): aliases file cannot be opened: \"%s\".\n", alias_fname, ht, 0, 0);

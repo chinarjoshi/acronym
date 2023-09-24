@@ -1,9 +1,7 @@
-#include <sys/stat.h>
-#include <unistd.h>
 #include "subcmds.h"
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
-#include "../file_io.h"
+#include "../file_io/file_io.h"
 
 bool add_cmd(Cli *cli) {
     struct Add a = cli->cmd.add;
@@ -13,11 +11,6 @@ bool add_cmd(Cli *cli) {
 
     // Pick the alias file name ('.env' if 'a.local', else '~/.aliases')
     const char *alias_fname = (a.local) ? AUTOENV_FNAME : ALIAS_FNAME;
-    // Make sure the alias file exists
-    if (access(alias_fname, F_OK) == -1) {
-        FILE *f = fopen(alias_fname, "w"); 
-        fclose(f);
-    }
     FILE *alias_f = fopen(alias_fname, "r");
     if (!alias_f)
         return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", alias_fname, ht, 0, 0);

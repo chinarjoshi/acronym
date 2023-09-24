@@ -1,7 +1,7 @@
 #include "subcmds.h"
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
-#include "../file_io.h"
+#include "../file_io/file_io.h"
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -13,12 +13,6 @@ bool remove_cmd(Cli *cli) {
 
     // Pick the alias file name ('.env' if 'a.local', else '~/.aliases')
     const char *alias_fname = (r.local) ? AUTOENV_FNAME : ALIAS_FNAME;
-    // Make sure the alias file exists
-    if (access(alias_fname, F_OK) == -1) {
-        printf("Nothing to do.");
-        free_hash_table(ht);
-        return false;
-    }
     FILE *alias_f = fopen(alias_fname, "r");
     if (!alias_f)
         return cleanup("Error (file I/O): aliases file not found: \"%s\".\n", alias_fname, ht, 0, 0);

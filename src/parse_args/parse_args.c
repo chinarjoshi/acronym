@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <argp.h>
 #include "parse_args.h"
-#include "../subcmds/subcmds.h"
+#include "../file_io/file_io.h"
 
 struct Cli *parse_args(int argc, char **argv) {
     Cli *cli = parse_global_options(argc, argv);

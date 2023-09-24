@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../hash_table/entry.h"
 #include "../hash_table/hash_table.h"
-#include "../file_io.h"
+#include "../file_io/file_io.h"
 #include "../toml/toml_extensions.h"
 
 bool show_cmd(Cli *cli) {
@@ -27,6 +27,10 @@ bool show_cmd(Cli *cli) {
 
     // Include the global alias file if not 'local'
     if (!s.local) {
+        if (s.commit_hash) {
+            // Then show the alias file from the other git commit and write to tmpfile
+        }
+
         FILE *alias_f = fopen(ALIAS_FNAME, "r");
         if (!alias_f) {
             perror("Error (file I/O): unable to open alias file: \"%s\".\n");

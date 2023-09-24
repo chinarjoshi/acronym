@@ -1,6 +1,6 @@
 #include "file_io.h"
-#include "hash_table/entry.h"
-#include "hash_table/hash_table.h"
+#include "../hash_table/entry.h"
+#include "../hash_table/hash_table.h"
 #include <pcre.h>
 #include <string.h>
 #include <stdio.h>
@@ -8,7 +8,6 @@
 const char *ALIAS_PATTERN = "^alias\\s+([^=]+)=['\"]?([^#\\n]+)(?:\\s+## ?([^\\n]+?))?\\n";
 const char *FILE_DELIMITER = "# --- Aliases ---\n";
 const int OVECTOR_LEN = 30;
-static void free_re_resources(pcre *re, pcre_extra *extras, FILE *f);
 
 // Using a compiled regex, match 'text' and put results in 'alias', 'command', and 'section'.
 // Returns false if it doesn't match, true if it does.
@@ -120,10 +119,4 @@ bool write_aliases(FILE *f, HashTable *ht) {
         }
     }
     return true;
-}
-
-static void free_re_resources(pcre *re, pcre_extra *extras, FILE *f) {
-    pcre_free(re);
-    pcre_free_study(extras);
-    fclose(f);
 }

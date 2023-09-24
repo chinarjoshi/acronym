@@ -1,27 +1,19 @@
 #include <stdbool.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include "subcmds.h"
 #include "../hash_table/hash_table.h"
 static void insert_path(const char *path, char **path_arr, int num_paths);
-char ALIAS_FNAME[64];
-char TOML_FNAME[64];
-char TMP_FNAME[64];
-const char *AUTOENV_FNAME;
-
 bool (*sub_cmds[])(Cli *) = {
     [ADD] = add_cmd,
     [REMOVE] = remove_cmd,
     [EDIT] = edit_cmd,
     [SHOW] = show_cmd,
+    [SYNC] = sync_cmd,
+    [RECCOMEND] = reccomend_cmd,
 };
-
-bool is_valid_dir(const char *dir) {
-    struct stat statbuf;
-    return !stat(dir, &statbuf) && S_ISDIR(statbuf.st_mode);
-}
 
 enum PathCmp compare_paths(const char *env_fname, const char *directory) {
     int env_fname_len = strlen(env_fname) - 5;
@@ -112,25 +104,6 @@ void free_env_paths(char **paths, int num_paths) {
         free(paths[i]);
     }
     free(paths);
-}
-
-// Sets 'ALIAS_FNAME' to the value of environmental variable "ACRONYM_ALIAS_FILE",
-// or if not found, the expansion of "~/.aliases"
-// Sets 'AUTOENV_FNAME' to its env variable, or '.env' if not found
-// (default: ".env"), otherwise returns the absolute path to ~/.aliases.
-void setup_fname_buffers() {
-    const char *alias_fname = getenv("ACRONYM_DIRECTORY");
-    if (alias_fname && strlen(alias_fname) > 0) {
-        snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s", alias_fname);
-    } else {
-        snprintf(ALIAS_FNAME, sizeof(ALIAS_FNAME), "%s/.aliases", getenv("HOME"));
-    }
-    snprintf(TMP_FNAME, sizeof(TMP_FNAME), "%s/.acronym_tmpfile", getenv("HOME"));
-    snprintf(TOML_FNAME, sizeof(TOML_FNAME), "%s/.acronym_tmpfile.toml", getenv("HOME"));
-
-    AUTOENV_FNAME = getenv("AUTOENV_ENV_FILENAME");
-    if (!AUTOENV_FNAME)
-        AUTOENV_FNAME = ".env";
 }
 
 // Bold the longest matching substring in 'data' from list 'l'

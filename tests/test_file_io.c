@@ -1,7 +1,7 @@
 #include <check.h>
 #include <pcre.h>
 #include <stdio.h>
-#include "../src/file_io.h"
+#include "../src/file_io/file_io.h"
 
 pcre *re;
 pcre_extra *extras;
