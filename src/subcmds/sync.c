@@ -18,6 +18,7 @@ static inline bool add_and_commit(const char *message) {
     snprintf(cmd, sizeof(cmd), "git add aliases.sh && git commit -m '%s'", message);
     return system(cmd);
 }
+void get_diff_stats(char *buffer, size_t buffer_size);
 
 bool sync_cmd(Cli *cli) {
     struct Sync s = cli->cmd.sync;
@@ -36,6 +37,7 @@ bool sync_cmd(Cli *cli) {
     }
 
     char command[256];
+    command[0] = '\0';
     if (s.remote_URL) {
         snprintf(command, sizeof(command), "git remote set-url origin %s", s.remote_URL);
         if (system(command))
@@ -65,11 +67,11 @@ bool sync_cmd(Cli *cli) {
         }
 
         // Add aliases.sh and commit
-        time_t t = time(NULL);
-        struct tm *tm_info = localtime(&t);
-        char timestamp[64];
-        strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", tm_info);
-        if (!add_and_commit(timestamp)) {
+        get_diff_stats(command, sizeof(command));
+        if (strlen(command) == 0) {
+            return true; // Nothing to do
+        }
+        if (!add_and_commit(command)) {
             fprintf(stderr, "Error: Git add and commit failed.\n");
             return false;
         }
@@ -83,4 +85,41 @@ bool sync_cmd(Cli *cli) {
     }
 
     return true;
+}
+
+void get_diff_stats(char *buffer, size_t buffer_size) {
+    char tmp[256];
+
+    // Run git diff command and read output
+    FILE *fp = popen("git diff --stat", "r");
+    if (!fp) {
+        perror("popen");
+        exit(EXIT_FAILURE);
+    }
+
+    // If the file is empty, then there are no changes to commit.
+    if (!fgets(tmp, sizeof(tmp), fp))
+        return; 
+
+    // Read the second line
+    fgets(tmp, sizeof(tmp), fp);
+    pclose(fp);
+
+    // Remove "1 file changed," since it's always 1 file
+    char *ptr = strchr(tmp, ',');
+    if (ptr && *(ptr + 1)) {
+        ptr += 2;
+    } else {
+        strcpy(buffer, "No changes");
+        return;
+    }
+
+    // Get current date
+    time_t t = time(NULL);
+    struct tm *tm_info = localtime(&t);
+    char date[16];
+    strftime(date, sizeof(date), "%b %d:", tm_info);
+
+    // Combine date and git stats
+    snprintf(buffer, buffer_size, "%s %s", date, ptr);
 }
