@@ -235,10 +235,19 @@ int sync_parse_opt(int key, char *arg, struct argp_state *state) {
     struct Sync *sync = &((Cli *)state->input)->cmd.sync;
     switch (key) {
         case 'r':
-            sync->rollback = atoi(arg);
+            if (sync->remote_URL) {
+                printf("Error (invalid args): multiple remote URLs provided.\n");
+                return 1;
+            }
+            if (!(sync->remote_URL = malloc(strlen(arg) + 1)))
+                return 1;
+            strcpy(sync->remote_URL, arg);
             break;
         case 'f':
             sync->forward = atoi(arg);
+            break;
+        case 'b':
+            sync->backward = atoi(arg);
             break;
         case ARGP_KEY_ARG:;
             if (sync->commit_hash) {
@@ -273,8 +282,6 @@ int reccomend_parse_opt(int key, char *arg, struct argp_state *state) {
 Cli *validate_args(Cli *cli) {
     union Cmd c = cli->cmd;
     bool invalid = false;
-
-
     switch (cli->type) {
         case ADD:
             if (!c.add.command) {
@@ -312,10 +319,10 @@ Cli *validate_args(Cli *cli) {
             }
             break;
         case SYNC:
-            if (c.sync.forward && c.sync.rollback) {
+            if (c.sync.forward && c.sync.backward) {
                 printf("Error (invalid args): cannot provide both forward and rollback.\n");
                 invalid = true;
-            } else if (c.sync.commit_hash && (c.sync.forward || c.sync.rollback)) {
+            } else if (c.sync.commit_hash && (c.sync.forward || c.sync.backward)) {
                 printf("Error (invalid args): cannot provide both commit hash and offset value.\n");
                 invalid = true;
             }

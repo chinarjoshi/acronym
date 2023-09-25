@@ -35,8 +35,9 @@ struct Show {
 };
 
 struct Sync {
+    char *remote_URL;
     char *commit_hash;
-    int rollback;
+    int backward;
     int forward;
 };
 

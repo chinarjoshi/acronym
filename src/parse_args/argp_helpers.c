@@ -39,7 +39,8 @@ struct argp_option edit_options[] = {
 struct argp edit_argp = { edit_options, edit_parse_opt }; 
 
 struct argp_option sync_options[] = {
-    { "rollback", 'r', "N", OPTION_ARG_OPTIONAL, "Rollback alias file by N versions (default: 1)" },
+    { "remote", 'r', "URL", 0, "Set remote repository to URL" },
+    { "backward", 'b', "N", OPTION_ARG_OPTIONAL, "Rollback alias file by N versions (default: 1)" },
     { "forward", 'f', "N", OPTION_ARG_OPTIONAL, "Forward alias file by N versions (default: 1)"},
     { 0 }
 };
