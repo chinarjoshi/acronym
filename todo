@@ -1,0 +1,29 @@
+With the new 'comment' section of the acronymed alias:
+
+When reading the alias file, grab comments that are either the line above
+or the commend at the end of line. If the comment length + alias length + command length > 60 chars, then dislpay it on the line above
+
+Get rid of reccomend and sync subcommands
+
+# This is a longer comment than the side of the file allows
+alias a=b
+alias asdf=asdf # This is shorter
+
+# More comment things more comments
+alias asdf=asdf
+
+Do two passes over the dictionary when writing the alias file to disk. First is shorter commands that go compactly line by line. 
+The second time is for longer commands and comments
+
+Changing the file in any way yields .aliases.old which is .gitignored
+
+Question: How to recover comments in a toml file?
+Change toml_table_t to include comments of the entry, and toml_dump to write the comments in the right place
+
+.aliases
+.aliases.old
+
+
+Make pull request to autoenv to source multiple file names, namely, .aliases
+
+This is all because environmental files should not be git tracked because of secrets, and so aliases ensure consistency in the commands you run to develop, build, and run your program.

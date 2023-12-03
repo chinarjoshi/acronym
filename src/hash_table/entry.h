@@ -7,6 +7,7 @@ typedef struct Entry {
     char *alias;   // key
     char *command; // value
     char *section; // cached value
+    char *comment; // description
     bool is_removed;
 } Entry;
 
