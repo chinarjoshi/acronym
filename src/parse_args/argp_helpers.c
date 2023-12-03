@@ -38,26 +38,9 @@ struct argp_option edit_options[] = {
 };
 struct argp edit_argp = { edit_options, edit_parse_opt }; 
 
-struct argp_option sync_options[] = {
-    { "remote", 'r', "URL", 0, "Set remote repository to URL" },
-    { "backward", 'b', "N", OPTION_ARG_OPTIONAL, "Rollback alias file by N versions (default: 1)" },
-    { "forward", 'f', "N", OPTION_ARG_OPTIONAL, "Forward alias file by N versions (default: 1)"},
-    { 0 }
-};
-struct argp sync_argp = { sync_options, sync_parse_opt }; 
-
-struct argp_option reccomend_options[] = {
-    { "num-recs", 's', "N", 0, "Give the top N reccomended aliases (default: 3)" },
-    { "interactive", 'i', 0, 0, "Automatically add reccomended aliases while prompting" },
-    { 0 }
-};
-struct argp reccomend_argp = { reccomend_options, reccomend_parse_opt }; 
-
 ArgpSubcmd argp_subcmds[] = {
     {"add", ADD, &add_argp},
     {"remove", REMOVE, &remove_argp},
     {"show", SHOW, &show_argp},
     {"edit", EDIT, &edit_argp},
-    {"sync", SYNC, &sync_argp},
-    {"reccomend", RECCOMEND, &reccomend_argp},
 };

@@ -34,18 +34,6 @@ struct Show {
     bool local;
 };
 
-struct Sync {
-    char *remote_URL;
-    char *commit_hash;
-    int backward;
-    int forward;
-};
-
-struct Reccomend {
-    int num_recs;
-    bool interactive;
-};
-
 struct AliasListNode {
     struct AliasListNode *next;
     char *data;
@@ -56,11 +44,9 @@ typedef union Cmd {
     struct Remove remove;
     struct Edit edit;
     struct Show show;
-    struct Sync sync;
-    struct Reccomend reccomend;
 } Cmd;
 
-enum CmdType { ADD, REMOVE, EDIT, SHOW, SYNC, RECCOMEND };
+enum CmdType { ADD, REMOVE, EDIT, SHOW, UNDO };
 
 typedef struct Cli {
     union Cmd cmd;
@@ -78,16 +64,12 @@ extern struct argp add_argp;
 extern struct argp remove_argp;
 extern struct argp show_argp;
 extern struct argp edit_argp;
-extern struct argp sync_argp;
-extern struct argp reccomend_argp;
 extern struct ArgpSubcmd argp_subcmds[];
 
 int add_parse_opt(int key, char *arg, struct argp_state *state);
 int remove_parse_opt(int key, char *arg, struct argp_state *state);
 int show_parse_opt(int key, char *arg, struct argp_state *state);
 int edit_parse_opt(int key, char *arg, struct argp_state *state);
-int sync_parse_opt(int key, char *arg, struct argp_state *state);
-int reccomend_parse_opt(int key, char *arg, struct argp_state *state);
 
 struct Cli *parse_args(int argc, char **argv);
 struct Cli *parse_global_options(int argc, char **argv);

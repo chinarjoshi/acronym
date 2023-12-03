@@ -158,28 +158,6 @@ START_TEST(test_show_cmd_commit_hash) {
 }
 END_TEST
 
-START_TEST(test_sync_cmd_normal) {
-    setup_fname_buffers();
-    Cli cli = {
-        .type = SYNC,
-        .verbosity = 1,
-    };
-
-    ck_assert(sync_cmd(&cli));
-}
-END_TEST
-
-START_TEST(test_reccomend_cmd_normal) {
-    setup_fname_buffers();
-    Cli cli = {
-        .type = RECCOMEND,
-        .verbosity = 1,
-    };
-
-    ck_assert(reccomend_cmd(&cli));
-}
-END_TEST
-
 START_TEST(test_compare_paths) {
     char *env_file = "/home/c/projects/.env";
     char *path1 = "/home/c/projects";
@@ -214,14 +192,6 @@ Suite *subcmds_suite(void) {
     tcase_add_test(tc_show, test_show_cmd_commit_hash);
     tcase_add_test(tc_show, test_show_cmd_local);
     suite_add_tcase(s, tc_show);
-
-    TCase *tc_sync = tcase_create("Sync cmd");
-    tcase_add_test(tc_sync, test_sync_cmd_normal);
-    suite_add_tcase(s, tc_sync);
-
-    TCase *tc_reccomend = tcase_create("Reccomend cmd");
-    tcase_add_test(tc_reccomend, test_reccomend_cmd_normal);
-    suite_add_tcase(s, tc_reccomend);
 
     TCase *tc_helpers = tcase_create("Subcmd helpers");
     tcase_add_test(tc_helpers, test_compare_paths);

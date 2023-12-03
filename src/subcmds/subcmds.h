@@ -16,8 +16,7 @@ bool add_cmd(Cli *cli);
 bool remove_cmd(Cli *cli);
 bool edit_cmd(Cli *cli);
 bool show_cmd(Cli *cli);
-bool sync_cmd(Cli *cli);
-bool reccomend_cmd(Cli *cli);
+bool undo_cmd(Cli *cli);
 char **get_env_paths(const char *start, int *num_paths);
 enum PathCmp compare_paths(const char *env_fname, const char *directory);
 int cleanup(const char *message, const char *message_arg, 

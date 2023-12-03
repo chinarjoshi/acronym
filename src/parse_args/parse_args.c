@@ -231,54 +231,6 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
     return 0;
 }
 
-int sync_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Sync *sync = &((Cli *)state->input)->cmd.sync;
-    switch (key) {
-        case 'r':
-            if (sync->remote_URL) {
-                printf("Error (invalid args): multiple remote URLs provided.\n");
-                return 1;
-            }
-            if (!(sync->remote_URL = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(sync->remote_URL, arg);
-            break;
-        case 'f':
-            sync->forward = atoi(arg);
-            break;
-        case 'b':
-            sync->backward = atoi(arg);
-            break;
-        case ARGP_KEY_ARG:;
-            if (sync->commit_hash) {
-                printf("Error (invalid args): multiple commit hashes provided.\n");
-                return 1;
-            }
-            if (!(sync->commit_hash = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(sync->commit_hash, arg);
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
-    }
-    return 0;
-}
-
-int reccomend_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Reccomend *reccomend = &((Cli *)state->input)->cmd.reccomend;
-    switch (key) {
-        case 'n':
-            reccomend->num_recs = atoi(arg);
-            break;
-        case 'l':
-            reccomend->interactive = true;
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
-    }
-    return 0;
-}
-
 Cli *validate_args(Cli *cli) {
     union Cmd c = cli->cmd;
     bool invalid = false;
@@ -318,16 +270,7 @@ Cli *validate_args(Cli *cli) {
                 invalid = true;
             }
             break;
-        case SYNC:
-            if (c.sync.forward && c.sync.backward) {
-                printf("Error (invalid args): cannot provide both forward and rollback.\n");
-                invalid = true;
-            } else if (c.sync.commit_hash && (c.sync.forward || c.sync.backward)) {
-                printf("Error (invalid args): cannot provide both commit hash and offset value.\n");
-                invalid = true;
-            }
-            break;
-        case RECCOMEND:
+        case UNDO:
             break;
     }
     if (invalid) {
@@ -363,9 +306,7 @@ void free_cli(Cli *cli) {
         case EDIT:
             free(cli->cmd.edit.editor);
             break;
-        case SYNC:
-            break;
-        case RECCOMEND:
+        case UNDO:
             break;
     }
     free(cli);

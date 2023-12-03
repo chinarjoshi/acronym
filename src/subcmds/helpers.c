@@ -11,8 +11,7 @@ bool (*sub_cmds[])(Cli *) = {
     [REMOVE] = remove_cmd,
     [EDIT] = edit_cmd,
     [SHOW] = show_cmd,
-    [SYNC] = sync_cmd,
-    [RECCOMEND] = reccomend_cmd,
+    [UNDO] = undo_cmd,
 };
 
 enum PathCmp compare_paths(const char *env_fname, const char *directory) {
