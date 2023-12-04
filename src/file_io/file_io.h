@@ -6,8 +6,8 @@
 
 extern char ACRONYM_DIRNAME[64];
 extern char ALIAS_FNAME[78];
-extern char TOML_FNAME[78];
-extern char TMP_FNAME[78];
+extern char TMP_TOML_FILE[78];
+extern char TMP_MISMATCHES_FILE[78];
 extern const char *AUTOENV_FNAME;
 
 extern const char *ALIAS_PATTERN;

@@ -46,11 +46,13 @@ typedef union Cmd {
     struct Show show;
 } Cmd;
 
-enum CmdType { ADD, REMOVE, EDIT, SHOW, UNDO };
+typedef enum CmdType { ADD, REMOVE, EDIT, SHOW, UNDO } CmdType;
+typedef enum Scope { GLOBAL, PROJ, LOCAL } Scope;
 
 typedef struct Cli {
     union Cmd cmd;
-    enum CmdType type;
+    CmdType type;
+    Scope scope;
     int verbosity;
 } Cli;
 

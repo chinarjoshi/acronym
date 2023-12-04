@@ -66,9 +66,9 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     // Open temporary file to append non-matching lines
     FILE *tmp_f = NULL;
     if (output_non_matches) {
-        tmp_f = fopen(TMP_FNAME, "w+");
+        tmp_f = fopen(TMP_MISMATCHES_FILE, "w+");
         if (!tmp_f) {
-            printf("Error (file I/O): cannot open file: \"%s\".", TMP_FNAME);
+            printf("Error (file I/O): cannot open file: \"%s\".", TMP_MISMATCHES_FILE);
             free_re_resources(re, extras, f);
             return NULL;
         }
@@ -78,6 +78,8 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     // the temporary file. Otherwise, add it to the hash table. At the end,
     // replace the original file with the pruned one.
     bool found_non_matching_line = false;
+    bool found_comment = false;
+    char comment_buf[sizeof(line)];
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
             if (create_entry(&entry, command, alias, section, false) == ERR_OUT_OF_MEMORY) {
@@ -85,15 +87,21 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
                 free_re_resources(re, extras, tmp_f);
                 fclose(f);
                 if (output_non_matches)
-                    remove(TMP_FNAME);
+                    remove(TMP_MISMATCHES_FILE);
                 return NULL;
             }
             add_entry(entry, ht);
+        } else if (line[0] == '#') {
+            // Save the value if its a comment
+            strcpy(comment_buf, line);
+            found_comment = true;
+            continue;
         } else if (output_non_matches && line[0] != '\n' && strcmp(line, FILE_DELIMITER) != 0) {
             // Add every line except new line and delimiter
             fputs(line, tmp_f);
             found_non_matching_line = true;
         }
+        found_comment = false;
     }
 
     if (output_non_matches && found_non_matching_line)

@@ -21,8 +21,8 @@ bool edit_cmd(Cli *cli) {
     if (!tmp_f)
         return cleanup(0, 0, ht, alias_f, 0);
 
-    // Serialize hash table to TOML_FNAME
-    if (!ht_to_toml_file(ht, TOML_FNAME))
+    // Serialize hash table to TMP_TOML_FILE
+    if (!ht_to_toml_file(ht, TMP_TOML_FILE))
         return 0;
 
     // Empty table because entries will be arbitrarily added and removed
@@ -31,23 +31,23 @@ bool edit_cmd(Cli *cli) {
     // Open the toml tmpfile with editor
     char command[128];
     char *editor = e.editor ? e.editor : getenv("EDITOR");
-    snprintf(command, sizeof(command), "%s %s", editor, TOML_FNAME);
+    snprintf(command, sizeof(command), "%s %s", editor, TMP_TOML_FILE);
 
     int result = system(command);
     if (result)
-        return cleanup("Error (system): failed to run command: \"%s\".\n", command, ht, 0, TOML_FNAME);
+        return cleanup("Error (system): failed to run command: \"%s\".\n", command, ht, 0, TMP_TOML_FILE);
 
-    if (!toml_file_to_ht(ht, TOML_FNAME))
+    if (!toml_file_to_ht(ht, TMP_TOML_FILE))
         return 0;
-    remove(TOML_FNAME);
+    remove(TMP_TOML_FILE);
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
-        return cleanup("Error (file I/O): unable to write to alias file: \"%s\".\n", alias_fname, ht, 0, TOML_FNAME);
+        return cleanup("Error (file I/O): unable to write to alias file: \"%s\".\n", alias_fname, ht, 0, TMP_TOML_FILE);
 
     free_hash_table(ht);
     fclose(tmp_f);
-    if (rename(TMP_FNAME, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_FNAME);
+    if (rename(TMP_MISMATCHES_FILE, alias_fname))
+        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_MISMATCHES_FILE);
     return true;
 }

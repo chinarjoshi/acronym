@@ -38,7 +38,11 @@ struct Cli *parse_args(int argc, char **argv) {
 struct Cli *parse_global_options(int argc, char **argv) {
     // If invoked without arguments, then print the alias file path
     if (argc < 2) {
-        printf("%s\n", ALIAS_FNAME);
+        const char *fname = getenv("ACRONYM_ALIAS_FNAME");
+        if (!fname)
+            fname = ".aliases.sh";
+
+        printf("%s/%s", getenv("HOME"), fname);
         return NULL;
     }
 

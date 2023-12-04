@@ -60,15 +60,15 @@ bool remove_cmd(Cli *cli) {
         r.aliases = r.aliases->next;
     }
     if (!something_removed)
-        return cleanup(0, 0, ht, tmp_f, TMP_FNAME);
+        return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_FILE);
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
-        return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".\n", TMP_FNAME, ht, tmp_f, TMP_FNAME);
+        return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".\n", TMP_MISMATCHES_FILE, ht, tmp_f, TMP_MISMATCHES_FILE);
 
     free_hash_table(ht);
     fclose(tmp_f);
-    if (rename(TMP_FNAME, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_FNAME);
+    if (rename(TMP_MISMATCHES_FILE, alias_fname))
+        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_MISMATCHES_FILE);
     return true;
 }

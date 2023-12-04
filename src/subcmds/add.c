@@ -28,16 +28,16 @@ bool add_cmd(Cli *cli) {
         if (cli->verbosity)
             printf("Duplicate: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n",
                   entry->alias, entry->command, entry->section);
-        return cleanup(0, 0, ht, tmp_f, TMP_FNAME);
+        return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_FILE);
     }
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
         return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".", 
-                       TMP_FNAME, ht, tmp_f, TMP_FNAME);
+                       TMP_MISMATCHES_FILE, ht, tmp_f, TMP_MISMATCHES_FILE);
 
-    if (rename(TMP_FNAME, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, ht, tmp_f, TMP_FNAME);
+    if (rename(TMP_MISMATCHES_FILE, alias_fname))
+        return cleanup("Error (file I/O): cannot rename file.\n", 0, ht, tmp_f, TMP_MISMATCHES_FILE);
 
     printf("Added: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n", 
            entry->alias, entry->command, entry->section);
