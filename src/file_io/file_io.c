@@ -66,9 +66,9 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     // Open temporary file to append non-matching lines
     FILE *tmp_f = NULL;
     if (output_non_matches) {
-        tmp_f = fopen(TMP_MISMATCHES_FILE, "w+");
+        tmp_f = fopen(TMP_MISMATCHES_PATH, "w+");
         if (!tmp_f) {
-            printf("Error (file I/O): cannot open file: \"%s\".", TMP_MISMATCHES_FILE);
+            printf("Error (file I/O): cannot open file: \"%s\".", TMP_MISMATCHES_PATH);
             free_re_resources(re, extras, f);
             return NULL;
         }
@@ -78,51 +78,57 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     // the temporary file. Otherwise, add it to the hash table. At the end,
     // replace the original file with the pruned one.
     bool found_non_matching_line = false;
-    bool found_comment = false;
-    char comment_buf[sizeof(line)];
+    char comment[sizeof(line) * 4];
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
-            if (create_entry(&entry, command, alias, section, false) == ERR_OUT_OF_MEMORY) {
+            if (create_entry(&entry, command, alias, section, comment, false) == ERR_OUT_OF_MEMORY) {
                 printf("Error (memory): out of memory while creating entry.\n");
                 free_re_resources(re, extras, tmp_f);
                 fclose(f);
                 if (output_non_matches)
-                    remove(TMP_MISMATCHES_FILE);
+                    remove(TMP_MISMATCHES_PATH);
                 return NULL;
             }
             add_entry(entry, ht);
         } else if (line[0] == '#') {
             // Save the value if its a comment
-            strcpy(comment_buf, line);
-            found_comment = true;
+            strncat(comment, line, sizeof(comment) - strlen(comment) - 1);
             continue;
         } else if (output_non_matches && line[0] != '\n' && strcmp(line, FILE_DELIMITER) != 0) {
             // Add every line except new line and delimiter
             fputs(line, tmp_f);
             found_non_matching_line = true;
         }
-        found_comment = false;
+        comment[0] = '\0';
     }
 
-    if (output_non_matches && found_non_matching_line)
+    if (output_non_matches && found_non_matching_line) {
         fputs("\n", tmp_f);
+        fputs(FILE_DELIMITER, tmp_f);
+    }
     free_re_resources(re, extras, f);
     return tmp_f;
 }
 
 // Given a hash table of aliases, write all elements to the given file stream.
+// Do two passes over the hash table:
+// 1. Write all entries without a comment first compactly
+// 2. Write remaining entries sandwiched between whitespace
 bool write_aliases(FILE *f, HashTable *ht) {
     if (ht->size == 0)
         return true;
 
     Entry *entry;
-    if (!fputs(FILE_DELIMITER, f)) {
-        printf("Error (file I/O): unable to write to file");
-        return false;
+    for (int i = 0; i < ht->capacity; i++) {
+        entry = ht->backing_array[i];
+        if (entry && !entry->is_removed && !entry->comment) {
+            fprintf(f, "alias %s='%s' ## %s\n", entry->alias, entry->command, entry->section);
+        }
     }
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
-        if (entry && !entry->is_removed) {
+        if (entry && !entry->is_removed && entry->comment) {
+            fprintf(f, "\n%s\n", entry->comment);
             fprintf(f, "alias %s='%s' ## %s\n", entry->alias, entry->command, entry->section);
         }
     }

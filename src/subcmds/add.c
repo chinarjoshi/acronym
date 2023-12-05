@@ -9,11 +9,10 @@ bool add_cmd(Cli *cli) {
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     Entry *entry;
 
-    // Pick the alias file name ('.env' if 'a.local', else '~/.aliases')
-    const char *alias_fname = (a.local) ? AUTOENV_FNAME : ALIAS_FNAME;
-    FILE *alias_f = fopen(alias_fname, "r");
+    // Open the aliases file
+    FILE *alias_f = fopen(ALIASES_PATH, "r");
     if (!alias_f)
-        return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", alias_fname, ht, 0, 0);
+        return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", ALIASES_PATH, ht, 0, 0);
 
     // Read aliases into hash table and write non-matching lines to tmp
     FILE *tmp_f = read_aliases(alias_f, ht, true);
@@ -21,23 +20,27 @@ bool add_cmd(Cli *cli) {
         return cleanup(0, 0, ht, alias_f, 0);
 
     // Create entry from command line args
-    create_entry(&entry, a.command, a.alias_override, a.section_override, a.include_flags);
+    create_entry(&entry, a.command, a.alias_override, a.section_override, 0, a.include_flags);
 
     // Add new entry to hash table and check for duplicate
     if (add_entry(entry, ht) == ERR_DUPLICATE) {
         if (cli->verbosity)
             printf("Duplicate: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n",
                   entry->alias, entry->command, entry->section);
-        return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_FILE);
+        return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_PATH);
     }
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
         return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".", 
-                       TMP_MISMATCHES_FILE, ht, tmp_f, TMP_MISMATCHES_FILE);
+                       TMP_MISMATCHES_PATH, ht, tmp_f, TMP_MISMATCHES_PATH);
 
-    if (rename(TMP_MISMATCHES_FILE, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, ht, tmp_f, TMP_MISMATCHES_FILE);
+    if (ACRONYM_SAVE_BACKUP)
+        if (rename(ALIASES_PATH, OLD_ALIASES_PATH))
+            return cleanup("Error (file I/O): cannot write backup.\n", 0, ht, tmp_f, TMP_MISMATCHES_PATH);
+
+    if (rename(TMP_MISMATCHES_PATH, ALIASES_PATH))
+        return cleanup("Error (file I/O): cannot override aliases.\n", 0, ht, tmp_f, TMP_MISMATCHES_PATH);
 
     printf("Added: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n", 
            entry->alias, entry->command, entry->section);

@@ -10,7 +10,7 @@
 // exluding their arguments, in order.
 Status create_entry(Entry **data_out, const char *command,
                       const char *alias_override, const char *section_override,
-                      bool include_flags) {
+                      const char *comment, bool include_flags) {
     Entry *entry = malloc(sizeof(Entry));
     if (!entry)
         return ERR_OUT_OF_MEMORY;
@@ -33,6 +33,13 @@ Status create_entry(Entry **data_out, const char *command,
     entry->section = malloc(strlen(section_override) + 1);
     strcpy(entry->section, section_override);
     entry->is_removed = false;
+
+    // If 'comment', is provided, then use it. Otherwise, set to null.
+    entry->comment = NULL;
+    if (comment) {
+        entry->comment = malloc(strlen(comment) + 1);
+        strcpy(entry->comment, comment);
+    }
 
     *data_out = entry;
     return SUCCESS;
@@ -131,5 +138,6 @@ void free_entry(Entry *entry) {
     free(entry->alias);
     free(entry->section);
     free(entry->command);
+    free(entry->comment);
     free(entry);
 }

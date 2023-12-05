@@ -2,7 +2,7 @@
 #define PARSE_ARGS_H
 #include <argp.h>
 #include <stdbool.h>
-#define NUM_SUBCMDS 6
+#define NUM_SUBCMDS 5
 typedef struct AliasListNode AliasListNode;
 
 struct Add {
@@ -10,7 +10,6 @@ struct Add {
     char *alias_override;
     char *section_override;
     bool include_flags;
-    bool local;
 };
 
 struct Remove {
@@ -18,12 +17,10 @@ struct Remove {
     bool section;
     bool force;
     bool interactive;
-    bool local;
 };
 
 struct Edit {
     char *editor;
-    bool local;
 };
 
 struct Show {
@@ -31,7 +28,6 @@ struct Show {
     char *commit_hash;
     bool alias;
     bool section;
-    bool local;
 };
 
 struct AliasListNode {
@@ -66,12 +62,14 @@ extern struct argp add_argp;
 extern struct argp remove_argp;
 extern struct argp show_argp;
 extern struct argp edit_argp;
+extern struct argp undo_argp;
 extern struct ArgpSubcmd argp_subcmds[];
 
 int add_parse_opt(int key, char *arg, struct argp_state *state);
 int remove_parse_opt(int key, char *arg, struct argp_state *state);
 int show_parse_opt(int key, char *arg, struct argp_state *state);
 int edit_parse_opt(int key, char *arg, struct argp_state *state);
+int undo_parse_opt(int key, char *arg, struct argp_state *state);
 
 struct Cli *parse_args(int argc, char **argv);
 struct Cli *parse_global_options(int argc, char **argv);

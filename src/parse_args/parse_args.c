@@ -38,11 +38,13 @@ struct Cli *parse_args(int argc, char **argv) {
 struct Cli *parse_global_options(int argc, char **argv) {
     // If invoked without arguments, then print the alias file path
     if (argc < 2) {
-        const char *fname = getenv("ACRONYM_ALIAS_FNAME");
-        if (!fname)
-            fname = ".aliases.sh";
+        const char *dir = getenv("ACRONYM_GLOBAL_DIR");
+        dir = (dir) ? dir : getenv("HOME");
 
-        printf("%s/%s", getenv("HOME"), fname);
+        const char *file = getenv("ACRONYM_FILENAME");
+        file = (file) ? file : ".aliases.sh";
+
+        printf("%s/%s", dir, file);
         return NULL;
     }
 
@@ -124,8 +126,11 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'i':
             add->include_flags = true;
             break;
+        case 'p':
+            ((Cli *)state->input)->scope = PROJ;
+            break;
         case 'l':
-            add->local = true;
+            ((Cli *)state->input)->scope = LOCAL;
             break;
         case ARGP_KEY_ARG:;
             if (add->command) {
@@ -154,8 +159,11 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
         case 'i':
             remove->interactive = true;
             break;
+        case 'p':
+            ((Cli *)state->input)->scope = PROJ;
+            break;
         case 'l':
-            remove->local = true;
+            ((Cli *)state->input)->scope = LOCAL;
             break;
         case ARGP_KEY_ARG:;
             AliasListNode *new_node;
@@ -187,8 +195,11 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
                 return 1;
             strcpy(edit->editor, arg);
             break;
+        case 'p':
+            ((Cli *)state->input)->scope = PROJ;
+            break;
         case 'l':
-            edit->local = true;
+            ((Cli *)state->input)->scope = LOCAL;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -205,8 +216,11 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
         case 's':
             show->section = true;
             break;
+        case 'p':
+            ((Cli *)state->input)->scope = PROJ;
+            break;
         case 'l':
-            show->local = true;
+            ((Cli *)state->input)->scope = LOCAL;
             break;
         case 'c':
             if (show->commit_hash) {
@@ -231,6 +245,18 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         default:
             return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+int undo_parse_opt(int key, char *arg, struct argp_state *state) {
+    switch (key) {
+        case 'p':
+            ((Cli *)state->input)->scope = PROJ;
+            break;
+        case 'l':
+            ((Cli *)state->input)->scope = LOCAL;
+            break;
     }
     return 0;
 }
