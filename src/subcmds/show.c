@@ -9,29 +9,23 @@
 bool show_cmd(Cli *cli) {
     struct Show s = cli->cmd.show;
 
-    // Read up until 'directory' if provided, or current directory
-    char cwd[PATH_MAX];
-    if (!getcwd(cwd, sizeof(cwd))) {
-        perror("Error (system): getcwd() error.\n");
-        return false;
-    }
-
-    // Get a list of .env file paths from AUTOENV_AUTH_FILE
-    int num_paths;
-    char **env_paths = get_env_paths(cwd, &num_paths);
-    if (!env_paths)
-        return false;
-
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
 
-    // Include the global alias file if not 'local'
-    if (!s.local) {
-        if (s.commit_hash) {
-            // Then show the alias file from the other git commit and write to tmpfile
-        }
+    if (IS_IN_GIT_REPO) {
+        // Include local aliases, highlighted differently to differentiate them
+        if (!include_aliases_file(LOCAL_ALIASES_PATH, ht))
+            return false;
 
-        FILE *alias_f = fopen(ALIAS_FNAME, "r");
+        // And now project aliases
+        if (!include_aliases_file(PROJ_ALIASES_PATH, ht))
+            return false;
+    }
+
+    // If not in git repo or -g is passed, then include global aliases file. 
+    // Use "!= GLOBAL" because GLOBAL is actually the default value.
+    if (!IS_IN_GIT_REPO || cli->scope != GLOBAL) {
+        FILE *alias_f = fopen(GLOBAL_ALIASES_PATH, "r");
         if (!alias_f) {
             perror("Error (file I/O): unable to open alias file: \"%s\".\n");
             return false;
@@ -39,18 +33,11 @@ bool show_cmd(Cli *cli) {
         read_aliases(alias_f, ht, false);
     }
 
-    // Load in .env aliases starting from root directory to current directory
-    for (int i = 0; i < num_paths; i++) {
-        FILE *env_f = fopen(env_paths[i], "r");
-        if (!env_f) continue;
-        read_aliases(env_f, ht, false);
+    if (s.prefixes) {
+        filter_hash_table(ht, s.prefixes, s.use_aliases, s.use_sections);
     }
-
-    if (s.prefixes)
-        filter_hash_table(ht, s.prefixes, s.alias, s.section);
 
     printf("%s", ht_to_toml_str(ht));
     free_hash_table(ht);
-    free_env_paths(env_paths, num_paths);
     return true;
 }

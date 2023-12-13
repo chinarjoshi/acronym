@@ -27,3 +27,14 @@ Change toml_table_t to include comments of the entry, and toml_dump to write the
 Make pull request to autoenv to source multiple file names, namely, .aliases
 
 This is all because environmental files should not be git tracked because of secrets, and so aliases ensure consistency in the commands you run to develop, build, and run your program.
+
+Local file cannot override aliases from the project level file.
+
+There's two sides
+
+A unified interface to scattered commands
+Benefits:
+- Faster onboarding time
+- Alliviates "works on my machine"
+- Less cognitive overhead in long commands
+- Faster than writing build scripts when the process changes quickly

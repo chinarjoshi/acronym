@@ -35,10 +35,6 @@ bool add_cmd(Cli *cli) {
         return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".", 
                        TMP_MISMATCHES_PATH, ht, tmp_f, TMP_MISMATCHES_PATH);
 
-    if (ACRONYM_SAVE_BACKUP)
-        if (rename(ALIASES_PATH, OLD_ALIASES_PATH))
-            return cleanup("Error (file I/O): cannot write backup.\n", 0, ht, tmp_f, TMP_MISMATCHES_PATH);
-
     if (rename(TMP_MISMATCHES_PATH, ALIASES_PATH))
         return cleanup("Error (file I/O): cannot override aliases.\n", 0, ht, tmp_f, TMP_MISMATCHES_PATH);
 

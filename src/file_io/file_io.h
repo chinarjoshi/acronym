@@ -5,11 +5,14 @@
 #include <pcre.h>
 #include <stdio.h>
 
-extern bool ACRONYM_SAVE_BACKUP;
-extern char ALIASES_PATH[PATH_MAX];
-extern char OLD_ALIASES_PATH[PATH_MAX];
-extern char TMP_MISMATCHES_PATH[64];
-extern char TMP_TOML_PATH[64];
+extern bool IS_IN_GIT_REPO;
+extern char *ALIASES_PATH;
+extern char GLOBAL_ALIASES_PATH[PATH_MAX];
+extern char PROJ_ALIASES_PATH[PATH_MAX];
+extern char LOCAL_ALIASES_PATH[PATH_MAX];
+
+extern char TMP_MISMATCHES_PATH[PATH_MAX];
+extern char TMP_TOML_PATH[PATH_MAX];
 
 extern const char *ALIAS_PATTERN;
 extern const char *FILE_DELIMITER;

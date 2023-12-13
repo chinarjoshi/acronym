@@ -103,7 +103,8 @@ struct Cli *parse_global_options(int argc, char **argv) {
 }
 
 int add_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Add *add = &((Cli *)state->input)->cmd.add;
+    Cli *cli = (Cli *)state->input;
+    struct Add *add = &cli->cmd.add;
     switch (key) {
         case 'a':
             if (add->alias_override) {
@@ -127,10 +128,18 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
             add->include_flags = true;
             break;
         case 'p':
-            ((Cli *)state->input)->scope = PROJ;
+            if (cli->scope != GLOBAL) {
+                printf("Error (invalid args): multiple scopes provided.\n");
+                return 1;
+            }
+            cli->scope = PROJ;
             break;
         case 'l':
-            ((Cli *)state->input)->scope = LOCAL;
+            if (cli->scope != GLOBAL) {
+                printf("Error (invalid args): multiple scopes provided.\n");
+                return 1;
+            }
+            cli->scope = LOCAL;
             break;
         case ARGP_KEY_ARG:;
             if (add->command) {
@@ -148,7 +157,8 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int remove_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Remove *remove = &((Cli *)state->input)->cmd.remove;
+    Cli *cli = (Cli *)state->input;
+    struct Remove *remove = &cli->cmd.remove;
     switch (key) {
         case 's':
             remove->section = true;
@@ -160,10 +170,18 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
             remove->interactive = true;
             break;
         case 'p':
-            ((Cli *)state->input)->scope = PROJ;
+            if (cli->scope != GLOBAL) {
+                printf("Error (invalid args): multiple scopes provided.\n");
+                return 1;
+            }
+            cli->scope = PROJ;
             break;
         case 'l':
-            ((Cli *)state->input)->scope = LOCAL;
+            if (cli->scope != GLOBAL) {
+                printf("Error (invalid args): multiple scopes provided.\n");
+                return 1;
+            }
+            cli->scope = LOCAL;
             break;
         case ARGP_KEY_ARG:;
             AliasListNode *new_node;
@@ -184,7 +202,8 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int edit_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Edit *edit = &((Cli *)state->input)->cmd.edit;
+    Cli *cli = (Cli *)state->input;
+    struct Edit *edit = &cli->cmd.edit;
     switch (key) {
         case 'e':
             if (edit->editor) {
@@ -196,10 +215,18 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
             strcpy(edit->editor, arg);
             break;
         case 'p':
-            ((Cli *)state->input)->scope = PROJ;
+            if (cli->scope != GLOBAL) {
+                printf("Error (invalid args): multiple scopes provided.\n");
+                return 1;
+            }
+            cli->scope = PROJ;
             break;
         case 'l':
-            ((Cli *)state->input)->scope = LOCAL;
+            if (cli->scope != GLOBAL) {
+                printf("Error (invalid args): multiple scopes provided.\n");
+                return 1;
+            }
+            cli->scope = LOCAL;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -208,28 +235,18 @@ int edit_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int show_parse_opt(int key, char *arg, struct argp_state *state) {
-    struct Show *show = &((Cli *)state->input)->cmd.show;
+    Cli *cli = (Cli *)state->input;
+    struct Show *show = &cli->cmd.show;
     switch (key) {
         case 'a':
-            show->alias = true;
+            show->use_aliases = true;
             break;
         case 's':
-            show->section = true;
+            show->use_sections = true;
             break;
-        case 'p':
-            ((Cli *)state->input)->scope = PROJ;
-            break;
-        case 'l':
-            ((Cli *)state->input)->scope = LOCAL;
-            break;
-        case 'c':
-            if (show->commit_hash) {
-                printf("Error (invalid args): multiple commit hashes provided.\n");
-                return 1;
-            }
-            if (!(show->commit_hash = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(show->commit_hash, arg);
+        case 'g':
+            // HACK: Global is the default, so to pass this parameter, make it not global
+            cli->scope = LOCAL;
             break;
         case ARGP_KEY_ARG:;
             AliasListNode *new_node;
@@ -294,7 +311,7 @@ Cli *validate_args(Cli *cli) {
             }
             break;
         case SHOW:
-            if (c.show.alias && c.show.section) {
+            if (c.show.aliases && c.show.sections) {
                 printf("Error (invalid args): alias and section flags" \
                        "cannot be true at the same time.\n");
                 invalid = true;

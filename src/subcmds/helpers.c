@@ -5,7 +5,7 @@
 #include <string.h>
 #include "subcmds.h"
 #include "../hash_table/hash_table.h"
-static void insert_path(const char *path, char **path_arr, int num_paths);
+#include "../file_io/file_io.h"
 bool (*sub_cmds[])(Cli *) = {
     [ADD] = add_cmd,
     [REMOVE] = remove_cmd,
@@ -13,76 +13,6 @@ bool (*sub_cmds[])(Cli *) = {
     [SHOW] = show_cmd,
     [UNDO] = undo_cmd,
 };
-
-enum PathCmp compare_paths(const char *env_fname, const char *directory) {
-    int env_fname_len = strlen(env_fname) - 5;
-    int directory_len = strlen(directory);
-
-    int cmp_env_fname_len = !strncmp(env_fname, directory, env_fname_len);
-    int cmp_directory_len = !strncmp(env_fname, directory, directory_len);
-
-    if (env_fname_len == directory_len && cmp_env_fname_len) {
-        return PATH_EQ;
-    } else if (env_fname_len < directory_len && cmp_env_fname_len) {
-        return PATH_CHILD;
-    } else if (env_fname_len > directory_len && cmp_directory_len) {
-        return PATH_PARENT;
-    }
-
-    return PATH_UNRELATED;
-}
-
-// Returns an array of .env paths that are children or parents of 'start', according to 
-// 'return_parents', in the form of 'num_paths' char pointers that must be freed.
-// The array is ordered from shortest to longest path.
-char **get_env_paths(const char *start, int *num_paths) {
-    const char *auth_fname = getenv("AUTOENV_AUTH_FILE");
-    FILE *auth_f = fopen(auth_fname, "r");
-    if (!auth_f) {
-        fprintf(stderr, "Error (file I/O): cannot open autoenv auth file: \"%s\".\n", auth_fname);
-        return NULL;
-    }
-
-    char line[PATH_MAX];
-    int max_paths = 32, path_count = 0;
-    char** paths = malloc(max_paths * sizeof(char *));
-
-    while (fgets(line, sizeof(line), auth_f)) {
-        char* path = strtok(line, ":");
-        enum PathCmp pcmp = compare_paths(path, start);
-        if (path && (pcmp == PATH_EQ || pcmp == PATH_CHILD)) {
-            if (path_count + 1 > max_paths) {
-                max_paths *= 2;
-                paths = realloc(paths, max_paths * sizeof(char *));
-            }
-            insert_path(path, paths, path_count);
-            path_count++;
-        }
-    }
-
-    fclose(auth_f);
-
-    *num_paths = path_count;
-    return paths;
-}
-
-// Insert 'path' into 'path_arr', which is length 'num_paths' and ascending in length.
-static void insert_path(const char *path, char **path_arr, int num_paths) {
-    int path_len = strlen(path);
-    int i;
-
-    // Find the position to insert the new path
-    for (i = num_paths - 1; i >= 0; --i) {
-        if (strlen(path_arr[i]) <= path_len) {
-            break;
-        }
-        // Shift elements to make room for the new path
-        path_arr[i + 1] = path_arr[i];
-    }
-    
-    // Insert the new path
-    path_arr[i + 1] = strdup(path);
-}
 
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove) {
@@ -96,13 +26,6 @@ int cleanup(const char *message, const char *message_arg,
     fclose(f);
     remove(fname_to_remove);
     return 0;
-}
-
-void free_env_paths(char **paths, int num_paths) {
-    for (int i = 0; i < num_paths; ++i) {
-        free(paths[i]);
-    }
-    free(paths);
 }
 
 // Bold the longest matching substring in 'data' from list 'l'
@@ -160,4 +83,15 @@ void filter_hash_table(HashTable *ht, AliasListNode *l, bool alias, bool section
             ht->size--;
         }
     }
+}
+
+bool include_aliases_file(char *path, HashTable *ht) {
+    // Include local aliases, highlighted differently to differentiate them
+    FILE *aliases_f = fopen(path, "r");
+    if (!aliases_f) {
+        perror("Error (file I/O): unable to open alias file: \"%s\".\n");
+        return false;
+    }
+    read_aliases(aliases_f, ht, false);
+    return true;
 }

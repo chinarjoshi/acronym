@@ -11,11 +11,10 @@ bool remove_cmd(Cli *cli) {
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     Entry *entry;
 
-    // Pick the alias file name ('.env' if 'a.local', else '~/.aliases')
-    const char *alias_fname = (r.local) ? AUTOENV_FNAME : ALIAS_FNAME;
-    FILE *alias_f = fopen(alias_fname, "r");
+    // Open the aliases file
+    FILE *alias_f = fopen(ALIASES_PATH, "r");
     if (!alias_f)
-        return cleanup("Error (file I/O): aliases file not found: \"%s\".\n", alias_fname, ht, 0, 0);
+        return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", ALIASES_PATH, ht, 0, 0);
 
     // Read aliases into hash table and write non-matching lines to tmp
     FILE *tmp_f = read_aliases(alias_f, ht, true);
@@ -60,15 +59,19 @@ bool remove_cmd(Cli *cli) {
         r.aliases = r.aliases->next;
     }
     if (!something_removed)
-        return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_FILE);
+        return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_PATH);
 
     // Write new aliases back to file and check for write permission
     if (!write_aliases(tmp_f, ht))
-        return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".\n", TMP_MISMATCHES_FILE, ht, tmp_f, TMP_MISMATCHES_FILE);
+        return cleanup("Error (file I/O): unable to write to temporary alias file: \"%s\".\n", TMP_MISMATCHES_PATH, ht, tmp_f, TMP_MISMATCHES_PATH);
 
     free_hash_table(ht);
     fclose(tmp_f);
-    if (rename(TMP_MISMATCHES_FILE, alias_fname))
-        return cleanup("Error (file I/O): cannot rename file.\n", 0, 0, 0, TMP_MISMATCHES_FILE);
+
+    if (ACRONYM_SAVE_BACKUP)
+        if (rename(ALIASES_PATH, OLD_ALIASES_PATH))
+            return cleanup("Error (file I/O): cannot write backup.\n", 0, ht, tmp_f, TMP_MISMATCHES_PATH);
+    if (rename(TMP_MISMATCHES_PATH, ALIASES_PATH))
+        return cleanup("Error (file I/O): cannot override aliases.\n", 0, 0, 0, TMP_MISMATCHES_PATH);
     return true;
 }

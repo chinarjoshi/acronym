@@ -25,11 +25,9 @@ struct argp_option remove_options[] = {
 struct argp remove_argp = { remove_options, remove_parse_opt }; 
 
 struct argp_option show_options[] = {
-    { "alias", 'a', 0, 0, "Show aliases starting with any of provided args" },
-    { "section", 's', 0, 0, "Show all aliases in sections starting with any of provided args" },
-    { "project", 'p', 0, 0, "Show aliases file in current project" },
-    { "local", 'l', 0, 0, "Show your local aliases file in current project" },
-    { "commit", 'c', "HASH", 0, "Show aliases from commit HASH in git index" },
+    { "global", 'g', 0, 0, "Include your global aliases, even when in a git repository" },
+    { "aliases", 'a', 0, 0, "Make arguments match only alias names" },
+    { "sections", 's', 0, 0, "Make arguments match only section names" },
     { 0 }
 };
 struct argp show_argp = { show_options, show_parse_opt }; 
