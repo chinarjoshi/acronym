@@ -68,9 +68,6 @@ bool remove_cmd(Cli *cli) {
     free_hash_table(ht);
     fclose(tmp_f);
 
-    if (ACRONYM_SAVE_BACKUP)
-        if (rename(ALIASES_PATH, OLD_ALIASES_PATH))
-            return cleanup("Error (file I/O): cannot write backup.\n", 0, ht, tmp_f, TMP_MISMATCHES_PATH);
     if (rename(TMP_MISMATCHES_PATH, ALIASES_PATH))
         return cleanup("Error (file I/O): cannot override aliases.\n", 0, 0, 0, TMP_MISMATCHES_PATH);
     return true;

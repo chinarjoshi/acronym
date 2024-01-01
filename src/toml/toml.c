@@ -1409,6 +1409,7 @@ toml_table_t *toml_parse_file(FILE *fp, char *errbuf, int errbufsz) {
   char *buf = 0;
   int off = 0;
 
+    // EDIT HERE SOMEWHERE -------------------------------------------------------------
   /* read from fp into buf */
   while (!feof(fp)) {
 

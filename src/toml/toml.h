@@ -54,8 +54,9 @@ struct toml_timestamp_t {
  */
 typedef struct toml_keyval_t toml_keyval_t;
 struct toml_keyval_t {
-  const char *key; /* key to this value */
-  const char *val; /* the raw value */
+  const char *key;     /* key to this value */
+  const char *val;     /* the raw value */
+  const char *comment; /* comment string */
 };
 
 typedef struct toml_arritem_t toml_arritem_t;

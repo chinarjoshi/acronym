@@ -12,11 +12,12 @@ static toml_table_t *create_toml_table(const char *key) {
     return t;
 }
 
-static toml_keyval_t *create_toml_keyval(const char *key, const char *val) {
+static toml_keyval_t *create_toml_keyval(const char *key, const char *val, const char *comment) {
     toml_keyval_t *kv = malloc(sizeof(toml_table_t));
     if (!kv) return NULL;
     kv->key = key; 
     kv->val = val; 
+    kv->comment = comment; 
     return kv;
 }
 
@@ -63,7 +64,7 @@ void ht_to_toml_table(HashTable *ht, toml_table_t *root) {
                 if (!section) return;
                 toml_add_subtable(root, section);
             }
-            toml_keyval_t *kv = create_toml_keyval(entry->alias, entry->command);
+            toml_keyval_t *kv = create_toml_keyval(entry->alias, entry->command, entry->comment);
             if (!kv) return;
             toml_add_keyval(section, kv);
         }
@@ -80,7 +81,7 @@ void toml_table_to_ht(HashTable *ht, toml_table_t *root) {
         for (int j = 0; j < section->nkval; ++j) {
             const char *key = toml_key_in(section, j);
             toml_datum_t d = toml_string_in(section, key);
-            create_entry(&entry, d.u.s, key, section->key, 0);
+            create_entry(&entry, d.u.s, key, section->key,0, 0);
             add_entry(entry, ht);
         }
     }
@@ -169,6 +170,7 @@ char *toml_dumps(toml_table_t *table) {
         for (int j = 0; j < tab->nkval; j++) {
             // "%s = \"%s\"\n"
             // %s \033[34m=\033[32m\"%s\"\033[0m\n
+            // EDIT HERE -------------------------------------------------------------
             len += strlen(tab->kval[j]->key) + strlen(tab->kval[j]->val) + 20;
         }
         if (i < table->ntab - 1)
@@ -184,6 +186,7 @@ char *toml_dumps(toml_table_t *table) {
         sprintf(toml_str + pos, "\033[34m[\033[35m%s\033[34m]\033[0m\n", tab->key);
         pos += strlen(tab->key) + 22;
         for (int j = 0; j < tab->nkval; j++) {
+            // EDIT HERE -------------------------------------------------------------
             sprintf(toml_str + pos, "%s \033[34m= \033[32m\"%s\"\033[0m\n", tab->kval[j]->key, tab->kval[j]->val);
             pos += strlen(tab->kval[j]->key) + strlen(tab->kval[j]->val) + 20;
         }
@@ -205,6 +208,7 @@ void toml_dump(toml_table_t *table, FILE *fp) {
         tab = table->tab[i];
         fprintf(fp, "[%s]\n", tab->key);
         for (int j = 0; j < tab->nkval; j++) {
+            // EDIT HERE -------------------------------------------------------------
             fprintf(fp, "%s = \"%s\"\n", tab->kval[j]->key, tab->kval[j]->val);
         }
         if (i < table->ntab - 1) {

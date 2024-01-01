@@ -11,7 +11,6 @@ bool (*sub_cmds[])(Cli *) = {
     [REMOVE] = remove_cmd,
     [EDIT] = edit_cmd,
     [SHOW] = show_cmd,
-    [UNDO] = undo_cmd,
 };
 
 int cleanup(const char *message, const char *message_arg, 

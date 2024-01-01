@@ -7,10 +7,10 @@
 char line[256];
 FILE *alias_f;
 static void setup() {
-    strcpy(ALIAS_FNAME, "/home/c/.acronym_test_cmd_alias");
-    strcpy(TMP_FNAME, "/home/c/.acronym_test_cmd_tmpfile"); // MUST BE ON SAME DEVICE AS ABOVE
-    AUTOENV_FNAME = "/home/c/.acronym_test_cmd_autoenv";
-    alias_f = fopen(ALIAS_FNAME, "w");
+    strcpy(ALIASES_PATH, "/home/c/.acronym_test_cmd_alias");
+    strcpy(TMP_MISMATCHES_PATH, "/home/c/.acronym_test_cmd_tmpfile"); // MUST BE ON SAME DEVICE AS ABOVE
+    ALIASES_PATH = "/home/c/.acronym_test_cmd_autoenv";
+    alias_f = fopen(ALIASES_PATH, "w");
     fputs(
 "# --- Aliases ---\n"
 "alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## unit test\n"
@@ -24,7 +24,7 @@ static void setup() {
 
 static void teardown() {
     fclose(alias_f);
-    remove(ALIAS_FNAME);
+    remove(ALIASES_PATH);
 }
 
 START_TEST(test_add_cmd_normal) {
@@ -41,7 +41,7 @@ START_TEST(test_add_cmd_normal) {
     int result = add_cmd(&cli);
     ck_assert(result);
 
-    alias_f = fopen(ALIAS_FNAME, "r");
+    alias_f = fopen(ALIASES_PATH, "r");
     bool found_new_line = false, found_old_line = false;
     while (fgets(line, sizeof(line), alias_f)) {
         if (!strncmp("alias gc", line, 8)) {
@@ -70,7 +70,7 @@ START_TEST(test_add_cmd_duplicate) {
     int result = add_cmd(&cli);
     ck_assert(!result);
 
-    alias_f = fopen(ALIAS_FNAME, "r");
+    alias_f = fopen(ALIASES_PATH, "r");
     while (fgets(line, sizeof(line), alias_f)) {
         if (!strncmp("alias test", line, 10)) {
             ck_assert_str_eq("alias test='CK_FORK=yes ~/projects/acronym/builds/tests' ## unit test\n", line);
@@ -91,7 +91,7 @@ START_TEST(test_remove_cmd_normal) {
     int result = remove_cmd(&cli);
     ck_assert(result);
 
-    alias_f = fopen(ALIAS_FNAME, "r");
+    alias_f = fopen(ALIASES_PATH, "r");
     bool found_original_line = false;
     bool found_env_variable = false;
     while (fgets(line, sizeof(line), alias_f)) {
@@ -110,7 +110,7 @@ START_TEST(test_remove_cmd_normal) {
 END_TEST
 
 START_TEST(test_show_cmd_normal) {
-    setup_fname_buffers();
+    setup_path_buffers(GLOBAL);
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
@@ -121,11 +121,10 @@ START_TEST(test_show_cmd_normal) {
 END_TEST
 
 START_TEST(test_show_cmd_local) {
-    setup_fname_buffers();
+    setup_path_buffers(PROJ);
     Cli cli = {
         .type = SHOW,
         .verbosity = 1,
-        .cmd.show.local = true
     };
 
     ck_assert(show_cmd(&cli));
@@ -133,7 +132,7 @@ START_TEST(test_show_cmd_local) {
 END_TEST
 
 START_TEST(test_show_cmd_aliases) {
-    setup_fname_buffers();
+    setup_path_buffers(GLOBAL);
     AliasListNode b = { .data = "gp", .next = NULL };
     AliasListNode a = { .data = "a", .next = &b };
     Cli cli = {
@@ -143,32 +142,6 @@ START_TEST(test_show_cmd_aliases) {
     };
 
     ck_assert(show_cmd(&cli));
-}
-END_TEST
-
-START_TEST(test_show_cmd_commit_hash) {
-    setup_fname_buffers();
-    Cli cli = {
-        .type = SHOW,
-        .verbosity = 1,
-        .cmd.show.commit_hash = "724976b"
-    };
-
-    ck_assert(show_cmd(&cli));
-}
-END_TEST
-
-START_TEST(test_compare_paths) {
-    char *env_file = "/home/c/projects/.env";
-    char *path1 = "/home/c/projects";
-    char *outside_path = "/home/c/asdf";
-    char *child_path = "/home/c/projects/acronym";
-    char *parent_path = "/home/c";
-
-    ck_assert(compare_paths(env_file, path1) == PATH_EQ);
-    ck_assert(compare_paths(env_file, outside_path) == PATH_UNRELATED);
-    ck_assert(compare_paths(env_file, child_path) == PATH_CHILD);
-    ck_assert(compare_paths(env_file, parent_path) == PATH_PARENT);
 }
 END_TEST
 
@@ -189,12 +162,8 @@ Suite *subcmds_suite(void) {
     TCase *tc_show = tcase_create("Show cmd");
     tcase_add_test(tc_show, test_show_cmd_normal);
     tcase_add_test(tc_show, test_show_cmd_aliases);
-    tcase_add_test(tc_show, test_show_cmd_commit_hash);
     tcase_add_test(tc_show, test_show_cmd_local);
     suite_add_tcase(s, tc_show);
 
-    TCase *tc_helpers = tcase_create("Subcmd helpers");
-    tcase_add_test(tc_helpers, test_compare_paths);
-    suite_add_tcase(s, tc_helpers);
     return s;
 }

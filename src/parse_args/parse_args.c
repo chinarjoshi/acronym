@@ -266,18 +266,6 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
     return 0;
 }
 
-int undo_parse_opt(int key, char *arg, struct argp_state *state) {
-    switch (key) {
-        case 'p':
-            ((Cli *)state->input)->scope = PROJ;
-            break;
-        case 'l':
-            ((Cli *)state->input)->scope = LOCAL;
-            break;
-    }
-    return 0;
-}
-
 Cli *validate_args(Cli *cli) {
     union Cmd c = cli->cmd;
     bool invalid = false;
@@ -311,13 +299,11 @@ Cli *validate_args(Cli *cli) {
             }
             break;
         case SHOW:
-            if (c.show.aliases && c.show.sections) {
+            if (c.show.use_aliases && c.show.use_sections) {
                 printf("Error (invalid args): alias and section flags" \
                        "cannot be true at the same time.\n");
                 invalid = true;
             }
-            break;
-        case UNDO:
             break;
     }
     if (invalid) {
@@ -352,8 +338,6 @@ void free_cli(Cli *cli) {
             break;
         case EDIT:
             free(cli->cmd.edit.editor);
-            break;
-        case UNDO:
             break;
     }
     free(cli);

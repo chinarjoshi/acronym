@@ -84,7 +84,7 @@ START_TEST(test_read_aliases) {
     HashTable *ht;
     int capacity = 71;
     create_hash_table(&ht, capacity, .5);
-    strcpy(TMP_FNAME, "/home/c/.acronym_tmpfile");
+    strcpy(TMP_MISMATCHES_PATH, "/home/c/.acronym_tmpfile");
     FILE *f = fopen("/tmp/acronym_test_read_tmpfile", "w+");
     fputs(
 "alias build=\"meson compile -C ~/projects/acronym/builds\"\n"
@@ -144,10 +144,10 @@ START_TEST(test_write_aliases) {
     create_hash_table(&ht, capacity, .5);
 
     Entry *entries[4];
-    create_entry(&entries[0], "git diff", 0, 0, 0);
-    create_entry(&entries[1], "ls -al", 0, 0, 0);
-    create_entry(&entries[2], "git push -u origin", 0, 0, 0);
-    create_entry(&entries[3], "git status", 0, 0, 0);
+    create_entry(&entries[0], "git diff", 0, 0, 0, 0);
+    create_entry(&entries[1], "ls -al", 0, 0, 0, 0);
+    create_entry(&entries[2], "git push -u origin", 0, 0, 0, 0);
+    create_entry(&entries[3], "git status", 0, 0, 0, 0);
     for (int i = 0; i < 4; i++)
         add_entry(entries[i], ht);
 

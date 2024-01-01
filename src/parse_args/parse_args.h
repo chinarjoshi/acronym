@@ -41,7 +41,7 @@ typedef union Cmd {
     struct Show show;
 } Cmd;
 
-typedef enum CmdType { ADD, REMOVE, EDIT, SHOW, UNDO } CmdType;
+typedef enum CmdType { ADD, REMOVE, EDIT, SHOW } CmdType;
 typedef enum Scope { GLOBAL, PROJ, LOCAL } Scope;
 
 typedef struct Cli {
@@ -61,14 +61,12 @@ extern struct argp add_argp;
 extern struct argp remove_argp;
 extern struct argp show_argp;
 extern struct argp edit_argp;
-extern struct argp undo_argp;
 extern struct ArgpSubcmd argp_subcmds[];
 
 int add_parse_opt(int key, char *arg, struct argp_state *state);
 int remove_parse_opt(int key, char *arg, struct argp_state *state);
 int show_parse_opt(int key, char *arg, struct argp_state *state);
 int edit_parse_opt(int key, char *arg, struct argp_state *state);
-int undo_parse_opt(int key, char *arg, struct argp_state *state);
 
 struct Cli *parse_args(int argc, char **argv);
 struct Cli *parse_global_options(int argc, char **argv);

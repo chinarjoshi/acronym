@@ -25,7 +25,7 @@ bool add_cmd(Cli *cli) {
     // Add new entry to hash table and check for duplicate
     if (add_entry(entry, ht) == ERR_DUPLICATE) {
         if (cli->verbosity)
-            printf("Duplicate: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m)\n",
+            printf("Duplicate: %s \033[34m= \033[31m\"%s\"\033[0m (\033[33m%s\033[0m)\n",
                   entry->alias, entry->command, entry->section);
         return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_PATH);
     }

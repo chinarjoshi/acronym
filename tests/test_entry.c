@@ -55,7 +55,7 @@ END_TEST
 START_TEST(test_create_entry_default1) {
     Entry *entry;
     char *command = "git branch --all";
-    Status s = create_entry(&entry, command, NULL, NULL, false);
+    Status s = create_entry(&entry, command, NULL, NULL, NULL, false);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "gb");
@@ -69,7 +69,7 @@ END_TEST
 START_TEST(test_create_entry_default2) {
     Entry *entry;
     char *command = "meson compile -C ~/projects/alias/builds";
-    Status s = create_entry(&entry, command, NULL, NULL, false);
+    Status s = create_entry(&entry, command, NULL, NULL, NULL, false);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "mc");
@@ -83,7 +83,7 @@ END_TEST
 START_TEST(test_create_entry_include_flags) {
     Entry *entry;
     char *command = "sudo pacman -Syu";
-    Status s = create_entry(&entry, command, NULL, NULL, true);
+    Status s = create_entry(&entry, command, NULL, NULL, NULL, true);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "pSyu");
@@ -98,7 +98,7 @@ START_TEST(test_create_entry_alias_override) {
     Entry *entry;
     char *command = "ls -al";
     char *alias_override = "ll";
-    Status s = create_entry(&entry, command, alias_override, NULL, true);
+    Status s = create_entry(&entry, command, alias_override, NULL, NULL, true);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "ll");
@@ -113,7 +113,7 @@ START_TEST(test_create_entry_section_override_include_flags) {
     Entry *entry;
     char *command = "npm uninstall -g";
     char *section_override = "package_managers";
-    Status s = create_entry(&entry, command, NULL, section_override, true);
+    Status s = create_entry(&entry, command, NULL, section_override, NULL, true);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "nug");
@@ -129,7 +129,7 @@ START_TEST(test_create_entry_all_options) {
     char *command = "cd ..";
     char *alias_override = "...";
     char *section_override = "etc";
-    Status s = create_entry(&entry, command, alias_override, section_override, false);
+    Status s = create_entry(&entry, command, alias_override, section_override, NULL, false);
 
     ck_assert(s == SUCCESS);
     ck_assert_str_eq(entry->alias, "...");

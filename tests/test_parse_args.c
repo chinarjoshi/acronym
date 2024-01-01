@@ -13,7 +13,6 @@ START_TEST(test_parse_args_add_normal) {
     ck_assert_ptr_null(a.alias_override);
     ck_assert_ptr_null(a.section_override);
     ck_assert(!a.include_flags);
-    ck_assert(!a.local);
 }
 END_TEST
 
@@ -27,7 +26,6 @@ START_TEST(test_parse_args_add_section) {
     ck_assert_ptr_null(a.alias_override);
     ck_assert_str_eq("git stuff", a.section_override);
     ck_assert(!a.include_flags);
-    ck_assert(!a.local);
 }
 END_TEST
 
@@ -41,7 +39,6 @@ START_TEST(test_parse_args_add_section_and_alias_override) {
     ck_assert_str_eq("gaa", a.alias_override);
     ck_assert_str_eq("git adding", a.section_override);
     ck_assert(!a.include_flags);
-    ck_assert(a.local);
 }
 END_TEST
 
@@ -55,7 +52,6 @@ START_TEST(test_parse_args_add_alias_override_local) {
     ck_assert_str_eq("ga", a.alias_override);
     ck_assert_ptr_null(a.section_override);
     ck_assert(!a.include_flags);
-    ck_assert(a.local);
 }
 END_TEST
 
@@ -69,7 +65,6 @@ START_TEST(test_parse_args_remove_normal) {
     ck_assert_str_eq(r.aliases->next->data, "a");
     ck_assert(r.force);
     ck_assert(r.section);
-    ck_assert(!r.local);
     ck_assert(!r.interactive);
 }
 END_TEST
@@ -85,7 +80,6 @@ START_TEST(test_parse_args_remove_all_flags) {
     ck_assert_str_eq(r.aliases->next->next->data, "a");
     ck_assert(r.force);
     ck_assert(r.section);
-    ck_assert(r.local);
 }
 
 START_TEST(test_parse_args_show_normal) {
@@ -93,7 +87,6 @@ START_TEST(test_parse_args_show_normal) {
     char *argv[] = { "acronym", "show" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_int_eq(cli->type, SHOW);
-    ck_assert(!cli->cmd.show.local);
 }
 END_TEST
 
@@ -102,7 +95,6 @@ START_TEST(test_parse_args_edit_normal) {
     char *argv[] = { "acronym", "edit", "-e", "emacs" };
     Cli *cli = parse_args(argc, argv);
     ck_assert_str_eq(cli->cmd.edit.editor, "emacs");
-    ck_assert(!cli->cmd.edit.local);
 }
 END_TEST
 

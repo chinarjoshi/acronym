@@ -40,17 +40,9 @@ struct argp_option edit_options[] = {
 };
 struct argp edit_argp = { edit_options, edit_parse_opt }; 
 
-struct argp_option undo_options[] = {
-    { "project", 'p', 0, 0, "Undo last change to aliases file in current project" },
-    { "local", 'l', 0, 0, "Undo last change to your local aliases file in current project" },
-    { 0 }
-};
-struct argp undo_argp = { undo_options, undo_parse_opt }; 
-
 ArgpSubcmd argp_subcmds[] = {
     {"add", ADD, &add_argp},
     {"remove", REMOVE, &remove_argp},
     {"show", SHOW, &show_argp},
     {"edit", EDIT, &edit_argp},
-    {"undo", UNDO, &undo_argp},
 };

@@ -9,7 +9,6 @@ bool add_cmd(Cli *cli);
 bool remove_cmd(Cli *cli);
 bool edit_cmd(Cli *cli);
 bool show_cmd(Cli *cli);
-bool undo_cmd(Cli *cli);
 int cleanup(const char *message, const char *message_arg, 
                           HashTable *ht, FILE *f, const char *fname_to_remove);
 void filter_hash_table(HashTable *ht, AliasListNode *l, bool alias, bool section);

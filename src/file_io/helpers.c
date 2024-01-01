@@ -5,6 +5,8 @@
 #include <linux/limits.h>
 #include "file_io.h"
 #include "../parse_args/parse_args.h"
+#define ACRONYM_FILENAME_DEFAULT ".aliases.sh"
+#define ACRONYM_LOCAL_FILENAME_DEFAULT ".env"
 
 static char *ACRONYM_FILENAME;
 static char *ACRONYM_LOCAL_FILENAME;
@@ -21,7 +23,7 @@ char LOCAL_ALIASES_PATH[PATH_MAX];
 char TMP_MISMATCHES_PATH[PATH_MAX];
 char TMP_TOML_PATH[PATH_MAX];
 
-const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree 2>/dev/null";
+const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree >/dev/null 2>&1";
 // This command returns the directory of the project level aliases file. 
 // if you are in a Git repository.
 //   if there is a file matching %s, use its directory
@@ -40,10 +42,10 @@ const char *find_git_alias_dir_cmd = "\
 
 static void get_env_vars() {
     char *c = getenv("ACRONYM_FILENAME");
-    ACRONYM_FILENAME = (c) ? c : ".aliases.sh";
+    ACRONYM_FILENAME = (c) ? c : ACRONYM_FILENAME_DEFAULT;
 
     c = getenv("ACRONYM_LOCAL_FILENAME");
-    ACRONYM_LOCAL_FILENAME = (c) ? c : ".env";
+    ACRONYM_LOCAL_FILENAME = (c) ? c : ACRONYM_LOCAL_FILENAME_DEFAULT;
 
     // Ensure main and local aliases file names are not the same
     if (!strcmp(ACRONYM_FILENAME, ACRONYM_LOCAL_FILENAME))
@@ -73,7 +75,7 @@ void setup_path_buffers(Scope scope) {
             sprintf(command_buf, find_git_alias_dir_cmd, ACRONYM_FILENAME);
             FILE *fp = popen(command_buf, "r");
             dir = fgets(output_buf, sizeof(output_buf), fp);
-            fclose(fp);
+            pclose(fp);
         } else {
             getcwd(dir, PATH_MAX);
         }
