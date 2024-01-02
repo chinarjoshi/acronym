@@ -34,10 +34,10 @@ const char *find_git_alias_dir_cmd = "\
         -maxdepth 2 \
         -type f \
         -name '%s' \
-    | head -n1 \
-    || git rev-parse --show-toplevel \
-    | xargs realpath --relative-to=$(pwd) \
-    | xargs dirname";
+        -exec dirname {} \\; \
+        -quit \
+    | grep . \
+    || git rev-parse --show-toplevel";
 
 
 static void get_env_vars() {
@@ -75,6 +75,7 @@ void setup_path_buffers(Scope scope) {
             sprintf(command_buf, find_git_alias_dir_cmd, ACRONYM_FILENAME);
             FILE *fp = popen(command_buf, "r");
             dir = fgets(output_buf, sizeof(output_buf), fp);
+            dir[strlen(dir) - 1] = '\0'; // After find command there is a trailing \n we need to strip
             pclose(fp);
         } else {
             getcwd(dir, PATH_MAX);

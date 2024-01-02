@@ -8,6 +8,7 @@ typedef struct Entry {
     char *command; // value
     char *section; // cached value
     char *comment; // description
+    bool use_double_quotes;
     bool is_removed;
 } Entry;
 

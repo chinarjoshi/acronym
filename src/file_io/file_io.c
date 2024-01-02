@@ -81,6 +81,7 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     char comment[sizeof(line) * 4];
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
+            comment[strlen(comment) - 1] = '\0'; // No more comment after this, remove trailing \n
             if (create_entry(&entry, command, alias, section, comment, false) == ERR_OUT_OF_MEMORY) {
                 printf("Error (memory): out of memory while creating entry.\n");
                 free_re_resources(re, extras, tmp_f);
@@ -90,11 +91,11 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
                 return NULL;
             }
             add_entry(entry, ht);
-        } else if (line[0] == '#') {
+        } else if (line[0] == '#' && strcmp(line, FILE_DELIMITER)) {
             // Save the value if its a comment
             strncat(comment, line, sizeof(comment) - strlen(comment) - 1);
             continue;
-        } else if (output_non_matches && line[0] != '\n' && strcmp(line, FILE_DELIMITER) != 0) {
+        } else if (output_non_matches && line[0] != '\n' && strcmp(line, FILE_DELIMITER)) {
             // Add every line except new line and delimiter
             fputs(line, tmp_f);
             found_non_matching_line = true;
@@ -119,17 +120,20 @@ bool write_aliases(FILE *f, HashTable *ht) {
         return true;
 
     Entry *entry;
+    char quote;
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
         if (entry && !entry->is_removed && !entry->comment) {
-            fprintf(f, "alias %s='%s' ## %s\n", entry->alias, entry->command, entry->section);
+            quote = entry->use_double_quotes ? '"' : '\'';
+            fprintf(f, "alias %s=%c%s%c ## %s\n", entry->alias, quote, entry->command, quote, entry->section);
         }
     }
     for (int i = 0; i < ht->capacity; i++) {
         entry = ht->backing_array[i];
         if (entry && !entry->is_removed && entry->comment) {
+            quote = entry->use_double_quotes ? '"' : '\'';
             fprintf(f, "\n%s\n", entry->comment);
-            fprintf(f, "alias %s='%s' ## %s\n", entry->alias, entry->command, entry->section);
+            fprintf(f, "alias %s=%c%s%c ## %s\n", entry->alias, quote, entry->command, quote, entry->section);
         }
     }
     return true;

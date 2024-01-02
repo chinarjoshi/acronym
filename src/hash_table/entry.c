@@ -21,6 +21,32 @@ Status create_entry(Entry **data_out, const char *command,
         return ERR_OUT_OF_MEMORY;
     strcpy(entry->command, command);
 
+    // If there's already a single quote in the command, then double quote the command
+    entry->use_double_quotes = strchr(command, '\'');
+
+    // If there's both single and double quotes, then escape all unescaped double quotes
+    // Count unescaped double quotes in the command
+    int unescaped_double_quote_count = 0;
+    for (const char *p = command; *p; p++)
+        if (*p == '"' && (p == command || *(p - 1) != '\\'))
+            unescaped_double_quote_count++;
+
+    // Allocate memory for the 'command' field.
+    int command_len = strlen(command) + unescaped_double_quote_count + 1;
+    if (!(entry->command = malloc(command_len)))
+        return ERR_OUT_OF_MEMORY;
+
+    // Copy the command string while escaping unescaped double quotes.
+    int j = 0;
+    for (int i = 0; command[i]; i++, j++) {
+        if (command[i] == '"' && (!i || command[i - 1] != '\\')) {
+            entry->command[j] = '\\';
+            j++; // Increment j an extra time for the added backslash
+        }
+        entry->command[j] = command[i];
+    }
+    entry->command[j] = '\0'; // Null-terminate the string
+
     // If 'alias_override' is given, then use it for 'alias' field. Otherwise, generate it.
     if (!alias_override)
         alias_override = create_alias_name(command, include_flags);
@@ -36,7 +62,7 @@ Status create_entry(Entry **data_out, const char *command,
 
     // If 'comment', is provided, then use it. Otherwise, set to null.
     entry->comment = NULL;
-    if (comment) {
+    if (comment && comment[0]) {
         entry->comment = malloc(strlen(comment) + 1);
         strcpy(entry->comment, comment);
     }

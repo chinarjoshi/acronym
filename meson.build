@@ -1,6 +1,7 @@
 project('acronym', 'c',
   version : '1.0.0',
-  license : 'MIT')
+  license : 'MIT',
+  default_options : ['c_args=-Wall -Wextra'])
 
 # Main executable
 pcre_dep = dependency('libpcre')
