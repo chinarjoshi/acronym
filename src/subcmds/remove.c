@@ -36,7 +36,7 @@ bool remove_cmd(Cli *cli) {
                 printf("Section not found: \033[32m\"%s\"\033[0m\n", r.aliases->data);
             } else {
                 if (cli->verbosity)
-                    printf("Deleted section: \033[32m\"%s\"\033[0m to \033[36m%s\033[0m\n", r.aliases->data, ALIASES_PATH);
+                    printf("Deleted section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m\n", r.aliases->data, ALIASES_PATH);
                 something_removed = true;
             }
         } else {
@@ -51,7 +51,7 @@ bool remove_cmd(Cli *cli) {
                 printf("Not found: \033[32m\"%s\"\033[0m\n", r.aliases->data);
             } else {
                 if (cli->verbosity)
-                    printf("Deleted: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m) to \033[36m%s\033[0m\n", 
+                    printf("Deleted: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m) from \033[36m%s\033[0m\n", 
                            entry->alias, entry->command, entry->section, ALIASES_PATH);
                 something_removed = true;
             }

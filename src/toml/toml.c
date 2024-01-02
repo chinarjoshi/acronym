@@ -27,6 +27,9 @@ void toml_set_memutil(void *(*xxmalloc)(size_t), void (*xxfree)(void *)) {
 #define free(x) error - forbidden - use FREE instead
 #define calloc(x, y) error - forbidden - use CALLOC instead
 
+static char comment[2048];
+static int comment_ptr;
+
 static void *CALLOC(size_t nmemb, size_t sz) {
   int nb = ALIGN8(sz) * nmemb;
   void *p = MALLOC(nb);
@@ -696,6 +699,17 @@ static toml_keyval_t *create_keyval_in_table(context_t *ctx, toml_table_t *tab,
 
   /* save the key in the new value struct */
   dest->key = newkey;
+
+  if (comment[0]) {
+    comment[strlen(comment) - 1] = '\0';
+    if (!(dest->comment = STRDUP(comment))) {
+      e_outofmemory(ctx, FLINE);
+      return 0;
+    }
+    comment[0] = '\0';
+    comment_ptr = 0;
+  }
+  
   return dest;
 }
 
@@ -1381,6 +1395,8 @@ toml_table_t *toml_parse(char *conf, char *errbuf, int errbufsz) {
       break;
 
     case LBRACKET: /* [ x.y.z ] or [[ x.y.z ]] */
+      comment[0] = '\0';
+      comment_ptr = 0;
       if (parse_select(&ctx))
         goto fail;
       break;
@@ -1743,8 +1759,11 @@ static int next_token(context_t *ctx, int dotisspecial) {
   while (p < ctx->stop) {
     /* skip comment. stop just before the \n. */
     if (*p == '#') {
-      for (p++; p < ctx->stop && *p != '\n'; p++)
-        ;
+      for (; p < ctx->stop && *p != '\n'; p++) {
+        comment[comment_ptr++] = *p;    
+      }
+      comment[comment_ptr++] = '\n';
+      comment[comment_ptr] = '\0';
       continue;
     }
 

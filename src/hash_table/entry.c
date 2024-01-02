@@ -62,7 +62,7 @@ Status create_entry(Entry **data_out, const char *command,
 
     // If 'comment', is provided, then use it. Otherwise, set to null.
     entry->comment = NULL;
-    if (comment && comment[0]) {
+    if (comment && comment[0] == '#') {
         entry->comment = malloc(strlen(comment) + 1);
         strcpy(entry->comment, comment);
     }
