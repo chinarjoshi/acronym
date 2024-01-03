@@ -9,6 +9,7 @@ struct Add {
     char *command; // Required
     char *alias_override;
     char *section_override;
+    char *comment;
     bool include_flags;
 };
 

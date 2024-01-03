@@ -38,3 +38,6 @@ Benefits:
 - Alliviates "works on my machine"
 - Less cognitive overhead in long commands
 - Faster than writing build scripts when the process changes quickly
+
+Problem:
+toml file has a bad escape issue. If semicolon is escaped, then the toml file wont take it. You need to double escape it in ht_to_toml_table and then unquote it in toml_table_to_ht

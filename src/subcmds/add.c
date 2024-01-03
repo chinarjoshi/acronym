@@ -20,7 +20,7 @@ bool add_cmd(Cli *cli) {
         return cleanup(0, 0, ht, alias_f, 0);
 
     // Create entry from command line args
-    create_entry(&entry, a.command, a.alias_override, a.section_override, 0, a.include_flags);
+    create_entry(&entry, a.command, a.alias_override, a.section_override, a.comment, a.include_flags);
 
     // Add new entry to hash table and check for duplicate
     if (add_entry(entry, ht) == ERR_DUPLICATE) {

@@ -124,6 +124,15 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
                 return 1;
             strcpy(add->section_override, arg);
             break;
+        case 'c':
+            if (add->comment) {
+                printf("Error (invalid args): multiple comments provided.\n");
+                return 1;
+            }
+            if (!(add->comment = malloc(strlen(arg) + 3)))
+                return 1;
+            sprintf(add->comment, "# %s", arg);
+            break;
         case 'i':
             add->include_flags = true;
             break;

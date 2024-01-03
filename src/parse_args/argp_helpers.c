@@ -7,6 +7,7 @@ const char *argp_program_bug_address = "chinarjoshi7@gmail.com";
 struct argp_option add_options[] = {
     { "alias", 'a', "ALIAS", 0, "Optionally provide alias" },
     { "section", 's', "SECTION", 0, "Optionally provide section/category" },
+    { "comment", 'c', "COMMENT", 0, "Optionally provide comment or description" },
     { "include-flags", 'i', 0, 0, "Include flags when generating default alias" },
     { "project", 'p', 0, 0, "Add to aliases file in current project" },
     { "local", 'l', 0, 0, "Add to your local aliases file in current project" },
