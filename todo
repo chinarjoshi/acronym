@@ -44,7 +44,7 @@ toml file has a bad escape issue. If semicolon is escaped, then the toml file wo
 
 
 Last things:
-Test toml handling
+Rename subcommands to CRUD
 The escape thing in edit
 Write documentation:
   readme

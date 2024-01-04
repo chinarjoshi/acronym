@@ -8,7 +8,7 @@
 #define ACRONYM_FILENAME_DEFAULT ".aliases.sh"
 #define ACRONYM_LOCAL_FILENAME_DEFAULT ".env"
 
-static char *ACRONYM_FILENAME;
+char *ACRONYM_FILENAME;
 static char *ACRONYM_LOCAL_FILENAME;
 static char *ACRONYM_GLOBAL_DIR;
 bool IS_IN_GIT_REPO;

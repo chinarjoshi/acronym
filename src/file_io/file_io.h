@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 extern bool IS_IN_GIT_REPO;
+extern char *ACRONYM_FILENAME;
 extern char *ALIASES_PATH;
 extern char GLOBAL_ALIASES_PATH[PATH_MAX];
 extern char PROJ_ALIASES_PATH[PATH_MAX];

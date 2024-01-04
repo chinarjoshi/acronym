@@ -116,6 +116,7 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches, int color_co
 // Do two passes over the hash table:
 // 1. Write all entries without a comment first compactly
 // 2. Write remaining entries sandwiched between whitespace
+// Finally, if this is the local project-wide aliases file, then append the command to source the project aliases
 bool write_aliases(FILE *f, HashTable *ht) {
     if (ht->size == 0)
         return true;
@@ -136,6 +137,9 @@ bool write_aliases(FILE *f, HashTable *ht) {
             fprintf(f, "\n%s\n", entry->comment);
             fprintf(f, "alias %s=%c%s%c ## %s\n", entry->alias, quote, entry->command, quote, entry->section);
         }
+    }
+    if (!strcmp(ALIASES_PATH, LOCAL_ALIASES_PATH)) {
+        fprintf(f, ". ./%s", ACRONYM_FILENAME);
     }
     return true;
 }
