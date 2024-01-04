@@ -10,7 +10,7 @@ const float load_factor = .5;
 
 static void setup(void) {
     char *command = "git status";
-    Status s = create_entry(&entry, command, NULL, NULL, NULL, false);
+    Status s = create_entry(&entry, command, NULL, NULL, NULL, 0, false);
     if (s == ERR_OUT_OF_MEMORY) {
         ck_abort_msg("Err: out of memory.");
         return;
@@ -59,9 +59,9 @@ START_TEST(test_add_entry_trigger_resize) {
     ck_assert_int_eq(ht->capacity, initial_capacity);
 
     Entry *entries[4];
-    create_entry(&entries[0], "cp", NULL, NULL, NULL, false);
-    create_entry(&entries[1], "ls -al", NULL, NULL, NULL, false);
-    create_entry(&entries[2], "git push -u origin", NULL, NULL, NULL, false);
+    create_entry(&entries[0], "cp", NULL, NULL, NULL, 0, false);
+    create_entry(&entries[1], "ls -al", NULL, NULL, NULL, 0, false);
+    create_entry(&entries[2], "git push -u origin", NULL, NULL, NULL, 0, false);
     entries[3] = entry;
 
     Status s;
@@ -122,9 +122,9 @@ END_TEST
 
 START_TEST(test_remove_section) {
     Entry *entries[4];
-    create_entry(&entries[0], "git diff", NULL, NULL, NULL, false);
-    create_entry(&entries[1], "cp", NULL, NULL, NULL, false);
-    create_entry(&entries[2], "git push -u origin", NULL, NULL, NULL, false);
+    create_entry(&entries[0], "git diff", NULL, NULL, NULL, 0, false);
+    create_entry(&entries[1], "cp", NULL, NULL, NULL, 0, false);
+    create_entry(&entries[2], "git push -u origin", NULL, NULL, NULL, 0, false);
     entries[3] = entry;
     ht->size = 4;
 

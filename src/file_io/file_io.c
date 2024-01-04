@@ -49,8 +49,9 @@ bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
  * Prunes those lines from file, leaving all others alone. *Closes the given 
  * file handler and returns a new one. Returns NULL if not output_non_matches,
  * regex, file I/O, or memory allocation fails, and a valid handler otherwise.
+ * If color_code is non-zero, then color the alias field that color.
  */
-FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
+FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches, int color_code) {
     char line[512], alias[64], command[256], section[64];
     int ovector[OVECTOR_LEN];
     Entry *entry;
@@ -82,7 +83,7 @@ FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches) {
     while (fgets(line, sizeof(line), f)) {
         if (match_line(re, extras, ovector, line, alias, command, section)) {
             comment[strlen(comment) - 1] = '\0'; // No more comment after this, remove trailing \n
-            if (create_entry(&entry, command, alias, section, comment, false) == ERR_OUT_OF_MEMORY) {
+            if (create_entry(&entry, command, alias, section, comment, color_code, false) == ERR_OUT_OF_MEMORY) {
                 printf("Error (memory): out of memory while creating entry.\n");
                 free_re_resources(re, extras, tmp_f);
                 fclose(f);

@@ -14,10 +14,10 @@ bool remove_cmd(Cli *cli) {
     // Open the aliases file
     FILE *alias_f = fopen(ALIASES_PATH, "r");
     if (!alias_f)
-        return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", ALIASES_PATH, ht, 0, 0);
+        return cleanup("Error (file I/O): aliases file cannot be opened: %s.\n", replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER), ht, 0, 0);
 
     // Read aliases into hash table and write non-matching lines to tmp
-    FILE *tmp_f = read_aliases(alias_f, ht, true);
+    FILE *tmp_f = read_aliases(alias_f, ht, true, 0);
     if (!tmp_f)
         return cleanup(0, 0, ht, alias_f, 0);
 
@@ -27,32 +27,32 @@ bool remove_cmd(Cli *cli) {
         if (r.section) {
             if (!r.force) {
                 char answer;
-                printf("Delete section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", r.aliases->data, ALIASES_PATH);
+                printf("Delete section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
             if (remove_section(r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Section not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", r.aliases->data, ALIASES_PATH);
+                printf("Section not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
             } else {
                 if (cli->verbosity)
-                    printf("Deleted section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m\n", r.aliases->data, ALIASES_PATH);
+                    printf("Deleted section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m\n", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 something_removed = true;
             }
         } else {
             if (r.interactive) {
                 char answer;
-                printf("Delete: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", r.aliases->data, ALIASES_PATH);
+                printf("Delete: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
             if (remove_entry(&entry, r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", r.aliases->data, ALIASES_PATH);
+                printf("Not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
             } else {
                 if (cli->verbosity)
                     printf("Deleted: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m) from \033[36m%s\033[0m\n", 
-                           entry->alias, entry->command, entry->section, ALIASES_PATH);
+                           entry->alias, entry->command, entry->section, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 something_removed = true;
             }
         }

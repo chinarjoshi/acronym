@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
@@ -6,11 +7,12 @@
 // Allocates an Entry and saves it in *data_out, returning the status.
 // If 'alias_override' is a valid string, then the 'alias' field will contain it
 // Same with 'section_override'
+// If 'color_code' is non-zero, then color the alias field with ANSII escape codes
 // If 'include_flags', then options and the first letter of flags are included,
 // exluding their arguments, in order.
 Status create_entry(Entry **data_out, const char *command,
                       const char *alias_override, const char *section_override,
-                      const char *comment, bool include_flags) {
+                      const char *comment, int color_code, bool include_flags) {
     Entry *entry = malloc(sizeof(Entry));
     if (!entry)
         return ERR_OUT_OF_MEMORY;
@@ -50,8 +52,12 @@ Status create_entry(Entry **data_out, const char *command,
     // If 'alias_override' is given, then use it for 'alias' field. Otherwise, generate it.
     if (!alias_override)
         alias_override = create_alias_name(command, include_flags);
-    entry->alias = malloc(strlen(alias_override) + 1);
-    strcpy(entry->alias, alias_override);
+
+    entry->alias = malloc(strlen(alias_override) + 1 + (color_code) ? 9 : 0);
+    if (color_code)
+        sprintf(entry->alias, "\033[%dm%s\033[0m", color_code, alias_override);
+    else
+        strcpy(entry->alias, alias_override);
 
     // Same thing with the section name.
     if (!section_override || section_override[0] == '\0')

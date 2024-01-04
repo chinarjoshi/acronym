@@ -99,7 +99,7 @@ START_TEST(test_read_aliases) {
     fflush(f);
     rewind(f);
 
-    FILE *tmp = read_aliases(f, ht, true);
+    FILE *tmp = read_aliases(f, ht, true, 0);
     ck_assert_ptr_nonnull(tmp);
     rewind(tmp);
     fflush(tmp);
@@ -144,10 +144,10 @@ START_TEST(test_write_aliases) {
     create_hash_table(&ht, capacity, .5);
 
     Entry *entries[4];
-    create_entry(&entries[0], "git diff", 0, 0, 0, 0);
-    create_entry(&entries[1], "ls -al", 0, 0, 0, 0);
-    create_entry(&entries[2], "git push -u origin", 0, 0, 0, 0);
-    create_entry(&entries[3], "git status", 0, 0, 0, 0);
+    create_entry(&entries[0], "git diff", 0, 0, 0, 0, 0);
+    create_entry(&entries[1], "ls -al", 0, 0, 0, 0, 0);
+    create_entry(&entries[2], "git push -u origin", 0, 0, 0, 0, 0);
+    create_entry(&entries[3], "git status", 0, 0, 0, 0, 0);
     for (int i = 0; i < 4; i++)
         add_entry(entries[i], ht);
 

@@ -84,7 +84,7 @@ void toml_table_to_ht(HashTable *ht, toml_table_t *root) {
     for (int i = 0; i < root->nkval; i++) {
         toml_keyval_t *kv = root->kval[i];
         toml_rtos(kv->val, &val);
-        create_entry(&entry, val, kv->key, 0, kv->comment, 0);
+        create_entry(&entry, val, kv->key, 0, kv->comment, 0, 0);
         free(val);
         add_entry(entry, ht);
     }
@@ -94,7 +94,7 @@ void toml_table_to_ht(HashTable *ht, toml_table_t *root) {
         for (int j = 0; j < section->nkval; ++j) {
             toml_keyval_t *kv = section->kval[j];
             toml_rtos(kv->val, &val);
-            create_entry(&entry, val, kv->key, section->key, kv->comment, 0);
+            create_entry(&entry, val, kv->key, section->key, kv->comment, 0, 0);
             free(val);
             add_entry(entry, ht);
         }
@@ -199,7 +199,7 @@ char *toml_dumps(toml_table_t *table) {
     int pos = 0;
     for (int i = 0; i < table->ntab; i++) {
         tab = table->tab[i];
-        sprintf(toml_str + pos, "\033[34m[\033[33m%s\033[34m]\033[0m\n", tab->key);
+        sprintf(toml_str + pos, "\033[34m[\033[37m%s\033[34m]\033[0m\n", tab->key);
         pos += strlen(tab->key) + 22;
         for (int j = 0; j < tab->nkval; j++) {
             toml_keyval_t *kv = tab->kval[j];

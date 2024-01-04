@@ -13,11 +13,12 @@ extern char LOCAL_ALIASES_PATH[PATH_MAX];
 
 extern char TMP_MISMATCHES_PATH[PATH_MAX];
 extern char TMP_TOML_PATH[PATH_MAX];
+extern char PATH_BUFFER[PATH_MAX];
 
 extern const char *ALIAS_PATTERN;
 extern const char *FILE_DELIMITER;
 extern const int OVECTOR_LEN;
-FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches);
+FILE *read_aliases(FILE *f, HashTable *ht, bool output_non_matches, int color_code);
 bool write_aliases(FILE *f, HashTable *ht);
 bool match_line(pcre *re, pcre_extra *extras, int *ovector, char *line,
                 char *alias, char *command, char *section);

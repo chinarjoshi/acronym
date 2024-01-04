@@ -22,6 +22,7 @@ char LOCAL_ALIASES_PATH[PATH_MAX];
 // Temporary files for writing and editing
 char TMP_MISMATCHES_PATH[PATH_MAX];
 char TMP_TOML_PATH[PATH_MAX];
+char PATH_BUFFER[PATH_MAX];
 
 // This command returns the directory of the project level aliases file. 
 // if you are in a Git repository.

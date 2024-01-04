@@ -23,7 +23,7 @@ typedef enum Status {
 
 Status create_entry(Entry **data_out, const char *command,
                     const char *alias_override, const char *section_override,
-                    const char *comment, bool include_flags);
+                    const char *comment, int color_code, bool include_flags);
 char *create_alias_name(const char *command, bool include_flags);
 char *create_section_name(const char *command);
 int hash_alias(char *alias, int capacity);
