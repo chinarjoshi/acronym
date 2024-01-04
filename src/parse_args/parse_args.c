@@ -38,7 +38,7 @@ struct Cli *parse_args(int argc, char **argv) {
     }
 
     if (!found) {
-        printf("Invalid argument: found invalid subcommand \"%s\", try CRUD.\n", subcommand);
+        printf("Invalid argument: found invalid subcommand \"%s\", try CRUD.\n\n", subcommand);
         print_help_and_exit(1);
     }
 
@@ -81,7 +81,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 if (optarg) {
                     int verbosity = atoi(optarg);
                     if (verbosity < 0 || verbosity > 3) {
-                        printf("Invalid argument: verbosity must be between 0-3, but was given \"%s\".\n", optarg);
+                        printf("Invalid argument: verbosity must be between 0-3, but was given \"%s\".\n\n", optarg);
                         print_help_and_exit(1);
                     }
                     cli->verbosity = verbosity;
@@ -99,7 +99,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 exit(0);
             case '?':
             default:
-                printf("Invalid argument: unknown option \"%c\".\n", opt);
+                printf("Invalid argument: unknown option \"%c\".\n\n", opt);
                 print_help_and_exit(1);
         }
     }
