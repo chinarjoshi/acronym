@@ -12,7 +12,7 @@ static const char *sem_ver = "1.0.0";
 
 static struct argp *current_argp;
 static void print_help_and_exit(int exit_code) {
-    printf("");
+    printf("HELP MESSAGE PLACEHOLDER\n");
     exit(exit_code);
 }
 
@@ -94,6 +94,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 break;
             case 'h':
                 print_help_and_exit(0);
+                break;
             case 'V':
                 printf("%s\n", sem_ver);
                 exit(0);
@@ -101,6 +102,7 @@ struct Cli *parse_global_options(int argc, char **argv) {
             default:
                 printf("Invalid argument: unknown option \"%c\".\n\n", opt);
                 print_help_and_exit(1);
+                break;
         }
     }
     return cli;
@@ -112,7 +114,7 @@ int create_parse_opt(int key, char *arg, struct argp_state *state) {
     switch (key) {
         case 'a':
             if (create->alias_override) {
-                printf("Invalid argument: multiple alias overrides provided: \"%s\", \"%s\".\n\n", 
+                printf("Invalid argument: multiple alias overrides provided - \"%s\", \"%s\".\n\n", 
                        create->alias_override, arg);
                 argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
@@ -123,7 +125,7 @@ int create_parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 's':
             if (create->section_override) {
-                printf("Invalid argument: multiple section overrides provided: \"%s\", \"%s\".\n\n", 
+                printf("Invalid argument: multiple section overrides provided - \"%s\", \"%s\".\n\n", 
                        create->section_override, arg);
                 argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
@@ -134,7 +136,7 @@ int create_parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 'c':
             if (create->comment) {
-                printf("Invalid argument: multiple comments provided: \"%s\", \"%s\".\n\n", 
+                printf("Invalid argument: multiple comments provided - \"%s\", \"%s\".\n\n", 
                        create->comment, arg);
                 argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
@@ -166,7 +168,7 @@ int create_parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case ARGP_KEY_ARG:;
             if (create->command) {
-                printf("Invalid argument: multiple commands provided: \"%s\", \"%s\".\n\n", 
+                printf("Invalid argument: multiple commands provided - \"%s\", \"%s\".\n\n", 
                        create->command, arg);
                 argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
@@ -238,7 +240,7 @@ int update_parse_opt(int key, char *arg, struct argp_state *state) {
     switch (key) {
         case 'e':
             if (update->editor) {
-                printf("Invalid argument: multiple editors provided: \"%s\", \"%s\".\n\n", 
+                printf("Invalid argument: multiple editors provided - \"%s\", \"%s\".\n\n", 
                        update->editor, arg);
                 argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
