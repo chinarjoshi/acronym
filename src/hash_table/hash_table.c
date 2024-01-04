@@ -132,6 +132,7 @@ void empty_hash_table(HashTable *ht) {
             ht->backing_array[i] = NULL;
         }
     }
+    ht->size = 0;
 }
 
 void free_hash_table(HashTable *ht) {
