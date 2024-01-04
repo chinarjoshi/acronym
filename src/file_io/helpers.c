@@ -23,7 +23,6 @@ char LOCAL_ALIASES_PATH[PATH_MAX];
 char TMP_MISMATCHES_PATH[PATH_MAX];
 char TMP_TOML_PATH[PATH_MAX];
 
-const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree >/dev/null 2>&1";
 // This command returns the directory of the project level aliases file. 
 // if you are in a Git repository.
 //   if there is a file matching %s, use its directory
@@ -63,39 +62,34 @@ static void get_env_vars() {
 void setup_path_buffers(Scope scope) {
     get_env_vars();
 
-    ALIASES_PATH = (scope == LOCAL) ? ACRONYM_LOCAL_FILENAME : ACRONYM_FILENAME;
-    IS_IN_GIT_REPO = !system(in_git_repo_cmd);
+    if (IS_IN_GIT_REPO) {
+        // If in git repo, set dir to the directory with the aliases file
+        char command_buf[strlen(find_git_alias_dir_cmd) + strlen(ACRONYM_FILENAME) + 1];
+        char directory[PATH_MAX];
+        sprintf(command_buf, find_git_alias_dir_cmd, ACRONYM_FILENAME);
 
-    // If not global scope, set dir to the directory in repo with the aliases file
-    char *dir = ACRONYM_GLOBAL_DIR;
-    if (scope != GLOBAL) {
-        if (IS_IN_GIT_REPO) {
-            char command_buf[strlen(find_git_alias_dir_cmd) + strlen(ACRONYM_FILENAME) + 1];
-            char output_buf[PATH_MAX];
-            sprintf(command_buf, find_git_alias_dir_cmd, ACRONYM_FILENAME);
-            FILE *fp = popen(command_buf, "r");
-            dir = fgets(output_buf, sizeof(output_buf), fp);
-            dir[strlen(dir) - 1] = '\0'; // After find command there is a trailing \n we need to strip
-            pclose(fp);
-        } else {
-            getcwd(dir, PATH_MAX);
-        }
+        FILE *fp = popen(command_buf, "r");
+        fgets(directory, sizeof(directory), fp);
+        pclose(fp);
+
+        directory[strlen(directory) - 1] = '\0'; // After find command there is a trailing \n we need to strip
+
+        // Write to git-specific buffers
+        snprintf(PROJ_ALIASES_PATH, PATH_MAX, "%s/%s", directory, ACRONYM_FILENAME);
+        snprintf(LOCAL_ALIASES_PATH, PATH_MAX, "%s/%s", directory, ACRONYM_LOCAL_FILENAME);
     }
 
-    // Write to buffers
+    // Write to mandatory buffers
     snprintf(GLOBAL_ALIASES_PATH, PATH_MAX, "%s/%s", ACRONYM_GLOBAL_DIR, ACRONYM_FILENAME);
-    snprintf(PROJ_ALIASES_PATH, PATH_MAX, "%s/%s", dir, ACRONYM_FILENAME);
-    snprintf(LOCAL_ALIASES_PATH, PATH_MAX, "%s/%s", dir, ACRONYM_LOCAL_FILENAME);
-
     snprintf(TMP_MISMATCHES_PATH, PATH_MAX, "%s/%s", ACRONYM_GLOBAL_DIR, ".acronym.tmp");
     snprintf(TMP_TOML_PATH, PATH_MAX, "%s/%s", ACRONYM_GLOBAL_DIR, ".acronym.toml");
 
-    ALIASES_PATH = GLOBAL_ALIASES_PATH;
-    if (scope == LOCAL) {
+    if (scope == GLOBAL)
+        ALIASES_PATH = GLOBAL_ALIASES_PATH;
+    else if (scope == LOCAL)
         ALIASES_PATH = LOCAL_ALIASES_PATH;
-    } else {
+    else
         ALIASES_PATH = PROJ_ALIASES_PATH;
-    }
 
     // If alias file doesn't exist already, then make it
     if (access(ALIASES_PATH, F_OK) == -1) {

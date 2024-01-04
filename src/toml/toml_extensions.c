@@ -199,7 +199,7 @@ char *toml_dumps(toml_table_t *table) {
     int pos = 0;
     for (int i = 0; i < table->ntab; i++) {
         tab = table->tab[i];
-        sprintf(toml_str + pos, "\033[34m[\033[35m%s\033[34m]\033[0m\n", tab->key);
+        sprintf(toml_str + pos, "\033[34m[\033[33m%s\033[34m]\033[0m\n", tab->key);
         pos += strlen(tab->key) + 22;
         for (int j = 0; j < tab->nkval; j++) {
             toml_keyval_t *kv = tab->kval[j];

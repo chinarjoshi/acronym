@@ -7,6 +7,8 @@
 #include "parse_args.h"
 #include "../file_io/file_io.h"
 
+static const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree >/dev/null 2>&1";
+
 struct Cli *parse_args(int argc, char **argv) {
     Cli *cli = parse_global_options(argc, argv);
     if (!cli)
@@ -276,8 +278,15 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 Cli *validate_args(Cli *cli) {
-    union Cmd c = cli->cmd;
     bool invalid = false;
+    union Cmd c = cli->cmd;
+    IS_IN_GIT_REPO = !system(in_git_repo_cmd);
+
+    if ((cli->scope == PROJ || cli->scope == LOCAL) && !IS_IN_GIT_REPO) {
+        printf("Error (invalid args): must be in git repo to use project-wide or local project-wide scope.\n");
+        invalid = true;
+    }
+
     switch (cli->type) {
         case ADD:
             if (!c.add.command) {
@@ -309,8 +318,7 @@ Cli *validate_args(Cli *cli) {
             break;
         case SHOW:
             if (c.show.use_aliases && c.show.use_sections) {
-                printf("Error (invalid args): alias and section flags" \
-                       "cannot be true at the same time.\n");
+                printf("Error (invalid args): cannot filter by both aliases and sections simutaneously.\n");
                 invalid = true;
             }
             break;
