@@ -6,8 +6,8 @@
 #include "../file_io/file_io.h"
 #include "../toml/toml_extensions.h"
 
-bool show_cmd(Cli *cli) {
-    struct Show s = cli->cmd.show;
+bool read_cmd(Cli *cli) {
+    struct Read r = cli->cmd.read;
 
     HashTable *ht;
     int orig_ht_size = 0;
@@ -35,8 +35,8 @@ bool show_cmd(Cli *cli) {
     if (cli->scope != GLOBAL || !IS_IN_GIT_REPO || !non_empty_git_aliases_files) {
         if (!include_aliases_file(GLOBAL_ALIASES_PATH, ht, global_cc))
             return false;
-        if (s.prefixes)
-            filter_hash_table(ht, s.prefixes, s.use_aliases, s.use_sections, global_cc);
+        if (r.prefixes)
+            filter_hash_table(ht, r.prefixes, r.use_aliases, r.use_sections, global_cc);
         added_global = ht->size > orig_ht_size;
         orig_ht_size = ht->size;
     }
@@ -45,16 +45,16 @@ bool show_cmd(Cli *cli) {
         // Include local aliases, highlighted differently to differentiate them
         if (!include_aliases_file(LOCAL_ALIASES_PATH, ht, local_cc))
             return false;
-        if (s.prefixes)
-            filter_hash_table(ht, s.prefixes, s.use_aliases, s.use_sections, local_cc);
+        if (r.prefixes)
+            filter_hash_table(ht, r.prefixes, r.use_aliases, r.use_sections, local_cc);
         added_local = ht->size > orig_ht_size;
         orig_ht_size = ht->size;
 
         // And now project aliases
         if (!include_aliases_file(PROJ_ALIASES_PATH, ht, proj_cc))
             return false;
-        if (s.prefixes)
-            filter_hash_table(ht, s.prefixes, s.use_aliases, s.use_sections, proj_cc);
+        if (r.prefixes)
+            filter_hash_table(ht, r.prefixes, r.use_aliases, r.use_sections, proj_cc);
         added_proj = ht->size > orig_ht_size;
         orig_ht_size = ht->size;
     }

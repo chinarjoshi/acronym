@@ -5,8 +5,8 @@
 #include "../hash_table/hash_table.h"
 #include "../toml/toml_extensions.h"
 
-bool edit_cmd(Cli *cli) {
-    struct Edit e = cli->cmd.edit;
+bool update_cmd(Cli *cli) {
+    struct Update u = cli->cmd.update;
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
 
@@ -29,7 +29,7 @@ bool edit_cmd(Cli *cli) {
 
     // Open the toml tmpfile with editor
     char command[128];
-    char *editor = e.editor ? e.editor : getenv("EDITOR");
+    char *editor = u.editor ? u.editor : getenv("EDITOR");
     snprintf(command, sizeof(command), "%s %s", editor, TMP_TOML_PATH);
 
     int result = system(command);

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-bool remove_cmd(Cli *cli) {
-    struct Remove r = cli->cmd.remove;
+bool delete_cmd(Cli *cli) {
+    struct Delete d = cli->cmd.delete;
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     Entry *entry;
@@ -23,32 +23,32 @@ bool remove_cmd(Cli *cli) {
 
     // Delete given aliases or sections, prompting unless force is given
     bool something_removed = false;
-    while (r.aliases) {
-        if (r.section) {
-            if (!r.force) {
+    while (d.aliases) {
+        if (d.section) {
+            if (!d.force) {
                 char answer;
-                printf("Delete section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
+                printf("Delete section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", d.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
-            if (remove_section(r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Section not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
+            if (remove_section(d.aliases->data, ht) == ERR_NOT_FOUND) {
+                printf("Section not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", d.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
             } else {
                 if (cli->verbosity)
-                    printf("Deleted section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m\n", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
+                    printf("Deleted section: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m\n", d.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 something_removed = true;
             }
         } else {
-            if (r.interactive) {
+            if (d.interactive) {
                 char answer;
-                printf("Delete: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
+                printf("Delete: \033[32m\"%s\"\033[0m from \033[36m%s\033[0m? [y/N]: ", d.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
                 scanf(" %c", &answer);
                 if (answer != 'y' && answer != 'Y')
                     continue;
             }
-            if (remove_entry(&entry, r.aliases->data, ht) == ERR_NOT_FOUND) {
-                printf("Not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", r.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
+            if (remove_entry(&entry, d.aliases->data, ht) == ERR_NOT_FOUND) {
+                printf("Not found: \033[31m\"%s\"\033[0m in \033[36m%s\033[0m\n", d.aliases->data, replace_home_with_tilde(ALIASES_PATH, PATH_BUFFER));
             } else {
                 if (cli->verbosity)
                     printf("Deleted: %s \033[34m= \033[32m\"%s\"\033[0m (\033[33m%s\033[0m) from \033[36m%s\033[0m\n", 
@@ -56,7 +56,7 @@ bool remove_cmd(Cli *cli) {
                 something_removed = true;
             }
         }
-        r.aliases = r.aliases->next;
+        d.aliases = d.aliases->next;
     }
     if (!something_removed)
         return cleanup(0, 0, ht, tmp_f, TMP_MISMATCHES_PATH);

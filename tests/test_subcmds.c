@@ -29,16 +29,16 @@ static void teardown() {
 
 START_TEST(test_add_cmd_normal) {
     Cli cli = {
-        .type = ADD,
+        .type = CREATE,
         .verbosity = 1,
-        .cmd.add = {
+        .cmd.create = {
             .command = "grep --color=auto",
             .section_override = "utils",
             .include_flags = true,
         },
     };
 
-    int result = add_cmd(&cli);
+    int result = create_cmd(&cli);
     ck_assert(result);
 
     alias_f = fopen(ALIASES_PATH, "r");
@@ -58,16 +58,16 @@ END_TEST
 
 START_TEST(test_add_cmd_duplicate) {
     Cli cli = {
-        .type = ADD,
+        .type = CREATE,
         .verbosity = 1,
-        .cmd.add = {
+        .cmd.create = {
             .command = "pytest ./*",
             .alias_override = "test",
             .section_override = "unit test",
         },
     };
 
-    int result = add_cmd(&cli);
+    int result = create_cmd(&cli);
     ck_assert(!result);
 
     alias_f = fopen(ALIASES_PATH, "r");
@@ -83,12 +83,12 @@ END_TEST
 START_TEST(test_remove_cmd_normal) {
     AliasListNode a = { .data = "test", .next = NULL };
     Cli cli = {
-        .type = REMOVE,
+        .type = DELETE,
         .verbosity = 1,
-        .cmd.remove.aliases = &a,
+        .cmd.delete.aliases = &a,
     };
 
-    int result = remove_cmd(&cli);
+    int result = delete_cmd(&cli);
     ck_assert(result);
 
     alias_f = fopen(ALIASES_PATH, "r");
@@ -112,22 +112,22 @@ END_TEST
 START_TEST(test_show_cmd_normal) {
     setup_path_buffers(GLOBAL);
     Cli cli = {
-        .type = SHOW,
+        .type = READ,
         .verbosity = 1,
     };
 
-    ck_assert(show_cmd(&cli));
+    ck_assert(read_cmd(&cli));
 }
 END_TEST
 
 START_TEST(test_show_cmd_local) {
     setup_path_buffers(PROJ);
     Cli cli = {
-        .type = SHOW,
+        .type = READ,
         .verbosity = 1,
     };
 
-    ck_assert(show_cmd(&cli));
+    ck_assert(read_cmd(&cli));
 }
 END_TEST
 
@@ -136,12 +136,12 @@ START_TEST(test_show_cmd_aliases) {
     AliasListNode b = { .data = "gp", .next = NULL };
     AliasListNode a = { .data = "a", .next = &b };
     Cli cli = {
-        .type = SHOW,
+        .type = READ,
         .verbosity = 1,
-        .cmd.show.prefixes = &a
+        .cmd.read.prefixes = &a
     };
 
-    ck_assert(show_cmd(&cli));
+    ck_assert(read_cmd(&cli));
 }
 END_TEST
 

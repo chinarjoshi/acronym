@@ -8,6 +8,13 @@
 #include "../file_io/file_io.h"
 
 static const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree >/dev/null 2>&1";
+static const char *sem_ver = "1.0.0";
+
+static struct argp *current_argp;
+static void print_help_and_exit(int exit_code) {
+    printf("");
+    exit(exit_code);
+}
 
 struct Cli *parse_args(int argc, char **argv) {
     Cli *cli = parse_global_options(argc, argv);
@@ -23,15 +30,16 @@ struct Cli *parse_args(int argc, char **argv) {
     for (size_t i = 0; i < NUM_SUBCMDS; i++) {
         if (!strcmp(subcommand, argp_subcmds[i].name)) {
             cli->type = argp_subcmds[i].type;
-            argp_parse(argp_subcmds[i].argp_parser, argc, argv, 0, 0, cli);
+            current_argp = argp_subcmds[i].argp_parser;
+            argp_parse(current_argp, argc, argv, 0, 0, cli);
             found = 1;
             break;
         }
     }
 
     if (!found) {
-        printf("Error (invalid args): invalid subcommand: %s\n", subcommand);
-        return NULL;
+        printf("Invalid argument: found invalid subcommand \"%s\", try CRUD.\n", subcommand);
+        print_help_and_exit(1);
     }
 
     return validate_args(cli);
@@ -46,8 +54,8 @@ struct Cli *parse_global_options(int argc, char **argv) {
         const char *file = getenv("ACRONYM_FILENAME");
         file = (file) ? file : ".aliases.sh";
 
-        printf("%s/%s", dir, file);
-        return NULL;
+        printf("%s/%s\n", dir, file);
+        exit(0);
     }
 
     Cli *cli = calloc(1, sizeof(Cli));
@@ -73,8 +81,8 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 if (optarg) {
                     int verbosity = atoi(optarg);
                     if (verbosity < 0 || verbosity > 3) {
-                        printf("Error (invalid args): verbosity must be between 0-3. Provided: %s\n", optarg);
-                        return NULL;
+                        printf("Invalid argument: verbosity must be between 0-3, but was given \"%s\".\n", optarg);
+                        print_help_and_exit(1);
                     }
                     cli->verbosity = verbosity;
                 } else {
@@ -84,82 +92,88 @@ struct Cli *parse_global_options(int argc, char **argv) {
             case 'q':
                 cli->verbosity = 0;
                 break;
-            case 'h': // TODO: flesh out these options
-                // Print help
-                printf("Help message\n");
-                return NULL;
-                break;
+            case 'h':
+                print_help_and_exit(0);
             case 'V':
-                // Print the version
-                printf("1.0.0\n");
-                return NULL;
-                break;
+                printf("%s\n", sem_ver);
+                exit(0);
             case '?':
             default:
-                printf("Error (invalid args): unknown option: \"%c\".\n", opt);
-                return NULL;
-                break;
+                printf("Invalid argument: unknown option \"%c\".\n", opt);
+                print_help_and_exit(1);
         }
     }
     return cli;
 }
 
-int add_parse_opt(int key, char *arg, struct argp_state *state) {
+int create_parse_opt(int key, char *arg, struct argp_state *state) {
     Cli *cli = (Cli *)state->input;
-    struct Add *add = &cli->cmd.add;
+    struct Create *create = &cli->cmd.create;
     switch (key) {
         case 'a':
-            if (add->alias_override) {
-                printf("Error (invalid args): multiple alias overrides provided.\n");
-                return 1;
+            if (create->alias_override) {
+                printf("Invalid argument: multiple alias overrides provided: \"%s\", \"%s\".\n\n", 
+                       create->alias_override, arg);
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
-            if (!(add->alias_override = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(add->alias_override, arg);
+            if (!(create->alias_override = strdup(arg))) {
+                perror("Failed memory allocation in function \"create_parse_opt\".\n");
+                exit(1);
+            }
             break;
         case 's':
-            if (add->section_override) {
-                printf("Error (invalid args): multiple section overrides provided.\n");
-                return 1;
+            if (create->section_override) {
+                printf("Invalid argument: multiple section overrides provided: \"%s\", \"%s\".\n\n", 
+                       create->section_override, arg);
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
-            if (!(add->section_override = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(add->section_override, arg);
+            if (!(create->section_override = strdup(arg))) {
+                perror("Failed memory allocation in function \"create_parse_opt\".\n");
+                exit(1);
+            }
             break;
         case 'c':
-            if (add->comment) {
-                printf("Error (invalid args): multiple comments provided.\n");
-                return 1;
+            if (create->comment) {
+                printf("Invalid argument: multiple comments provided: \"%s\", \"%s\".\n\n", 
+                       create->comment, arg);
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
-            if (!(add->comment = malloc(strlen(arg) + 3)))
-                return 1;
-            sprintf(add->comment, "# %s", arg);
+            if (!(create->comment = malloc(strlen(arg) + 3))) {
+                perror("Failed memory allocation in function \"create_parse_opt\".\n");
+                exit(1);
+            }
+            sprintf(create->comment, "# %s", arg);
             break;
         case 'i':
-            add->include_flags = true;
+            create->include_flags = true;
             break;
         case 'p':
             if (cli->scope != GLOBAL) {
-                printf("Error (invalid args): multiple scopes provided.\n");
-                return 1;
+                printf("Invalid argument: multiple scopes provided.\n\n");
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
             cli->scope = PROJ;
             break;
         case 'l':
             if (cli->scope != GLOBAL) {
-                printf("Error (invalid args): multiple scopes provided.\n");
-                return 1;
+                printf("Invalid argument: multiple scopes provided.\n\n");
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
             cli->scope = LOCAL;
             break;
+        case 'h':
+            argp_state_help(state, stdout, ARGP_HELP_STD_HELP);
+            break;
         case ARGP_KEY_ARG:;
-            if (add->command) {
-                printf("Error (invalid args): multiple commands provided.\n");
-                return 1;
+            if (create->command) {
+                printf("Invalid argument: multiple commands provided: \"%s\", \"%s\".\n\n", 
+                       create->command, arg);
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
-            if (!(add->command = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(add->command, arg);
+            if (!(create->command = strdup(arg))) {
+                perror("Failed memory allocation in function \"create_parse_opt\".\n");
+                exit(1);
+            }
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -167,44 +181,50 @@ int add_parse_opt(int key, char *arg, struct argp_state *state) {
     return 0;
 }
 
-int remove_parse_opt(int key, char *arg, struct argp_state *state) {
+int delete_parse_opt(int key, char *arg, struct argp_state *state) {
     Cli *cli = (Cli *)state->input;
-    struct Remove *remove = &cli->cmd.remove;
+    struct Delete *delete = &cli->cmd.delete;
     switch (key) {
         case 's':
-            remove->section = true;
+            delete->section = true;
             break;
         case 'f':
-            remove->force = true;
+            delete->force = true;
             break;
         case 'i':
-            remove->interactive = true;
+            delete->interactive = true;
             break;
         case 'p':
             if (cli->scope != GLOBAL) {
-                printf("Error (invalid args): multiple scopes provided.\n");
-                return 1;
+                printf("Invalid argument: multiple scopes provided.\n\n");
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
             cli->scope = PROJ;
             break;
         case 'l':
             if (cli->scope != GLOBAL) {
-                printf("Error (invalid args): multiple scopes provided.\n");
-                return 1;
+                printf("Invalid argument: multiple scopes provided.\n\n");
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
             cli->scope = LOCAL;
+            break;
+        case 'h':
+            argp_state_help(state, stdout, ARGP_HELP_STD_HELP);
             break;
         case ARGP_KEY_ARG:;
             AliasListNode *new_node;
-            if (!(new_node = malloc(sizeof(AliasListNode))))
-                return 1;
+            if (!(new_node = malloc(sizeof(AliasListNode)))) {
+                perror("Failed memory allocation in function \"delete_parse_opt\".\n");
+                exit(1);
+            }
             if (!(new_node->data = malloc(strlen(arg) + 1))) {
                 free(new_node);
-                return 1;
+                perror("Failed memory allocation in function \"delete_parse_opt\".\n");
+                exit(1);
             }
             strcpy(new_node->data, arg);
-            new_node->next = remove->aliases;
-            remove->aliases = new_node;
+            new_node->next = delete->aliases;
+            delete->aliases = new_node;
             break;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -212,48 +232,53 @@ int remove_parse_opt(int key, char *arg, struct argp_state *state) {
     return 0;
 }
 
-int edit_parse_opt(int key, char *arg, struct argp_state *state) {
+int update_parse_opt(int key, char *arg, struct argp_state *state) {
     Cli *cli = (Cli *)state->input;
-    struct Edit *edit = &cli->cmd.edit;
+    struct Update *update = &cli->cmd.update;
     switch (key) {
         case 'e':
-            if (edit->editor) {
-                printf("Error (invalid args): multiple editors provided.\n");
-                return 1;
+            if (update->editor) {
+                printf("Invalid argument: multiple editors provided: \"%s\", \"%s\".\n\n", 
+                       update->editor, arg);
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
-            if (!(edit->editor = malloc(strlen(arg) + 1)))
-                return 1;
-            strcpy(edit->editor, arg);
+            if (!(update->editor = strdup(arg))) {
+                perror("Failed memory allocation in function \"update_parse_opt\".\n");
+                exit(1);
+            }
             break;
         case 'p':
             if (cli->scope != GLOBAL) {
-                printf("Error (invalid args): multiple scopes provided.\n");
-                return 1;
+                printf("Invalid argument: multiple scopes provided.\n\n");
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
             cli->scope = PROJ;
             break;
         case 'l':
             if (cli->scope != GLOBAL) {
-                printf("Error (invalid args): multiple scopes provided.\n");
-                return 1;
+                printf("Invalid argument: multiple scopes provided.\n\n");
+                argp_state_help(state, stdout, ARGP_HELP_STD_ERR);
             }
             cli->scope = LOCAL;
             break;
+        case 'h':
+            argp_state_help(state, stdout, ARGP_HELP_STD_HELP);
+            exit(0);
         default:
             return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
 
-int show_parse_opt(int key, char *arg, struct argp_state *state) {
+int read_parse_opt(int key, char *arg, struct argp_state *state) {
     Cli *cli = (Cli *)state->input;
-    struct Show *show = &cli->cmd.show;
+    struct Read *read = &cli->cmd.read;
     switch (key) {
         case 'a':
-            show->use_aliases = true;
+            read->use_aliases = true;
             break;
         case 's':
-            show->use_sections = true;
+            read->use_sections = true;
             break;
         case 'g':
             // HACK: Global is the default, so to pass this parameter, make it not global
@@ -261,16 +286,22 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case ARGP_KEY_ARG:;
             AliasListNode *new_node;
-            if (!(new_node = malloc(sizeof(AliasListNode))))
-                return 1;
+            if (!(new_node = malloc(sizeof(AliasListNode)))) {
+                perror("Failed memory allocation in function \"read_parse_opt\".\n");
+                exit(1);
+            }
             if (!(new_node->data = malloc(strlen(arg) + 1))) {
                 free(new_node);
-                return 1;
+                perror("Failed memory allocation in function \"read_parse_opt\".\n");
+                exit(1);
             }
             strcpy(new_node->data, arg);
-            new_node->next = show->prefixes;
-            show->prefixes = new_node;
+            new_node->next = read->prefixes;
+            read->prefixes = new_node;
             break;
+        case 'h':
+            argp_state_help(state, stdout, ARGP_HELP_STD_HELP);
+            exit(0);
         default:
             return ARGP_ERR_UNKNOWN;
     }
@@ -278,54 +309,53 @@ int show_parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 Cli *validate_args(Cli *cli) {
-    bool invalid = false;
+    bool valid = true;
     union Cmd c = cli->cmd;
     IS_IN_GIT_REPO = !system(in_git_repo_cmd);
 
     if ((cli->scope == PROJ || cli->scope == LOCAL) && !IS_IN_GIT_REPO) {
-        printf("Error (invalid args): must be in git repo to use project-wide or local project-wide scope.\n");
-        invalid = true;
+        printf("Invalid usage: must be in git repo to use project-wide or local project-wide scope.\n\n");
+        valid = false;
     }
 
     switch (cli->type) {
-        case ADD:
-            if (!c.add.command) {
-                printf("Error (invalid args): must provide command to alias.\n");
-                invalid = true;
+        case CREATE:
+            if (!c.create.command) {
+                printf("Missing argument: must provide a command to alias.\n\n");
+                valid = false;
             }
             break;
-        case REMOVE:
-            if (c.remove.force && c.remove.interactive) {
-                printf("Error (invalid args): force and interactive flags " \
-                       "cannot be true at same time.\n");
-                invalid = true;
-            }
-            if (!c.remove.aliases) {
-                printf("Error (invalid args): no %s provided.\n", 
-                       c.remove.section ? "section" : "alias"); 
-                invalid = true;
+        case READ:
+            if (c.read.use_aliases && c.read.use_sections) {
+                printf("Invalid argument: cannot filter by both aliases and sections simutaneously.\n\n");
+                valid = false;
             }
             break;
-        case EDIT:
-            if (!c.edit.editor)
+        case UPDATE:
+            if (!c.update.editor)
                 break;
             char command[128];
-            snprintf(command, 128, "command -v %s > /dev/null", c.edit.editor);
+            snprintf(command, 128, "command -v %s > /dev/null", c.update.editor);
             if (system(command)) {
-                printf("Error (system): editor program not found: \"%s\".\n", c.edit.editor);
-                invalid = true;
+                printf("Invalid argument: editor program not found: \"%s\".\n\n", c.update.editor);
+                valid = false;
             }
             break;
-        case SHOW:
-            if (c.show.use_aliases && c.show.use_sections) {
-                printf("Error (invalid args): cannot filter by both aliases and sections simutaneously.\n");
-                invalid = true;
+        case DELETE:
+            if (c.delete.force && c.delete.interactive) {
+                printf("Invalid argument: force and interactive flags cannot be true at same time.\n\n");
+                valid = false;
+            }
+            if (!c.delete.aliases) {
+                printf("Invalid argument: no %s provided.\n\n", c.delete.section ? "section" : "alias"); 
+                valid = false;
             }
             break;
     }
-    if (invalid) {
-        free_cli(cli);
-        return NULL;
+
+    if (!valid) {
+        argp_help(current_argp, stdout, ARGP_HELP_STD_HELP, "acronym");
+        exit(1);
     }
     return cli;
 }
@@ -342,19 +372,19 @@ void free_alias_list(AliasListNode *node) {
 
 void free_cli(Cli *cli) {
     switch (cli->type) {
-        case ADD:
-            free(cli->cmd.add.command);
-            free(cli->cmd.add.alias_override);
-            free(cli->cmd.add.section_override);
+        case CREATE:
+            free(cli->cmd.create.command);
+            free(cli->cmd.create.alias_override);
+            free(cli->cmd.create.section_override);
             break;
-        case REMOVE:
-            free_alias_list(cli->cmd.remove.aliases);
+        case READ:
+            free_alias_list(cli->cmd.read.prefixes);
             break;
-        case SHOW:
-            free_alias_list(cli->cmd.show.prefixes);
+        case UPDATE:
+            free(cli->cmd.update.editor);
             break;
-        case EDIT:
-            free(cli->cmd.edit.editor);
+        case DELETE:
+            free_alias_list(cli->cmd.delete.aliases);
             break;
     }
     free(cli);

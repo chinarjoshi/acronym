@@ -5,7 +5,7 @@
 #define NUM_SUBCMDS 5
 typedef struct AliasListNode AliasListNode;
 
-struct Add {
+struct Create {
     char *command; // Required
     char *alias_override;
     char *section_override;
@@ -13,21 +13,21 @@ struct Add {
     bool include_flags;
 };
 
-struct Remove {
+struct Read {
+    AliasListNode *prefixes;
+    bool use_aliases;
+    bool use_sections;
+};
+
+struct Update {
+    char *editor;
+};
+
+struct Delete {
     AliasListNode *aliases;
     bool section;
     bool force;
     bool interactive;
-};
-
-struct Edit {
-    char *editor;
-};
-
-struct Show {
-    AliasListNode *prefixes;
-    bool use_aliases;
-    bool use_sections;
 };
 
 struct AliasListNode {
@@ -36,13 +36,13 @@ struct AliasListNode {
 };
 
 typedef union Cmd {
-    struct Add add;
-    struct Remove remove;
-    struct Edit edit;
-    struct Show show;
+    struct Create create;
+    struct Read read;
+    struct Update update;
+    struct Delete delete;
 } Cmd;
 
-typedef enum CmdType { ADD, REMOVE, EDIT, SHOW } CmdType;
+typedef enum CmdType { CREATE, READ, UPDATE, DELETE} CmdType;
 typedef enum Scope { GLOBAL, PROJ, LOCAL } Scope;
 
 typedef struct Cli {
@@ -58,16 +58,16 @@ typedef struct ArgpSubcmd {
     struct argp *argp_parser;
 } ArgpSubcmd;
 
-extern struct argp add_argp;
-extern struct argp remove_argp;
-extern struct argp show_argp;
-extern struct argp edit_argp;
+extern struct argp create_argp;
+extern struct argp read_argp;
+extern struct argp update_argp;
+extern struct argp delete_argp;
 extern struct ArgpSubcmd argp_subcmds[];
 
-int add_parse_opt(int key, char *arg, struct argp_state *state);
-int remove_parse_opt(int key, char *arg, struct argp_state *state);
-int show_parse_opt(int key, char *arg, struct argp_state *state);
-int edit_parse_opt(int key, char *arg, struct argp_state *state);
+int create_parse_opt(int key, char *arg, struct argp_state *state);
+int delete_parse_opt(int key, char *arg, struct argp_state *state);
+int read_parse_opt(int key, char *arg, struct argp_state *state);
+int update_parse_opt(int key, char *arg, struct argp_state *state);
 
 struct Cli *parse_args(int argc, char **argv);
 struct Cli *parse_global_options(int argc, char **argv);

@@ -3,8 +3,8 @@
 #include "../hash_table/hash_table.h"
 #include "../file_io/file_io.h"
 
-bool add_cmd(Cli *cli) {
-    struct Add a = cli->cmd.add;
+bool create_cmd(Cli *cli) {
+    struct Create c = cli->cmd.create;
     HashTable *ht;
     create_hash_table(&ht, INITIAL_CAPACITY, LOAD_FACTOR);
     Entry *entry;
@@ -20,7 +20,7 @@ bool add_cmd(Cli *cli) {
         return cleanup(0, 0, ht, alias_f, 0);
 
     // Create entry from command line args
-    create_entry(&entry, a.command, a.alias_override, a.section_override, a.comment, 0, a.include_flags);
+    create_entry(&entry, c.command, c.alias_override, c.section_override, c.comment, 0, c.include_flags);
 
     // Add new entry to hash table and check for duplicate
     if (add_entry(entry, ht) == ERR_DUPLICATE) {

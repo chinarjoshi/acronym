@@ -7,10 +7,10 @@
 #include "../hash_table/hash_table.h"
 #include "../file_io/file_io.h"
 bool (*sub_cmds[])(Cli *) = {
-    [ADD] = add_cmd,
-    [REMOVE] = remove_cmd,
-    [EDIT] = edit_cmd,
-    [SHOW] = show_cmd,
+    [CREATE] = create_cmd,
+    [READ] = read_cmd,
+    [UPDATE] = update_cmd,
+    [DELETE] = delete_cmd,
 };
 
 int cleanup(const char *message, const char *message_arg, 
