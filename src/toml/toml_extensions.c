@@ -186,7 +186,7 @@ char *toml_dumps(toml_table_t *table) {
             // %s \033[34m=\033[32m\"%s\"\033[0m\n
             toml_keyval_t *kv = tab->kval[j];
             if (kv->comment && kv->comment[0] == '#')
-                len += strlen(kv->comment) + 1;
+                len += strlen(kv->comment) + 4 + 5 + 1; // \033[3m %s \033[23m\n
             len += strlen(tab->kval[j]->key) + strlen(tab->kval[j]->val) + 20;
         }
         if (i < table->ntab - 1)
@@ -204,8 +204,8 @@ char *toml_dumps(toml_table_t *table) {
         for (int j = 0; j < tab->nkval; j++) {
             toml_keyval_t *kv = tab->kval[j];
             if (kv->comment && kv->comment[0] == '#') {
-                sprintf(toml_str + pos, "%s\n", kv->comment);
-                pos += strlen(kv->comment) + 1;
+                sprintf(toml_str + pos, "\033[3m%s\033[23m\n", kv->comment);
+                pos += strlen(kv->comment) + 10;
             }
             sprintf(toml_str + pos, "%s \033[34m= \033[32m\"%s\"\033[0m\n", kv->key, kv->val);
             pos += strlen(kv->key) + strlen(kv->val) + 20;
