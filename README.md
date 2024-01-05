@@ -1,5 +1,5 @@
 # acronym
-A program that syncs shell usage between development environments through ***aliases***. It implements CRUD operations on alias databases at different scopes.
+A tool that syncs shell usage between development environments through [***aliases***](https://tldp.org/LDP/abs/html/aliases.html). It implements CRUD operations on alias databases at different scopes.
 
 ## Rational
 Development environments are notoriously hard to keep consistent. One component is the difficulty establishing and remembering the commands to make your software, which often have
@@ -7,20 +7,20 @@ long and awkward flags that are a common source of error.
 
 This solution is a version-controlled file strictly containing aliases for commands to be used by the whole team, named `.aliases.sh`.
 It can be version-controlled because its devoid of secrets, and it dodges the complexity and performance impact of a container. This comes with significant advantages:
-1. *Enforces consistent shell usage during collaborating*: everyone is running identical commands, which simplifies new developer onboarding and removes a component of the *"well it works on my machine"* problem
+1. *Enforces consistent shell usage when collaborating*: everyone is running identical commands, which simplifies new developer onboarding and removes a component of the *"well it works on my machine"* problem
 2. *Allows a uniform interface to all of your projects, regardless of the language or build system*: `build` can mean make, cmake, ninja, meson, scons, gradle, etc. based on the current project.
     Remember what the tool does, instead of its name
 3. *Encourages ergonomic names to your long commands*: typing `l` instead of `ls -ghAFG --color=auto` reduces typos and saves time
 
 ## Usage
 
-Only one person needs the `acronym` executable. To use global aliases, add this command to your .bashrc/.zshrc: `. $(acronym)`. 
-To use project-wide aliases, all contributors can simply source the `.aliases.sh` file located in the git repository, either manually or with [autoenv](https://github.com/hyperupcall/autoenv).
+Only one person needs the `acronym` executable for everyone to benefit. To use global aliases, add this command to your .bashrc/.zshrc: `. $(acronym)`[^1].
+To use project-wide aliases, all contributors can simply source the `.aliases.sh` file located in your git repository, either manually or with [autoenv](https://github.com/hyperupcall/autoenv).
 
 There are 3 alias database scopes:
 1. *global* defines aliases available everywhere. Default: `~/.aliases.sh`
 2. *project-wide* defines aliases specific to a git-tracked directory, which should be version-controlled and used by all contributors. Example: `~/projects/example/.aliases.sh`
-3. *local project-wide* is same as above, but is local to your machine and specified in the git ignore file.  Example: `~/projects/example/.env`
+3. *local project-wide* is same as above, but is local to your machine and specified in the git ignore file [^2].  Example: `~/projects/example/.env`
 
 Every entry in the database has the following string fields:
  - alias: the new command you type
@@ -28,7 +28,7 @@ Every entry in the database has the following string fields:
  - section: the category the alias falls under (for organization)
  - comment: an optional description
 
-There are 4 database operations:
+There are 4 database operations[^3]:
 
 ### `acronym create [OPTION ...] [COMMAND]`
 
@@ -77,9 +77,6 @@ Remove aliases or whole sections from the database.
 ```
 ![delete_demo2](https://github.com/chinarjoshi/acronym/assets/68311366/df78d0d9-8dfb-48bb-8fd3-b4ef56c0b103)
 
-The alias database incurs no performance penalty because it is converted to a shell script of `alias` commands for the shell to source. Also, acronym adds the command `. ./.aliases.sh` to the end of the `.env` file in the local scope,
-so no modifications are needed when using autoenv.
-
 ## Installation
 
 Binaries are available for x86_64 Linux and MacOS.
@@ -89,8 +86,9 @@ If you're an **Arch Linux** user, you can install acronym from the AUR
 $ yay -S acronym
 ```
 
-If you're a **MacOS Homebrew** user, you can install acronym from homebrew-core
+If you're a **MacOS Homebrew** user, you can install acronym from a tap
 ```
+$ brew tap chinarjoshi/tap
 $ brew install acronym
 ```
 
@@ -106,3 +104,7 @@ Acronym can be configured through the following environmental variables:
 * `ACRONYM_LOCAL_FILENAME`: The name of the local project-wide alias file. Default: `.env`
 * `ACRONYM_GLOBAL_DIR`: The directory that contains the global alias file. Useful if you want it to be somewhere like dotfiles. Default: `~`
 
+[^1]: Invoking `acronym` with no parameters prints the path to the global aliases file
+[^2]: The `.env` file can still contain any other code. Local mode will just append all aliases to the end of the file, and top it off
+with the command `. ./.aliases.sh`, meaning local aliases *cannot* override project-wide aliases
+[^3]: The alias database incurs no performance penalty because it is converted to a plain shell script of `alias` commands for the shell to source.
