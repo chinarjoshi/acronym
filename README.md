@@ -17,7 +17,7 @@ It can be version-controlled because its devoid of secrets, and it dodges the co
 Only one person needs the `acronym` executable. To use global aliases, add this command to your .bashrc/.zshrc: `. $(acronym)`. 
 To use project-wide aliases, all contributors can simply source the `.aliases.sh` file located in the git repository, either manually or with [autoenv](https://github.com/hyperupcall/autoenv).
 
-There are 4 operations (CRUD), and 3 database scopes. 
+There are 3 alias database scopes:
 1. *global* defines aliases available everywhere. Default: `~/.aliases.sh`
 2. *project-wide* defines aliases specific to a git-tracked directory, which should be version-controlled and used by all contributors. Example: `~/projects/example/.aliases.sh`
 3. *local project-wide* is same as above, but is local to your machine and specified in the git ignore file.  Example: `~/projects/example/.env`
@@ -27,6 +27,8 @@ Every entry in the database has the following string fields:
  - command: the actual command the alias runs
  - section: the category the alias falls under (for organization)
  - comment: an optional description
+
+There are 4 database operations:
 
 ### `acronym create [OPTION ...] [COMMAND]`
 
