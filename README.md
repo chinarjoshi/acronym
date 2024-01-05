@@ -37,6 +37,8 @@ Adds a new alias to the specified database scope by providing the command. By de
   -s, --section=SECTION      Optionally provide section/category
   -i, --include-flags        Include flags when generating default alias
 ```
+![create_demo](https://github.com/chinarjoshi/acronym/assets/68311366/2d948894-ed5f-45b5-9140-4bb427679e7a)
+
 ### `acronym read [OPTION ...] [PATTERN ...]`
 
 Shows your aliases in *TOML format*, optionally filtered by the given patterns. If you're in a git repository, it will show the *project-wide* and *local project-wide* scopes.
@@ -46,6 +48,8 @@ If neither of those files exist or you're not in a git repository, it will show 
   -a, --aliases              Make patterns match aliases
   -s, --sections             Make patterns match sections
 ```
+![read_demo](https://github.com/chinarjoshi/acronym/assets/68311366/d4f49bd5-3f84-4fe3-b0f9-dec5a6087cc3)
+
 ### `acronym update [OPTION ...]`
 
 Edit the database in *TOML format* using your default editor. Here you can create, update, or delete entries and have the output converted back to shell script format. The scope is *global* by default.
@@ -54,6 +58,8 @@ Edit the database in *TOML format* using your default editor. Here you can creat
   -l, --local                Edit local project-wide alias database
   -e, --editor=EDITOR        Name of editor to use
 ```
+![update_demo](https://github.com/chinarjoshi/acronym/assets/68311366/30b9611b-dc1e-44bb-808b-c383dcdb743a)
+
 ### `acronym delete [OPTION ...] [ALIAS/SECTION ...]`
 
 Remove aliases or whole sections from the database.
@@ -64,4 +70,6 @@ Remove aliases or whole sections from the database.
   -f, --force                Never prompt, even if alias not found
   -i, --interactive          Prompt before every removal
 ```
+![delete_demo2](https://github.com/chinarjoshi/acronym/assets/68311366/df78d0d9-8dfb-48bb-8fd3-b4ef56c0b103)
+
 ## Installation
