@@ -14,7 +14,8 @@ It can be version-controlled because its devoid of secrets, and it dodges the co
 
 ## Usage
 
-Only one person needs the `acronym` executable. All contributors can simply source the `.aliases.sh` file located in the git repository, either manually or with [autoenv](https://github.com/hyperupcall/autoenv).
+Only one person needs the `acronym` executable. To use global aliases, add this command to your .bashrc/.zshrc: `. $(acronym)`. 
+To use project-wide aliases, all contributors can simply source the `.aliases.sh` file located in the git repository, either manually or with [autoenv](https://github.com/hyperupcall/autoenv).
 
 There are 4 operations (CRUD), and 3 database scopes. 
 1. *global* defines aliases available everywhere. Default: `~/.aliases.sh`
