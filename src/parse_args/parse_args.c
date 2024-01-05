@@ -12,7 +12,10 @@ static const char *sem_ver = "1.0.0";
 
 static struct argp *current_argp;
 static void print_help_and_exit(int exit_code) {
-    printf("HELP MESSAGE PLACEHOLDER\n");
+    FILE *f = fopen("help_message.txt", "r");
+    while (fgets(PATH_BUFFER, sizeof(PATH_BUFFER), f)) {
+        printf("%s", PATH_BUFFER);
+    }
     exit(exit_code);
 }
 

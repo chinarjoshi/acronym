@@ -1,0 +1,31 @@
+acronym 1.0.0
+Chinar Joshi <chinarjoshi7@gmail.com>
+
+acronym syncs shell usage between development environments through aliases.
+It implements CRUD operations on alias databases at different scopes.
+
+There are 3 alias database scopes:
+  global        defines aliases available everywhere
+  project-wide  defines aliases specific to a git-tracked directory, which should be 
+                     version-controlled and used by all contributors.
+  local         same as above, but is local to your machine and in git ignore
+
+Every entry in the database has the following string fields:
+  alias     the new command you type
+  command   the actual command the alias runs
+  section   the category the alias falls under (for organization)
+  comment   an optional description
+
+Usage: acronym [OPTION ...] [SUBCOMMAND]
+
+  -q, --quiet      Suppress output
+  -v, --verbose    Use verbose output
+  -h, --help       Give this help list
+  -V, --version    Print program version
+
+There are 4 subcommands (CRUD):
+
+  create   Adds a new alias to the database by providing the command.
+  read     Shows your aliases in TOML format, optionally filtered by the given patterns.
+  update   Edit the database in TOML format using your default editor.
+  delete   Remove aliases or whole sections from the database.
