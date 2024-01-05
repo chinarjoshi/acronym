@@ -28,7 +28,7 @@ Every entry in the database has the following string fields:
  - section: the category the alias falls under (for organization)
  - comment: an optional description
 
-There are 4 database operations[^3]:
+There are 4 database operations (CRUD) [^3]:
 
 ### `acronym create [OPTION ...] [COMMAND]`
 
