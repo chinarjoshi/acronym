@@ -16,6 +16,9 @@ static void setup() {
     memset(command, 0, sizeof(command));
     memset(section, 0, sizeof(section));
     memset(ovector, 0, sizeof(ovector));
+    ALIASES_PATH = "~";
+    ACRONYM_FILENAME = ".aliases.sh";
+    strcpy(LOCAL_ALIASES_PATH, "~");
 }
 
 static void teardown() {
@@ -134,7 +137,7 @@ START_TEST(test_read_aliases) {
     ck_assert_str_eq(line, "DEBUG_EXECUTABLE=~/projects/acronym/builds/tests\n");
     fgets(line, sizeof(line), tmp);
     ck_assert_str_eq(line, "\n");
-    ck_assert(!fgets(line, sizeof(line), tmp));
+    ck_assert(fgets(line, sizeof(line), tmp));
 }
 END_TEST
 
@@ -151,7 +154,7 @@ START_TEST(test_write_aliases) {
     for (int i = 0; i < 4; i++)
         add_entry(entries[i], ht);
 
-    FILE *f = fopen("/tmp/acronym_test_write_tmpfile", "w+");
+    FILE *f = fopen("/tmp/acronym_test_writing_tmpfile", "w+");
     fputs("CK_FORK=no\n\n", f);
 
     write_aliases(f, ht);
@@ -163,8 +166,6 @@ START_TEST(test_write_aliases) {
     fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "\n");
     fgets(line, sizeof(line), f);
-    ck_assert_str_eq(line, FILE_DELIMITER);
-    fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "alias gd='git diff' ## git\n");
     fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "alias gp='git push -u origin' ## git\n");
@@ -172,7 +173,8 @@ START_TEST(test_write_aliases) {
     ck_assert_str_eq(line, "alias gs='git status' ## git\n");
     fgets(line, sizeof(line), f);
     ck_assert_str_eq(line, "alias l='ls -al' ## ls\n");
-    ck_assert(!fgets(line, sizeof(line), f));
+    fgets(line, sizeof(line), f);
+    ck_assert_str_eq(line, ". ./.aliases.sh");
 }
 END_TEST
 

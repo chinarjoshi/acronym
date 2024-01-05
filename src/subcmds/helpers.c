@@ -95,7 +95,7 @@ bool include_aliases_file(char *path, HashTable *ht, int color_code) {
     // Include local aliases, highlighted differently to differentiate them
     FILE *aliases_f = fopen(path, "r");
     if (!aliases_f) {
-        perror("Error (file I/O): unable to open alias file: \"%s\".\n");
+        printf("Invalid file I/O: unable to open alias file: \"%s\".\n", path);
         return false;
     }
 

@@ -63,6 +63,7 @@ extern struct argp read_argp;
 extern struct argp update_argp;
 extern struct argp delete_argp;
 extern struct ArgpSubcmd argp_subcmds[];
+extern const char *help_message;
 
 int create_parse_opt(int key, char *arg, struct argp_state *state);
 int delete_parse_opt(int key, char *arg, struct argp_state *state);

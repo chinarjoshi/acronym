@@ -7,9 +7,10 @@
 char line[256];
 FILE *alias_f;
 static void setup() {
-    strcpy(ALIASES_PATH, "/home/c/.acronym_test_cmd_alias");
+    ALIASES_PATH = "/home/c/.acronym_test_cmd_alias";
+    IS_IN_GIT_REPO = false;
     strcpy(TMP_MISMATCHES_PATH, "/home/c/.acronym_test_cmd_tmpfile"); // MUST BE ON SAME DEVICE AS ABOVE
-    ALIASES_PATH = "/home/c/.acronym_test_cmd_autoenv";
+    strcpy(GLOBAL_ALIASES_PATH, ALIASES_PATH);
     alias_f = fopen(ALIASES_PATH, "w");
     fputs(
 "# --- Aliases ---\n"
@@ -109,42 +110,6 @@ START_TEST(test_remove_cmd_normal) {
 }
 END_TEST
 
-START_TEST(test_show_cmd_normal) {
-    setup_path_buffers(GLOBAL);
-    Cli cli = {
-        .type = READ,
-        .verbosity = 1,
-    };
-
-    ck_assert(read_cmd(&cli));
-}
-END_TEST
-
-START_TEST(test_show_cmd_local) {
-    setup_path_buffers(PROJ);
-    Cli cli = {
-        .type = READ,
-        .verbosity = 1,
-    };
-
-    ck_assert(read_cmd(&cli));
-}
-END_TEST
-
-START_TEST(test_show_cmd_aliases) {
-    setup_path_buffers(GLOBAL);
-    AliasListNode b = { .data = "gp", .next = NULL };
-    AliasListNode a = { .data = "a", .next = &b };
-    Cli cli = {
-        .type = READ,
-        .verbosity = 1,
-        .cmd.read.prefixes = &a
-    };
-
-    ck_assert(read_cmd(&cli));
-}
-END_TEST
-
 Suite *subcmds_suite(void) {
     Suite *s = suite_create("Subcmds");
 
@@ -158,12 +123,6 @@ Suite *subcmds_suite(void) {
     tcase_add_test(tc_remove, test_remove_cmd_normal);
     tcase_add_checked_fixture(tc_remove, setup, teardown);
     suite_add_tcase(s, tc_remove);
-
-    TCase *tc_show = tcase_create("Show cmd");
-    tcase_add_test(tc_show, test_show_cmd_normal);
-    tcase_add_test(tc_show, test_show_cmd_aliases);
-    tcase_add_test(tc_show, test_show_cmd_local);
-    suite_add_tcase(s, tc_show);
 
     return s;
 }

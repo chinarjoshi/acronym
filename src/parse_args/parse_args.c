@@ -11,11 +11,8 @@ static const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree >/dev/
 static const char *sem_ver = "1.0.0";
 
 static struct argp *current_argp;
-static void print_help_and_exit(int exit_code) {
-    FILE *f = fopen("help_message.txt", "r");
-    while (fgets(PATH_BUFFER, sizeof(PATH_BUFFER), f)) {
-        printf("%s", PATH_BUFFER);
-    }
+static inline void print_help_and_exit(int exit_code) {
+    printf("%s", help_message);
     exit(exit_code);
 }
 
