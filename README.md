@@ -1,11 +1,11 @@
 # acronym
-A tool that syncs shell usage between development environments through [***aliases***](https://tldp.org/LDP/abs/html/aliases.html). It implements CRUD operations on alias databases at different scopes.
+A tool that syncs shell usage between development environments through [***aliases***](https://tldp.org/LDP/abs/html/aliases.html).
 
 ## Rational
 Development environments are notoriously hard to keep consistent. One component is the difficulty establishing and remembering the commands to make your software, which often have
 long and awkward flags that are a common source of error. 
 
-This solution is a version-controlled file strictly containing aliases for commands to be used by the whole team, named `.aliases.sh`.
+This solution is a new version-controlled file strictly containing aliases for commands to be used by the whole team, named `.aliases.sh`.
 It can be version-controlled because its devoid of secrets, and it dodges the complexity and performance impact of a container. This comes with significant advantages:
 1. *Enforces consistent shell usage when collaborating*: everyone is running identical commands, which simplifies new developer onboarding and removes a component of the *"well it works on my machine"* problem
 2. *Allows a uniform interface to all of your projects, regardless of the language or build system*: `build` can mean make, cmake, ninja, meson, scons, gradle, etc. based on the current project.
@@ -14,7 +14,7 @@ It can be version-controlled because its devoid of secrets, and it dodges the co
 
 ## Usage
 
-Only one person needs the `acronym` executable for everyone to benefit. To use global aliases, add this command to your .bashrc/.zshrc: `. $(acronym)`[^1].
+Acronym manages *databases* of aliases that compile to plain shell scripts. Only one person needs the `acronym` executable for everyone to benefit. To use global aliases, add this command to your .bashrc/.zshrc: `. $(acronym -g)`[^1].
 To use project-wide aliases, all contributors can simply source the `.aliases.sh` file located in your git repository, either manually or with [autoenv](https://github.com/hyperupcall/autoenv).
 
 There are 3 alias database scopes:
@@ -94,7 +94,7 @@ $ brew install acronym
 
 Otherwise, you can download the binary from the releases tab and install it with the following command
 ```
-$ chmod +x acronym && sudo mv acronym /usr/local/bin
+$ chmod +x acronym* && sudo mv acronym* /usr/local/bin/acronym
 ```
 
 ## Configuration
