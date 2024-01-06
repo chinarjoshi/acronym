@@ -49,26 +49,15 @@ struct Cli *parse_args(int argc, char **argv) {
 }
 
 struct Cli *parse_global_options(int argc, char **argv) {
-    // If invoked without arguments, then print the alias file path
-    if (argc < 2) {
-        const char *dir = getenv("ACRONYM_GLOBAL_DIR");
-        dir = (dir) ? dir : getenv("HOME");
-
-        const char *file = getenv("ACRONYM_FILENAME");
-        file = (file) ? file : ".aliases.sh";
-
-        printf("%s/%s\n", dir, file);
-        exit(0);
-    }
-
     Cli *cli = calloc(1, sizeof(Cli));
     if (!cli)
         return NULL;
     cli->verbosity = 1;
 
     // Stop option processing at first subcommand, and v has an optional argument
-    char *short_options = "+v::qhV";
+    char *short_options = "+v::gqhV";
     struct option long_options[] = {
+        { "show-global-path", no_argument, 0, 'g' },
         { "verbose", optional_argument, 0, 'v' },
         { "quiet", no_argument, 0, 'q' },
         { "help", no_argument, 0, 'h' },
@@ -80,6 +69,15 @@ struct Cli *parse_global_options(int argc, char **argv) {
     opterr = 0;
     while ((opt = getopt_long(argc, argv, short_options, long_options, 0)) != -1) {
         switch (opt) {
+            case 'g':;
+                const char *dir = getenv("ACRONYM_GLOBAL_DIR");
+                dir = (dir) ? dir : getenv("HOME");
+
+                const char *file = getenv("ACRONYM_FILENAME");
+                file = (file) ? file : ".aliases.sh";
+
+                printf("%s/%s\n", dir, file);
+                exit(0);
             case 'v':
                 if (optarg) {
                     int verbosity = atoi(optarg);
