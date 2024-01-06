@@ -49,7 +49,7 @@ static void get_env_vars() {
 
     // Ensure main and local aliases file names are not the same
     if (!strcmp(ACRONYM_FILENAME, ACRONYM_LOCAL_FILENAME))
-        fprintf(stderr, "Error (Environment): ACRONYM_FILENAME and ACRONYM_LOCAL_FILENAME cannot be equal");
+        fprintf(stderr, "Invalid environmental variable: $ACRONYM_FILENAME and $ACRONYM_LOCAL_FILENAME cannot be equal.\n");
 
     c = getenv("ACRONYM_GLOBAL_DIR");
     ACRONYM_GLOBAL_DIR = (c) ? c : getenv("HOME");
@@ -57,7 +57,7 @@ static void get_env_vars() {
     // Ensure global directory exists
     struct stat st = {0};
     if (stat(ACRONYM_GLOBAL_DIR, &st) == -1)
-        fprintf(stderr, "Error (File I/O): ACRONYM_GLOBAL_DIR is invalid path.");
+        fprintf(stderr, "Invalid environmental variable: $ACRONYM_GLOBAL_DIR is an invalid path.\n");
 }
 
 void setup_path_buffers(Scope scope) {
