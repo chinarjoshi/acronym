@@ -4,7 +4,7 @@ project('acronym', 'c',
   default_options : ['c_args=-Wall -Wextra'])
 
 # Main executable
-pcre_dep = dependency('libpcre')
+pcre_dep = dependency('libpcre', static : true)
 sources = [
   'src/main.c', 
   'src/file_io/file_io.c',
@@ -24,7 +24,6 @@ sources = [
 executable('acronym', sources : sources, dependencies : pcre_dep)
 
 # Test suite
-check_dep = dependency('check')
 
 test_sources = [
   'src/file_io/file_io.c',
@@ -47,5 +46,9 @@ test_sources = [
   'tests/test_subcmds.c',
   'tests/test.c',
 ]
-e = executable('tests', sources : test_sources, dependencies : [check_dep, pcre_dep])
-test('test', e)
+
+if get_option('enable-tests')
+  check_dep = dependency('check')
+  e = executable('tests', sources : test_sources, dependencies : [check_dep, pcre_dep])
+  test('test', e)
+endif

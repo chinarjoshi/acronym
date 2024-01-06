@@ -11,10 +11,6 @@ static const char *in_git_repo_cmd = "git rev-parse --is-inside-work-tree >/dev/
 static const char *sem_ver = "1.0.0";
 
 static struct argp *current_argp;
-static inline void print_help_and_exit(int exit_code) {
-    printf("%s", help_message);
-    exit(exit_code);
-}
 
 struct Cli *parse_args(int argc, char **argv) {
     Cli *cli = parse_global_options(argc, argv);
@@ -24,8 +20,14 @@ struct Cli *parse_args(int argc, char **argv) {
     // Move forward argc and argv to subcommand
     argc -= optind;
     argv += optind;
-    char *subcommand = argv[0];
 
+    if (!argc) {
+        printf("Missing argument: no subcommand provided.\n\n");
+        printf("%s", short_help_message);
+        exit(1);
+    }
+
+    char *subcommand = argv[0];
     int found = 0;
     for (size_t i = 0; i < NUM_SUBCMDS; i++) {
         if (!strcmp(subcommand, argp_subcmds[i].name)) {
@@ -38,8 +40,9 @@ struct Cli *parse_args(int argc, char **argv) {
     }
 
     if (!found) {
-        printf("Invalid argument: found invalid subcommand \"%s\", try CRUD.\n\n", subcommand);
-        print_help_and_exit(1);
+        printf("Invalid argument: found invalid subcommand \"%s\".\n\n", subcommand);
+        printf("%s", short_help_message);
+        exit(1);
     }
 
     return validate_args(cli);
@@ -82,7 +85,8 @@ struct Cli *parse_global_options(int argc, char **argv) {
                     int verbosity = atoi(optarg);
                     if (verbosity < 0 || verbosity > 3) {
                         printf("Invalid argument: verbosity must be between 0-3, but was given \"%s\".\n\n", optarg);
-                        print_help_and_exit(1);
+                        printf("%s", short_help_message);
+                        exit(1);
                     }
                     cli->verbosity = verbosity;
                 } else {
@@ -93,15 +97,17 @@ struct Cli *parse_global_options(int argc, char **argv) {
                 cli->verbosity = 0;
                 break;
             case 'h':
-                print_help_and_exit(0);
+                printf("%s", long_help_message);
+                exit(0);
                 break;
             case 'V':
-                printf("%s\n", sem_ver);
+                printf("acronym v%s\n", sem_ver);
                 exit(0);
             case '?':
             default:
                 printf("Invalid argument: unknown option \"%c\".\n\n", opt);
-                print_help_and_exit(1);
+                printf("%s", short_help_message);
+                exit(1);
                 break;
         }
     }

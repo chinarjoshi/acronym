@@ -59,20 +59,21 @@ ArgpSubcmd argp_subcmds[] = {
     {"delete", DELETE, &delete_argp},
 };
 
-const char *help_message = \
+const char *long_help_message = \
 "acronym 1.0.0\n"
 "Chinar Joshi <chinarjoshi7@gmail.com>\n"
 "\n"
 "acronym syncs shell usage between development environments through aliases.\n"
-"It implements CRUD operations on alias databases at different scopes.\n"
 "\n"
 "There are 3 alias database scopes:\n"
+"\n"
 "  global        defines aliases available everywhere\n"
 "  project-wide  defines aliases specific to a git-tracked directory, which should be\n"
 "                     version-controlled and used by all contributors.\n"
 "  local         same as above, but is local to your machine and in git ignore\n"
 "\n"
 "Every entry in the database has the following string fields:\n"
+"\n"
 "  alias     the new command you type\n"
 "  command   the actual command the alias runs\n"
 "  section   the category the alias falls under (for organization)\n"
@@ -83,6 +84,21 @@ const char *help_message = \
 "  -q, --quiet      Suppress output\n"
 "  -v, --verbose    Use verbose output\n"
 "  -h, --help       Give this help list\n"
+"  -V, --version    Print program version\n"
+"\n"
+"There are 4 subcommands (CRUD):\n"
+"\n"
+"  create   Adds a new alias to the database by providing the command.\n"
+"  read     Shows your aliases in TOML format, optionally filtered by the given patterns.\n"
+"  update   Edit the database in TOML format using your default editor.\n"
+"  delete   Remove aliases or whole sections from the database.\n";
+
+const char *short_help_message = \
+"Usage: acronym [OPTION ...] [SUBCOMMAND]\n"
+"\n"
+"  -q, --quiet      Suppress output\n"
+"  -v, --verbose    Use verbose output\n"
+"  -h, --help       Give full help list\n"
 "  -V, --version    Print program version\n"
 "\n"
 "There are 4 subcommands (CRUD):\n"
