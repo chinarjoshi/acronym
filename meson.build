@@ -1,7 +1,7 @@
 project('acronym', 'c',
   version : '1.0.0',
   license : 'MIT',
-  default_options : ['c_args=-Wall -Wextra'])
+  default_options : ['c_args=-Wall -Wextra -Wno-unused-result -Wno-format-truncation', 'optimization=3'])
 
 # Main executable
 pcre_dep = dependency('libpcre', static : true)
@@ -21,7 +21,7 @@ sources = [
   'src/toml/toml.c',
   'src/toml/toml_extensions.c',
 ]
-executable('acronym', sources : sources, dependencies : pcre_dep)
+executable('acronym', sources : sources, install : true, dependencies : pcre_dep)
 
 # Test suite
 
